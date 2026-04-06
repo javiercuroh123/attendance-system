@@ -1,0 +1,11 @@
+# Dependencias
+node_modules/
+apps/**/node_modules/
+packages/**/node_modules/
+
+# Compilados
+dist/
+build/
+
+# Entornos
+.env
