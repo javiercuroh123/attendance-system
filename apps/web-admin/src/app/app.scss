@@ -1,0 +1,85 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+  background: #f3f6fb;
+  color: #1b2534;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+}
+
+.layout {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.topbar {
+  background: #102a43;
+  color: #f0f4f8;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.topbar p {
+  margin: 0.4rem 0 0;
+  opacity: 0.9;
+  font-size: 0.92rem;
+}
+
+.menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+}
+
+.menu a {
+  text-decoration: none;
+  color: #102a43;
+  background: #d9e2ec;
+  padding: 0.45rem 0.7rem;
+  border-radius: 0.55rem;
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.menu a.active {
+  background: #f0b429;
+  color: #102a43;
+}
+
+.content {
+  margin-top: 1rem;
+  background: #ffffff;
+  border-radius: 0.75rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid #d9e2ec;
+}
+
+.feature-page h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.feature-page p {
+  margin-top: 0.6rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 700px) {
+  .layout {
+    padding: 0.75rem;
+  }
+
+  .menu {
+    gap: 0.4rem;
+  }
+
+  .menu a {
+    font-size: 0.8rem;
+  }
+}

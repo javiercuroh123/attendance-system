@@ -8,7 +8,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Branch } from '../../branches/entities/branch.entity';
 import { AttendanceStatus } from '../../common/enums/attendance-status.enum';
 import { Employee } from '../../employees/entities/employee.entity';
 import { QrSession } from '../../qr/entities/qr.entity';
@@ -44,10 +43,6 @@ export class AttendanceRecord {
   @ManyToOne(() => QrSession, { nullable: true })
   @JoinColumn({ name: 'qr_session_id' })
   qr_session?: QrSession | null;
-
-  @ManyToOne(() => Branch, { nullable: true })
-  @JoinColumn({ name: 'branch_id' })
-  branch?: Branch | null;
 
   @Column({ type: 'jsonb', nullable: true })
   device_info?: Record<string, unknown> | null;

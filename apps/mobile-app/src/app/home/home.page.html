@@ -1,20 +1,26 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Blank
-    </ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
+  <ion-header>
     <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
+      <ion-title>Inicio</ion-title>
     </ion-toolbar>
   </ion-header>
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
-  </div>
-</ion-content>
+  <ion-content class="ion-padding">
+    <h2>Panel Movil</h2>
+    <p>Accesos rapidos para marcacion y seguimiento personal.</p>
+
+    <div class="actions">
+      <ion-button expand="block" routerLink="/scan">Escanear QR</ion-button>
+      <ion-button expand="block" fill="outline" routerLink="/my-attendance">
+        Mi asistencia
+      </ion-button>
+      <ion-button expand="block" fill="outline" routerLink="/incidents">
+        Incidencias
+      </ion-button>
+      <ion-button expand="block" fill="outline" routerLink="/profile">
+        Perfil
+      </ion-button>
+      <ion-button expand="block" color="medium" fill="clear" routerLink="/login">
+        Cerrar sesion
+      </ion-button>
+    </div>
+  </ion-content>

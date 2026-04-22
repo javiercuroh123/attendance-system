@@ -2,20 +2,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
-  ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Branch } from '../../branches/entities/branch.entity';
 
 @Entity('qr_sessions')
 export class QrSession {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
-
-  @ManyToOne(() => Branch)
-  @JoinColumn({ name: 'branch_id' })
-  branch!: Branch;
 
   @Column({ type: 'uuid' })
   issued_by!: string;
@@ -28,6 +21,9 @@ export class QrSession {
 
   @Column({ type: 'timestamp' })
   expires_at!: Date;
+
+  @Column({ type: 'varchar', nullable: true })
+  point_description?: string | null;
 
   @Column({ type: 'varchar', default: 'ACTIVE' })
   status!: string;

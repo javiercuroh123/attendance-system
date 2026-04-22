@@ -3,19 +3,19 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
-import { RolesPermissionsModule } from './roles-permissions/roles-permissions.module';
-import { ClientsModule } from './clients/clients.module';
-import { BranchesModule } from './branches/branches.module';
-import { ProjectsModule } from './projects/projects.module';
-import { SchedulesModule } from './schedules/schedules.module';
-import { EmployeesModule } from './employees/employees.module';
-import { QrModule } from './qr/qr.module';
+import { AreasModule } from './areas/areas.module';
 import { AttendanceModule } from './attendance/attendance.module';
-import { IncidentsModule } from './incidents/incidents.module';
 import { AuditModule } from './audit/audit.module';
+import { AuthModule } from './auth/auth.module';
+import { EmployeesModule } from './employees/employees.module';
+import { IncidentsModule } from './incidents/incidents.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { QrModule } from './qr/qr.module';
 import { ReportsModule } from './reports/reports.module';
+import { RolesPermissionsModule } from './roles-permissions/roles-permissions.module';
+import { SchedulesModule } from './schedules/schedules.module';
+import { SettingsModule } from './settings/settings.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -38,9 +38,8 @@ import { ReportsModule } from './reports/reports.module';
     AuthModule,
     UsersModule,
     RolesPermissionsModule,
-    ClientsModule,
-    BranchesModule,
-    ProjectsModule,
+    AreasModule,
+    SettingsModule,
     SchedulesModule,
     EmployeesModule,
     QrModule,
@@ -48,6 +47,7 @@ import { ReportsModule } from './reports/reports.module';
     IncidentsModule,
     AuditModule,
     ReportsModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

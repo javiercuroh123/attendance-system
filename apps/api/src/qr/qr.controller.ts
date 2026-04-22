@@ -1,12 +1,12 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuditService } from '../audit/audit.service';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { RoleCode } from '../common/enums/role-code.enum';
-import type { AuthenticatedUser } from '../common/interfaces/authenticated-user.interface';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { RoleCode } from '../common/enums/role-code.enum';
+import type { AuthenticatedUser } from '../common/interfaces/authenticated-user.interface';
 import { CreateQrDto } from './dto/create-qr.dto';
 import { ValidateQrDto } from './dto/validate-qr.dto';
 import { QrService } from './qr.service';
@@ -23,7 +23,7 @@ export class QrController {
 
   @Post('sessions')
   @Roles(RoleCode.ADMIN, RoleCode.RRHH, RoleCode.SUPERVISOR)
-  @ApiOperation({ summary: 'Generar sesión de QR temporal' })
+  @ApiOperation({ summary: 'Generar sesion de QR temporal' })
   async createSession(
     @Body() dto: CreateQrDto,
     @CurrentUser() user: AuthenticatedUser,
@@ -35,14 +35,17 @@ export class QrController {
       action: 'CREATE_SESSION',
       entityName: 'qr_sessions',
       entityId: session.id,
-      newData: { branchId: dto.branchId, expiresAt: session.expiresAt },
+      newData: {
+        pointDescription: dto.qrPointDescription ?? null,
+        expiresAt: session.expiresAt,
+      },
     });
     return session;
   }
 
   @Get('sessions/:id')
   @Roles(RoleCode.ADMIN, RoleCode.RRHH, RoleCode.SUPERVISOR)
-  @ApiOperation({ summary: 'Obtener sesión QR por id' })
+  @ApiOperation({ summary: 'Obtener sesion QR por id' })
   getSession(@Param('id') id: string) {
     return this.qrService.getSession(id);
   }

@@ -5,11 +5,9 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Branch } from '../branches/entities/branch.entity';
-import { Client } from '../clients/entities/client.entity';
-import { Project } from '../projects/entities/project.entity';
-import { Schedule } from '../schedules/entities/schedule.entity';
+import { Area } from '../areas/entities/area.entity';
 import { EmployeeScheduleAssignment } from '../schedules/entities/employee-schedule-assignment.entity';
+import { Schedule } from '../schedules/entities/schedule.entity';
 import { User } from '../users/entities/user.entity';
 import { AssignScheduleDto } from './dto/assign-schedule.dto';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
@@ -23,12 +21,8 @@ export class EmployeesService {
     private readonly employeeRepository: Repository<Employee>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(Branch)
-    private readonly branchRepository: Repository<Branch>,
-    @InjectRepository(Client)
-    private readonly clientRepository: Repository<Client>,
-    @InjectRepository(Project)
-    private readonly projectRepository: Repository<Project>,
+    @InjectRepository(Area)
+    private readonly areaRepository: Repository<Area>,
     @InjectRepository(EmployeeScheduleAssignment)
     private readonly assignmentRepository: Repository<EmployeeScheduleAssignment>,
     @InjectRepository(Schedule)
@@ -43,11 +37,18 @@ export class EmployeesService {
       throw new NotFoundException('Usuario no encontrado');
     }
 
+    const area = await this.areaRepository.findOne({
+      where: { id: dto.areaId },
+    });
+    if (!area) {
+      throw new NotFoundException('Area no encontrada');
+    }
+
     const sameCode = await this.employeeRepository.findOne({
       where: { code: dto.code },
     });
     if (sameCode)
-      throw new ConflictException('El código de empleado ya existe');
+      throw new ConflictException('El codigo de empleado ya existe');
 
     const sameDni = await this.employeeRepository.findOne({
       where: { dni: dto.dni },
@@ -61,7 +62,7 @@ export class EmployeesService {
       first_name: dto.firstName,
       last_name: dto.lastName,
       phone: dto.phone,
-      area: dto.area,
+      area,
       position: dto.position,
       hire_date: dto.hireDate,
       status: dto.status ?? 'ACTIVE',
@@ -70,34 +71,13 @@ export class EmployeesService {
     if (dto.supervisorId) {
       employee.supervisor = await this.findOne(dto.supervisorId);
     }
-    if (dto.branchId) {
-      const branch = await this.branchRepository.findOne({
-        where: { id: dto.branchId },
-      });
-      if (!branch) throw new NotFoundException('Sede no encontrada');
-      employee.branch = branch;
-    }
-    if (dto.clientId) {
-      const client = await this.clientRepository.findOne({
-        where: { id: dto.clientId },
-      });
-      if (!client) throw new NotFoundException('Cliente no encontrado');
-      employee.client = client;
-    }
-    if (dto.projectId) {
-      const project = await this.projectRepository.findOne({
-        where: { id: dto.projectId },
-      });
-      if (!project) throw new NotFoundException('Proyecto no encontrado');
-      employee.project = project;
-    }
 
     return this.employeeRepository.save(employee);
   }
 
   findAll() {
     return this.employeeRepository.find({
-      relations: ['user', 'supervisor', 'branch', 'client', 'project'],
+      relations: ['user', 'supervisor', 'area'],
       order: { first_name: 'ASC' },
     });
   }
@@ -105,7 +85,7 @@ export class EmployeesService {
   async findOne(id: string) {
     const employee = await this.employeeRepository.findOne({
       where: { id },
-      relations: ['user', 'supervisor', 'branch', 'client', 'project'],
+      relations: ['user', 'supervisor', 'area'],
     });
 
     if (!employee) {
@@ -118,7 +98,7 @@ export class EmployeesService {
   async findByUserId(userId: string) {
     const employee = await this.employeeRepository.findOne({
       where: { user: { id: userId } },
-      relations: ['user', 'supervisor', 'branch', 'client', 'project'],
+      relations: ['user', 'supervisor', 'area'],
     });
     if (!employee) {
       throw new NotFoundException(
@@ -138,39 +118,26 @@ export class EmployeesService {
       if (!user) throw new NotFoundException('Usuario no encontrado');
       employee.user = user;
     }
+
+    if (dto.areaId !== undefined) {
+      const area = await this.areaRepository.findOne({
+        where: { id: dto.areaId },
+      });
+      if (!area) throw new NotFoundException('Area no encontrada');
+      employee.area = area;
+    }
+
     if (dto.code !== undefined) employee.code = dto.code;
     if (dto.dni !== undefined) employee.dni = dto.dni;
     if (dto.firstName !== undefined) employee.first_name = dto.firstName;
     if (dto.lastName !== undefined) employee.last_name = dto.lastName;
     if (dto.phone !== undefined) employee.phone = dto.phone;
-    if (dto.area !== undefined) employee.area = dto.area;
     if (dto.position !== undefined) employee.position = dto.position;
     if (dto.hireDate !== undefined) employee.hire_date = dto.hireDate;
     if (dto.status !== undefined) employee.status = dto.status;
 
     if (dto.supervisorId) {
       employee.supervisor = await this.findOne(dto.supervisorId);
-    }
-    if (dto.branchId) {
-      const branch = await this.branchRepository.findOne({
-        where: { id: dto.branchId },
-      });
-      if (!branch) throw new NotFoundException('Sede no encontrada');
-      employee.branch = branch;
-    }
-    if (dto.clientId) {
-      const client = await this.clientRepository.findOne({
-        where: { id: dto.clientId },
-      });
-      if (!client) throw new NotFoundException('Cliente no encontrado');
-      employee.client = client;
-    }
-    if (dto.projectId) {
-      const project = await this.projectRepository.findOne({
-        where: { id: dto.projectId },
-      });
-      if (!project) throw new NotFoundException('Proyecto no encontrado');
-      employee.project = project;
     }
 
     return this.employeeRepository.save(employee);

@@ -17,8 +17,8 @@ import {
   toIsoDate,
 } from '../common/utils/date.utils';
 import { Employee } from '../employees/entities/employee.entity';
-import { EmployeeScheduleAssignment } from '../schedules/entities/employee-schedule-assignment.entity';
 import { QrService } from '../qr/qr.service';
+import { EmployeeScheduleAssignment } from '../schedules/entities/employee-schedule-assignment.entity';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { ManualAdjustmentDto } from './dto/manual-adjustment.dto';
 import { AttendanceEvent } from './entities/attendance-event.entity';
@@ -42,7 +42,7 @@ export class AttendanceService {
   private async getEmployeeByUserId(userId: string) {
     const employee = await this.employeeRepository.findOne({
       where: { user: { id: userId } },
-      relations: ['user', 'branch', 'project', 'client'],
+      relations: ['user', 'area', 'supervisor'],
     });
 
     if (!employee) {
@@ -77,24 +77,20 @@ export class AttendanceService {
   }
 
   async check(dto: CreateAttendanceDto, currentUser: AuthenticatedUser) {
-    const qrSession = await this.qrService.findActiveSessionByToken(
-      dto.qrToken,
-    );
+    const qrSession = await this.qrService.findActiveSessionByToken(dto.qrToken);
     const employee = await this.getEmployeeByUserId(currentUser.userId);
     const now = new Date();
     const today = toIsoDate(now);
 
-    if (employee.branch?.id && employee.branch.id !== qrSession.branch.id) {
-      throw new ForbiddenException(
-        'La sede del QR no coincide con la sede asignada al empleado',
-      );
+    if (!employee.area) {
+      throw new BadRequestException('El empleado no tiene area asignada');
     }
 
     const schedule = await this.getActiveSchedule(employee.id, today);
 
     let record = await this.attendanceRepository.findOne({
       where: { employee: { id: employee.id }, attendance_date: today },
-      relations: ['employee', 'branch', 'qr_session'],
+      relations: ['employee', 'qr_session'],
     });
 
     if (!record) {
@@ -115,7 +111,6 @@ export class AttendanceService {
         late_minutes: lateMinutes,
         source: 'APP_MOBILE',
         qr_session: qrSession,
-        branch: qrSession.branch,
         device_info: dto.deviceInfo ?? null,
       });
 
@@ -150,7 +145,6 @@ export class AttendanceService {
           ? AttendanceStatus.LATE
           : AttendanceStatus.COMPLETE;
       record.qr_session = qrSession;
-      record.branch = qrSession.branch;
       record.device_info = dto.deviceInfo ?? record.device_info ?? null;
       record = await this.attendanceRepository.save(record);
 
@@ -186,7 +180,7 @@ export class AttendanceService {
     const employee = await this.getEmployeeByUserId(currentUser.userId);
     return this.attendanceRepository.find({
       where: { employee: { id: employee.id } },
-      relations: ['branch'],
+      relations: ['employee', 'employee.area'],
       order: { attendance_date: 'DESC' },
       take: 90,
     });
@@ -199,16 +193,14 @@ export class AttendanceService {
     const qb = this.attendanceRepository
       .createQueryBuilder('attendance')
       .leftJoinAndSelect('attendance.employee', 'employee')
-      .leftJoinAndSelect('attendance.branch', 'branch')
-      .leftJoinAndSelect('employee.project', 'project')
+      .leftJoinAndSelect('employee.area', 'area')
       .orderBy('attendance.attendance_date', 'DESC');
 
     if (query.from)
       qb.andWhere('attendance.attendance_date >= :from', { from: query.from });
     if (query.to)
       qb.andWhere('attendance.attendance_date <= :to', { to: query.to });
-    if (query.branchId)
-      qb.andWhere('branch.id = :branchId', { branchId: query.branchId });
+    if (query.areaId) qb.andWhere('area.id = :areaId', { areaId: query.areaId });
     if (query.employeeId)
       qb.andWhere('employee.id = :employeeId', {
         employeeId: query.employeeId,
@@ -235,7 +227,7 @@ export class AttendanceService {
   async findOne(id: string, currentUser: AuthenticatedUser) {
     const record = await this.attendanceRepository.findOne({
       where: { id },
-      relations: ['employee', 'employee.user', 'branch', 'qr_session'],
+      relations: ['employee', 'employee.user', 'employee.area', 'qr_session'],
     });
 
     if (!record) {

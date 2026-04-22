@@ -2,10 +2,16 @@
 node_modules/
 apps/**/node_modules/
 packages/**/node_modules/
+.angular/
 
 # Compilados
 dist/
 build/
+apps/mobile-app/www/
+
 
 # Entornos
 .env
+
+# Herramientas locales
+.codex
