@@ -1,0 +1,91 @@
+<section class="auth-shell">
+  <aside class="auth-left">
+    <div class="auth-left-brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="2" width="6" height="6" rx="1" fill="white" opacity=".9" />
+          <rect x="10" y="2" width="6" height="6" rx="1" fill="white" opacity=".9" />
+          <rect x="2" y="10" width="6" height="6" rx="1" fill="white" opacity=".9" />
+          <rect x="10" y="10" width="3" height="3" rx=".5" fill="white" opacity=".9" />
+          <rect x="15" y="10" width="1" height="3" rx=".5" fill="white" opacity=".9" />
+          <rect x="10" y="15" width="3" height="1" rx=".5" fill="white" opacity=".9" />
+          <rect x="15" y="14" width="1" height="2" rx=".5" fill="white" opacity=".9" />
+          <rect x="13" y="13" width="1" height="1" rx=".5" fill="white" opacity=".9" />
+        </svg>
+      </div>
+      <span class="auth-left-name">Asistencia QR</span>
+    </div>
+
+    <p class="auth-left-copy">Control preciso.<br />Registro confiable.</p>
+    <p class="auth-left-note">Angular · NestJS · PostgreSQL · v1.0 MVP</p>
+  </aside>
+
+  <main class="auth-right">
+    <div class="auth-box">
+      <h1>Iniciar sesion</h1>
+      <p>Panel administrativo — acceso restringido</p>
+
+      <form class="auth-form" [formGroup]="form" (ngSubmit)="submit()">
+        <div>
+          <label for="email">Correo electronico</label>
+          <input
+            id="email"
+            class="finput"
+            type="email"
+            formControlName="email"
+            autocomplete="email"
+            placeholder="usuario@empresa.com"
+          />
+          @if (form.controls.email.invalid && form.controls.email.touched) {
+            <small class="field-error">Ingresa un correo valido.</small>
+          }
+        </div>
+
+        <div>
+          <label for="password">Contrasena</label>
+          <div class="password-wrap">
+            <input
+              id="password"
+              class="finput"
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              autocomplete="current-password"
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              class="toggle-password"
+              (click)="togglePassword()"
+              [attr.aria-label]="showPassword() ? 'Ocultar contrasena' : 'Mostrar contrasena'"
+            >
+              {{ showPassword() ? 'Ocultar' : 'Ver' }}
+            </button>
+          </div>
+          @if (form.controls.password.invalid && form.controls.password.touched) {
+            <small class="field-error">La contrasena debe tener al menos 6 caracteres.</small>
+          }
+        </div>
+
+        @if (errorMessage()) {
+          <p class="auth-error">{{ errorMessage() }}</p>
+        }
+
+        <button class="btn-dark" type="submit" [disabled]="isSubmitting()">
+          {{ isSubmitting() ? 'Ingresando...' : 'Ingresar al sistema' }}
+        </button>
+      </form>
+
+      <div class="auth-links">
+        <a routerLink="/auth/login">¿Olvidaste tu contrasena?</a>
+        <a href="mailto:soporte@empresa.com">Soporte tecnico</a>
+      </div>
+
+      <div class="auth-modules">
+        <p>
+          Modulo de autenticacion del panel web administrativo. Gestiona inicio
+          de sesion y renovacion de credenciales con JWT.
+        </p>
+      </div>
+    </div>
+  </main>
+</section>
