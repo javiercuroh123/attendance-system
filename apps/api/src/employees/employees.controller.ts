@@ -15,7 +15,6 @@ import type { AuthenticatedUser } from '../common/interfaces/authenticated-user.
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
-import { AssignScheduleDto } from './dto/assign-schedule.dto';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { EmployeesService } from './employees.service';
@@ -91,37 +90,5 @@ export class EmployeesController {
       },
     });
     return employee;
-  }
-
-  @Get(':id/schedule')
-  @Roles(RoleCode.ADMIN, RoleCode.RRHH, RoleCode.SUPERVISOR)
-  @ApiOperation({ summary: 'Listar horarios asignados a un empleado' })
-  getSchedules(@Param('id') id: string) {
-    return this.employeesService.getSchedules(id);
-  }
-
-  @Post(':id/schedule')
-  @Roles(RoleCode.ADMIN, RoleCode.RRHH)
-  @ApiOperation({ summary: 'Asignar horario a un empleado' })
-  async assignSchedule(
-    @Param('id') id: string,
-    @Body() dto: AssignScheduleDto,
-    @CurrentUser() actor: AuthenticatedUser,
-  ) {
-    const assignment = await this.employeesService.assignSchedule(id, dto);
-    await this.auditService.create({
-      actorUserId: actor.userId,
-      module: 'employees',
-      action: 'ASSIGN_SCHEDULE',
-      entityName: 'employee_schedule_assignments',
-      entityId: assignment.id,
-      newData: {
-        employeeId: id,
-        scheduleId: dto.scheduleId,
-        validFrom: dto.validFrom,
-        validTo: dto.validTo ?? null,
-      },
-    });
-    return assignment;
   }
 }

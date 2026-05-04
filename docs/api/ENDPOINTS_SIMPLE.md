@@ -15,13 +15,6 @@
 - `PATCH /users/:id`
 - `PATCH /users/:id/status`
 
-## Areas
-
-- `GET /areas`
-- `POST /areas`
-- `GET /areas/:id`
-- `PATCH /areas/:id`
-
 ## Settings
 
 - `GET /settings`
@@ -33,13 +26,12 @@
 - `POST /employees`
 - `GET /employees/:id`
 - `PATCH /employees/:id`
-- `GET /employees/:id/schedule`
-- `POST /employees/:id/schedule`
 
 ## Schedules
 
 - `GET /schedules`
 - `POST /schedules`
+- `GET /schedules/:id`
 - `PATCH /schedules/:id`
 
 ## QR
@@ -76,9 +68,3 @@
 
 - `GET /audit`
 - `GET /audit/:entity/:id`
-
-## Notifications
-
-- `POST /notifications/internal`
-- `GET /notifications/me`
-- `PATCH /notifications/:id/read`

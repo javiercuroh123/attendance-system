@@ -38,7 +38,7 @@ export class AuthService {
       throw new UnauthorizedException('El usuario está inactivo');
     }
 
-    const roles = user.roles.map((role) => role.code);
+    const roles = [user.role];
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
@@ -65,6 +65,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         status: user.status,
+        role: user.role,
         roles,
       },
     };
@@ -88,7 +89,7 @@ export class AuthService {
       throw new UnauthorizedException('Refresh token inválido');
     }
 
-    const roles = user.roles.map((role) => role.code);
+    const roles = [user.role];
     const newPayload: JwtPayload = {
       sub: user.id,
       email: user.email,
@@ -122,7 +123,8 @@ export class AuthService {
       id: user.id,
       email: user.email,
       status: user.status,
-      roles: user.roles.map((role) => role.code),
+      role: user.role,
+      roles: [user.role],
       lastLoginAt: user.last_login_at,
     };
   }

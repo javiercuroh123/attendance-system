@@ -3,16 +3,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AreasModule } from './areas/areas.module';
 import { AttendanceModule } from './attendance/attendance.module';
 import { AuditModule } from './audit/audit.module';
 import { AuthModule } from './auth/auth.module';
 import { EmployeesModule } from './employees/employees.module';
 import { IncidentsModule } from './incidents/incidents.module';
-import { NotificationsModule } from './notifications/notifications.module';
 import { QrModule } from './qr/qr.module';
 import { ReportsModule } from './reports/reports.module';
-import { RolesPermissionsModule } from './roles-permissions/roles-permissions.module';
 import { SchedulesModule } from './schedules/schedules.module';
 import { SettingsModule } from './settings/settings.module';
 import { UsersModule } from './users/users.module';
@@ -37,8 +34,6 @@ import { UsersModule } from './users/users.module';
     }),
     AuthModule,
     UsersModule,
-    RolesPermissionsModule,
-    AreasModule,
     SettingsModule,
     SchedulesModule,
     EmployeesModule,
@@ -47,7 +42,6 @@ import { UsersModule } from './users/users.module';
     IncidentsModule,
     AuditModule,
     ReportsModule,
-    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

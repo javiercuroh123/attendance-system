@@ -22,11 +22,6 @@ export const routes: Routes = [
       import('./features/employees/employees.page').then((m) => m.EmployeesPage),
   },
   {
-    path: 'areas',
-    loadComponent: () =>
-      import('./features/areas/areas.page').then((m) => m.AreasPage),
-  },
-  {
     path: 'schedules',
     loadComponent: () =>
       import('./features/schedules/schedules.page').then((m) => m.SchedulesPage),

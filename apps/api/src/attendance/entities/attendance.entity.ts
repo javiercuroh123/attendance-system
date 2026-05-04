@@ -4,14 +4,12 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { AttendanceStatus } from '../../common/enums/attendance-status.enum';
 import { Employee } from '../../employees/entities/employee.entity';
 import { QrSession } from '../../qr/entities/qr.entity';
-import { AttendanceEvent } from './attendance-event.entity';
 
 @Entity('attendance_records')
 export class AttendanceRecord {
@@ -31,7 +29,7 @@ export class AttendanceRecord {
   @Column({ type: 'timestamp', nullable: true })
   check_out_at?: Date | null;
 
-  @Column({ type: 'varchar', default: AttendanceStatus.ON_TIME })
+  @Column({ type: 'varchar', default: AttendanceStatus.PRESENT })
   status!: AttendanceStatus | string;
 
   @Column({ type: 'int', default: 0 })
@@ -46,9 +44,6 @@ export class AttendanceRecord {
 
   @Column({ type: 'jsonb', nullable: true })
   device_info?: Record<string, unknown> | null;
-
-  @OneToMany(() => AttendanceEvent, (event) => event.attendance_record)
-  events!: AttendanceEvent[];
 
   @CreateDateColumn()
   created_at!: Date;

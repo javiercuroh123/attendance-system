@@ -2,12 +2,10 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinTable,
-  ManyToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Role } from '../../roles-permissions/entities/roles-permission.entity';
+import { RoleCode } from '../../common/enums/role-code.enum';
 
 @Entity('users')
 export class User {
@@ -19,6 +17,9 @@ export class User {
 
   @Column({ type: 'varchar' })
   password_hash!: string;
+
+  @Column({ type: 'varchar', default: RoleCode.EMPLOYEE })
+  role!: RoleCode | string;
 
   @Column({ type: 'varchar', nullable: true })
   refresh_token_hash?: string | null;
@@ -34,12 +35,4 @@ export class User {
 
   @UpdateDateColumn()
   updated_at!: Date;
-
-  @ManyToMany(() => Role)
-  @JoinTable({
-    name: 'user_roles',
-    joinColumn: { name: 'user_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'role_id', referencedColumnName: 'id' },
-  })
-  roles!: Role[];
 }

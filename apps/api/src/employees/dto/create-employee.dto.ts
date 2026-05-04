@@ -28,9 +28,10 @@ export class CreateEmployeeDto {
   @IsString()
   phone?: string;
 
-  @ApiProperty()
-  @IsUUID()
-  areaId!: string;
+  @ApiPropertyOptional({ example: 'Administración' })
+  @IsOptional()
+  @IsString()
+  areaName?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -41,6 +42,11 @@ export class CreateEmployeeDto {
   @IsOptional()
   @IsUUID()
   supervisorId?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsUUID()
+  scheduleId?: string;
 
   @ApiPropertyOptional({ example: '2026-04-02' })
   @IsOptional()

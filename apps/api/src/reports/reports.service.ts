@@ -2,27 +2,26 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AttendanceRecord } from '../attendance/entities/attendance.entity';
-import { IncidentRequest } from '../incidents/entities/incident.entity';
 
 @Injectable()
 export class ReportsService {
   constructor(
     @InjectRepository(AttendanceRecord)
     private readonly attendanceRepository: Repository<AttendanceRecord>,
-    @InjectRepository(IncidentRequest)
-    private readonly incidentRepository: Repository<IncidentRequest>,
   ) {}
 
   async daily(query: Record<string, string | undefined>) {
     const qb = this.attendanceRepository
       .createQueryBuilder('attendance')
       .leftJoinAndSelect('attendance.employee', 'employee')
-      .leftJoinAndSelect('employee.area', 'area')
       .orderBy('employee.last_name', 'ASC');
 
     if (query.date)
       qb.andWhere('attendance.attendance_date = :date', { date: query.date });
-    if (query.areaId) qb.andWhere('area.id = :areaId', { areaId: query.areaId });
+    if (query.areaName)
+      qb.andWhere('employee.area_name ILIKE :areaName', {
+        areaName: `%${query.areaName}%`,
+      });
     if (query.employeeId)
       qb.andWhere('employee.id = :employeeId', { employeeId: query.employeeId });
     if (query.status)
@@ -44,10 +43,12 @@ export class ReportsService {
     const qb = this.attendanceRepository
       .createQueryBuilder('attendance')
       .leftJoinAndSelect('attendance.employee', 'employee')
-      .leftJoinAndSelect('employee.area', 'area')
       .where('attendance.attendance_date BETWEEN :from AND :to', { from, to });
 
-    if (query.areaId) qb.andWhere('area.id = :areaId', { areaId: query.areaId });
+    if (query.areaName)
+      qb.andWhere('employee.area_name ILIKE :areaName', {
+        areaName: `%${query.areaName}%`,
+      });
 
     const rows = await qb.getMany();
 
@@ -57,9 +58,10 @@ export class ReportsService {
         employeeId: string;
         employeeName: string;
         areaName: string;
-        onTime: number;
+        present: number;
         late: number;
-        complete: number;
+        incomplete: number;
+        absent: number;
       }
     >();
 
@@ -68,15 +70,17 @@ export class ReportsService {
       const existing = summary.get(key) ?? {
         employeeId: row.employee.id,
         employeeName: `${row.employee.first_name} ${row.employee.last_name}`,
-        areaName: row.employee.area?.name ?? 'Sin area',
-        onTime: 0,
+        areaName: row.employee.area_name ?? 'Sin area',
+        present: 0,
         late: 0,
-        complete: 0,
+        incomplete: 0,
+        absent: 0,
       };
 
-      if (row.status === 'ON_TIME') existing.onTime += 1;
+      if (row.status === 'PRESENT') existing.present += 1;
       if (row.status === 'LATE') existing.late += 1;
-      if (row.check_out_at) existing.complete += 1;
+      if (row.status === 'INCOMPLETE') existing.incomplete += 1;
+      if (row.status === 'ABSENT') existing.absent += 1;
       summary.set(key, existing);
     }
 
@@ -92,7 +96,6 @@ export class ReportsService {
     const qb = this.attendanceRepository
       .createQueryBuilder('attendance')
       .leftJoinAndSelect('attendance.employee', 'employee')
-      .leftJoinAndSelect('employee.area', 'area')
       .where('attendance.late_minutes > 0')
       .orderBy('attendance.attendance_date', 'DESC');
 
@@ -100,7 +103,10 @@ export class ReportsService {
       qb.andWhere('attendance.attendance_date >= :from', { from: query.from });
     if (query.to)
       qb.andWhere('attendance.attendance_date <= :to', { to: query.to });
-    if (query.areaId) qb.andWhere('area.id = :areaId', { areaId: query.areaId });
+    if (query.areaName)
+      qb.andWhere('employee.area_name ILIKE :areaName', {
+        areaName: `%${query.areaName}%`,
+      });
 
     const rows = await qb.getMany();
     return {
@@ -110,23 +116,22 @@ export class ReportsService {
   }
 
   async absences(query: Record<string, string | undefined>) {
-    const qb = this.incidentRepository
-      .createQueryBuilder('incident')
-      .leftJoinAndSelect('incident.employee', 'employee')
-      .leftJoinAndSelect('employee.area', 'area')
-      .orderBy('incident.attendance_date', 'DESC');
+    const qb = this.attendanceRepository
+      .createQueryBuilder('attendance')
+      .leftJoinAndSelect('attendance.employee', 'employee')
+      .where('attendance.status = :status', { status: 'ABSENT' })
+      .orderBy('attendance.attendance_date', 'DESC');
 
-    if (query.attendanceDate)
-      qb.andWhere('incident.attendance_date = :attendanceDate', {
-        attendanceDate: query.attendanceDate,
+    if (query.from)
+      qb.andWhere('attendance.attendance_date >= :from', { from: query.from });
+    if (query.to)
+      qb.andWhere('attendance.attendance_date <= :to', { to: query.to });
+    if (query.areaName)
+      qb.andWhere('employee.area_name ILIKE :areaName', {
+        areaName: `%${query.areaName}%`,
       });
 
-    if (query.areaId) qb.andWhere('area.id = :areaId', { areaId: query.areaId });
-
-    const incidents = await qb.getMany();
-    const rows = incidents.filter((item) =>
-      item.request_type.toUpperCase().includes('ABSENCE'),
-    );
+    const rows = await qb.getMany();
 
     return {
       total: rows.length,

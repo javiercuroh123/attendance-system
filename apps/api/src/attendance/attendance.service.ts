@@ -7,7 +7,6 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AuditService } from '../audit/audit.service';
-import { AttendanceEventType } from '../common/enums/attendance-event-type.enum';
 import { AttendanceStatus } from '../common/enums/attendance-status.enum';
 import { RoleCode } from '../common/enums/role-code.enum';
 import type { AuthenticatedUser } from '../common/interfaces/authenticated-user.interface';
@@ -18,10 +17,8 @@ import {
 } from '../common/utils/date.utils';
 import { Employee } from '../employees/entities/employee.entity';
 import { QrService } from '../qr/qr.service';
-import { EmployeeScheduleAssignment } from '../schedules/entities/employee-schedule-assignment.entity';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { ManualAdjustmentDto } from './dto/manual-adjustment.dto';
-import { AttendanceEvent } from './entities/attendance-event.entity';
 import { AttendanceRecord } from './entities/attendance.entity';
 
 @Injectable()
@@ -29,12 +26,8 @@ export class AttendanceService {
   constructor(
     @InjectRepository(AttendanceRecord)
     private readonly attendanceRepository: Repository<AttendanceRecord>,
-    @InjectRepository(AttendanceEvent)
-    private readonly eventRepository: Repository<AttendanceEvent>,
     @InjectRepository(Employee)
     private readonly employeeRepository: Repository<Employee>,
-    @InjectRepository(EmployeeScheduleAssignment)
-    private readonly assignmentRepository: Repository<EmployeeScheduleAssignment>,
     private readonly qrService: QrService,
     private readonly auditService: AuditService,
   ) {}
@@ -42,7 +35,7 @@ export class AttendanceService {
   private async getEmployeeByUserId(userId: string) {
     const employee = await this.employeeRepository.findOne({
       where: { user: { id: userId } },
-      relations: ['user', 'area', 'supervisor'],
+      relations: ['user', 'supervisor', 'schedule'],
     });
 
     if (!employee) {
@@ -54,26 +47,31 @@ export class AttendanceService {
     return employee;
   }
 
-  private async getActiveSchedule(employeeId: string, attendanceDate: string) {
-    const assignments = await this.assignmentRepository.find({
-      where: { employee: { id: employeeId }, status: 'ACTIVE' },
-      relations: ['schedule'],
-      order: { valid_from: 'DESC' },
-    });
-
-    const assignment = assignments.find((item) => {
-      const starts = item.valid_from <= attendanceDate;
-      const ends = !item.valid_to || item.valid_to >= attendanceDate;
-      return starts && ends;
-    });
-
-    if (!assignment) {
+  private getScheduleOrFail(employee: Employee) {
+    if (!employee.schedule) {
       throw new BadRequestException(
         'El empleado no tiene horario activo asignado',
       );
     }
+    return employee.schedule;
+  }
 
-    return assignment.schedule;
+  private calculateLateStatus(
+    checkInTime: Date,
+    startTime: string,
+    toleranceMinutes: number,
+  ) {
+    const scheduledStart = combineDateAndTime(checkInTime, startTime);
+    const lateThreshold = new Date(
+      scheduledStart.getTime() + toleranceMinutes * 60000,
+    );
+    const lateMinutes =
+      checkInTime > lateThreshold ? diffMinutes(checkInTime, lateThreshold) : 0;
+    return {
+      lateMinutes,
+      status:
+        lateMinutes > 0 ? AttendanceStatus.LATE : AttendanceStatus.INCOMPLETE,
+    };
   }
 
   async check(dto: CreateAttendanceDto, currentUser: AuthenticatedUser) {
@@ -81,12 +79,7 @@ export class AttendanceService {
     const employee = await this.getEmployeeByUserId(currentUser.userId);
     const now = new Date();
     const today = toIsoDate(now);
-
-    if (!employee.area) {
-      throw new BadRequestException('El empleado no tiene area asignada');
-    }
-
-    const schedule = await this.getActiveSchedule(employee.id, today);
+    const schedule = this.getScheduleOrFail(employee);
 
     let record = await this.attendanceRepository.findOne({
       where: { employee: { id: employee.id }, attendance_date: today },
@@ -94,14 +87,11 @@ export class AttendanceService {
     });
 
     if (!record) {
-      const scheduledStart = combineDateAndTime(now, schedule.start_time);
-      const lateThreshold = new Date(
-        scheduledStart.getTime() + schedule.tolerance_minutes * 60000,
+      const { lateMinutes, status } = this.calculateLateStatus(
+        now,
+        schedule.start_time,
+        schedule.tolerance_minutes,
       );
-      const lateMinutes =
-        now > lateThreshold ? diffMinutes(now, lateThreshold) : 0;
-      const status =
-        lateMinutes > 0 ? AttendanceStatus.LATE : AttendanceStatus.ON_TIME;
 
       record = this.attendanceRepository.create({
         employee,
@@ -109,28 +99,16 @@ export class AttendanceService {
         check_in_at: now,
         status,
         late_minutes: lateMinutes,
-        source: 'APP_MOBILE',
+        source: 'QR',
         qr_session: qrSession,
         device_info: dto.deviceInfo ?? null,
       });
 
       record = await this.attendanceRepository.save(record);
-      await this.eventRepository.save(
-        this.eventRepository.create({
-          attendance_record: record,
-          event_type: AttendanceEventType.CHECK_IN,
-          event_at: now,
-          qr_session: qrSession,
-          payload_json: {
-            deviceTime: dto.deviceTime ?? null,
-            deviceInfo: dto.deviceInfo ?? null,
-          },
-        }),
-      );
 
       return {
         success: true,
-        attendanceType: AttendanceEventType.CHECK_IN,
+        attendanceType: 'CHECK_IN',
         status,
         lateMinutes,
         serverTime: now,
@@ -141,29 +119,14 @@ export class AttendanceService {
     if (!record.check_out_at) {
       record.check_out_at = now;
       record.status =
-        record.late_minutes > 0
-          ? AttendanceStatus.LATE
-          : AttendanceStatus.COMPLETE;
+        record.late_minutes > 0 ? AttendanceStatus.LATE : AttendanceStatus.PRESENT;
       record.qr_session = qrSession;
       record.device_info = dto.deviceInfo ?? record.device_info ?? null;
       record = await this.attendanceRepository.save(record);
 
-      await this.eventRepository.save(
-        this.eventRepository.create({
-          attendance_record: record,
-          event_type: AttendanceEventType.CHECK_OUT,
-          event_at: now,
-          qr_session: qrSession,
-          payload_json: {
-            deviceTime: dto.deviceTime ?? null,
-            deviceInfo: dto.deviceInfo ?? null,
-          },
-        }),
-      );
-
       return {
         success: true,
-        attendanceType: AttendanceEventType.CHECK_OUT,
+        attendanceType: 'CHECK_OUT',
         status: record.status,
         lateMinutes: record.late_minutes,
         serverTime: now,
@@ -180,7 +143,7 @@ export class AttendanceService {
     const employee = await this.getEmployeeByUserId(currentUser.userId);
     return this.attendanceRepository.find({
       where: { employee: { id: employee.id } },
-      relations: ['employee', 'employee.area'],
+      relations: ['employee', 'employee.schedule'],
       order: { attendance_date: 'DESC' },
       take: 90,
     });
@@ -193,14 +156,16 @@ export class AttendanceService {
     const qb = this.attendanceRepository
       .createQueryBuilder('attendance')
       .leftJoinAndSelect('attendance.employee', 'employee')
-      .leftJoinAndSelect('employee.area', 'area')
       .orderBy('attendance.attendance_date', 'DESC');
 
     if (query.from)
       qb.andWhere('attendance.attendance_date >= :from', { from: query.from });
     if (query.to)
       qb.andWhere('attendance.attendance_date <= :to', { to: query.to });
-    if (query.areaId) qb.andWhere('area.id = :areaId', { areaId: query.areaId });
+    if (query.areaName)
+      qb.andWhere('employee.area_name ILIKE :areaName', {
+        areaName: `%${query.areaName}%`,
+      });
     if (query.employeeId)
       qb.andWhere('employee.id = :employeeId', {
         employeeId: query.employeeId,
@@ -227,7 +192,7 @@ export class AttendanceService {
   async findOne(id: string, currentUser: AuthenticatedUser) {
     const record = await this.attendanceRepository.findOne({
       where: { id },
-      relations: ['employee', 'employee.user', 'employee.area', 'qr_session'],
+      relations: ['employee', 'employee.user', 'employee.schedule', 'qr_session'],
     });
 
     if (!record) {
@@ -254,29 +219,40 @@ export class AttendanceService {
     currentUser: AuthenticatedUser,
   ) {
     let record = await this.findOne(id, currentUser);
+    const schedule = record.employee.schedule;
     const previous = {
       checkInAt: record.check_in_at?.toISOString() ?? null,
       checkOutAt: record.check_out_at?.toISOString() ?? null,
+      lateMinutes: record.late_minutes,
       status: record.status,
     };
 
     if (dto.checkInAt) record.check_in_at = new Date(dto.checkInAt);
     if (dto.checkOutAt) record.check_out_at = new Date(dto.checkOutAt);
-    record.status = AttendanceStatus.COMPLETE;
-    record = await this.attendanceRepository.save(record);
+    record.source = 'MANUAL';
 
-    await this.eventRepository.save(
-      this.eventRepository.create({
-        attendance_record: record,
-        event_type: AttendanceEventType.MANUAL_ADJUSTMENT,
-        event_at: new Date(),
-        payload_json: {
-          reason: dto.reason,
-          checkInAt: dto.checkInAt ?? null,
-          checkOutAt: dto.checkOutAt ?? null,
-        },
-      }),
-    );
+    if (!record.check_in_at) {
+      record.late_minutes = 0;
+      record.status = AttendanceStatus.ABSENT;
+    } else if (schedule) {
+      const outcome = this.calculateLateStatus(
+        record.check_in_at,
+        schedule.start_time,
+        schedule.tolerance_minutes,
+      );
+      record.late_minutes = outcome.lateMinutes;
+      record.status = record.check_out_at ? AttendanceStatus.PRESENT : outcome.status;
+      if (outcome.lateMinutes > 0) {
+        record.status = AttendanceStatus.LATE;
+      }
+    } else {
+      record.late_minutes = 0;
+      record.status = record.check_out_at
+        ? AttendanceStatus.PRESENT
+        : AttendanceStatus.INCOMPLETE;
+    }
+
+    record = await this.attendanceRepository.save(record);
 
     await this.auditService.create({
       actorUserId: currentUser.userId,
@@ -288,6 +264,7 @@ export class AttendanceService {
       newData: {
         checkInAt: record.check_in_at?.toISOString() ?? null,
         checkOutAt: record.check_out_at?.toISOString() ?? null,
+        lateMinutes: record.late_minutes,
         status: record.status,
         reason: dto.reason,
       },

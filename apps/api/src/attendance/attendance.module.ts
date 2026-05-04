@@ -3,20 +3,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuditModule } from '../audit/audit.module';
 import { Employee } from '../employees/entities/employee.entity';
 import { QrModule } from '../qr/qr.module';
-import { EmployeeScheduleAssignment } from '../schedules/entities/employee-schedule-assignment.entity';
 import { AttendanceController } from './attendance.controller';
 import { AttendanceService } from './attendance.service';
-import { AttendanceEvent } from './entities/attendance-event.entity';
 import { AttendanceRecord } from './entities/attendance.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      AttendanceRecord,
-      AttendanceEvent,
-      Employee,
-      EmployeeScheduleAssignment,
-    ]),
+    TypeOrmModule.forFeature([AttendanceRecord, Employee]),
     QrModule,
     AuditModule,
   ],

@@ -6,8 +6,6 @@ Backend NestJS alineado al levantamiento funcional y diseno tecnico simple.
 
 - `auth`
 - `users`
-- `roles-permissions`
-- `areas`
 - `settings`
 - `schedules`
 - `employees`
@@ -16,7 +14,17 @@ Backend NestJS alineado al levantamiento funcional y diseno tecnico simple.
 - `incidents`
 - `reports`
 - `audit`
-- `notifications`
+
+## Tablas finales del modelo simplificado
+
+- `users`
+- `employees`
+- `system_settings`
+- `work_schedules`
+- `qr_sessions`
+- `attendance_records`
+- `incident_requests`
+- `audit_logs`
 
 ## Modulos retirados del alcance simple
 
@@ -35,7 +43,7 @@ Backend NestJS alineado al levantamiento funcional y diseno tecnico simple.
 - `POST /auth/refresh`
 - `POST /auth/logout`
 - `GET /auth/me`
-- `GET /areas`
+- `GET /users`
 - `PATCH /settings`
 - `POST /employees`
 - `POST /qr/sessions`

@@ -25,7 +25,7 @@ export class IncidentsService {
   private async getEmployeeByUserId(userId: string) {
     const employee = await this.employeeRepository.findOne({
       where: { user: { id: userId } },
-      relations: ['user', 'supervisor', 'area'],
+      relations: ['user', 'supervisor', 'schedule'],
     });
     if (!employee) {
       throw new NotFoundException(
@@ -62,7 +62,7 @@ export class IncidentsService {
   findMe(currentUser: AuthenticatedUser) {
     return this.incidentRepository.find({
       where: { employee: { user: { id: currentUser.userId } } },
-      relations: ['employee', 'employee.area'],
+      relations: ['employee', 'employee.schedule'],
       order: { created_at: 'DESC' },
     });
   }
@@ -74,7 +74,6 @@ export class IncidentsService {
     const qb = this.incidentRepository
       .createQueryBuilder('incident')
       .leftJoinAndSelect('incident.employee', 'employee')
-      .leftJoinAndSelect('employee.area', 'area')
       .leftJoinAndSelect('incident.reviewer', 'reviewer')
       .orderBy('incident.created_at', 'DESC');
 
@@ -84,7 +83,10 @@ export class IncidentsService {
       qb.andWhere('employee.id = :employeeId', {
         employeeId: query.employeeId,
       });
-    if (query.areaId) qb.andWhere('area.id = :areaId', { areaId: query.areaId });
+    if (query.areaName)
+      qb.andWhere('employee.area_name ILIKE :areaName', {
+        areaName: `%${query.areaName}%`,
+      });
     if (query.attendanceDate)
       qb.andWhere('incident.attendance_date = :attendanceDate', {
         attendanceDate: query.attendanceDate,
@@ -107,7 +109,7 @@ export class IncidentsService {
   async findOne(id: string) {
     const incident = await this.incidentRepository.findOne({
       where: { id },
-      relations: ['employee', 'employee.user', 'employee.area', 'reviewer'],
+      relations: ['employee', 'employee.user', 'employee.schedule', 'reviewer'],
     });
     if (!incident) {
       throw new NotFoundException('Incidencia no encontrada');

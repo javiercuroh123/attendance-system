@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Area } from '../../areas/entities/area.entity';
+import { Schedule } from '../../schedules/entities/schedule.entity';
 import { User } from '../../users/entities/user.entity';
 
 @Entity('employees')
@@ -35,9 +35,8 @@ export class Employee {
   @Column({ type: 'varchar', nullable: true })
   phone?: string | null;
 
-  @ManyToOne(() => Area)
-  @JoinColumn({ name: 'area_id' })
-  area!: Area;
+  @Column({ type: 'varchar', nullable: true })
+  area_name?: string | null;
 
   @Column({ type: 'varchar', nullable: true })
   position?: string | null;
@@ -45,6 +44,10 @@ export class Employee {
   @ManyToOne(() => Employee, { nullable: true })
   @JoinColumn({ name: 'supervisor_id' })
   supervisor?: Employee | null;
+
+  @ManyToOne(() => Schedule, { nullable: true })
+  @JoinColumn({ name: 'schedule_id' })
+  schedule?: Schedule | null;
 
   @Column({ type: 'date', nullable: true })
   hire_date?: string | null;

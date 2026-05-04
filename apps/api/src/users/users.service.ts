@@ -8,7 +8,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 import { RoleCode } from '../common/enums/role-code.enum';
-import { Role } from '../roles-permissions/entities/roles-permission.entity';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -19,8 +18,6 @@ export class UsersService implements OnModuleInit {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(Role)
-    private readonly roleRepository: Repository<Role>,
   ) {}
 
   async onModuleInit() {
@@ -29,35 +26,22 @@ export class UsersService implements OnModuleInit {
       return;
     }
 
-    const adminRole = await this.roleRepository.findOne({
-      where: { code: RoleCode.ADMIN },
-    });
-    if (!adminRole) {
-      return;
-    }
-
     const admin = this.userRepository.create({
       email: 'admin@consultora.com',
       password_hash: await bcrypt.hash('12345678', 10),
       status: 'ACTIVE',
-      roles: [adminRole],
+      role: RoleCode.ADMIN,
     });
 
     await this.userRepository.save(admin);
   }
 
   async findByEmail(email: string) {
-    return this.userRepository.findOne({
-      where: { email },
-      relations: ['roles'],
-    });
+    return this.userRepository.findOne({ where: { email } });
   }
 
   async findOneOrFail(id: string) {
-    const user = await this.userRepository.findOne({
-      where: { id },
-      relations: ['roles'],
-    });
+    const user = await this.userRepository.findOne({ where: { id } });
 
     if (!user) {
       throw new NotFoundException('Usuario no encontrado');
@@ -67,10 +51,7 @@ export class UsersService implements OnModuleInit {
   }
 
   async findAll() {
-    const users = await this.userRepository.find({
-      relations: ['roles'],
-      order: { created_at: 'DESC' },
-    });
+    const users = await this.userRepository.find({ order: { created_at: 'DESC' } });
 
     return users.map((user) => ({
       id: user.id,
@@ -78,7 +59,7 @@ export class UsersService implements OnModuleInit {
       status: user.status,
       last_login_at: user.last_login_at,
       created_at: user.created_at,
-      roles: user.roles.map((role) => role.code),
+      role: user.role,
     }));
   }
 
@@ -90,17 +71,11 @@ export class UsersService implements OnModuleInit {
       throw new ConflictException('El correo ya está registrado');
     }
 
-    const roles = dto.roleCodes?.length
-      ? await this.roleRepository.find({
-          where: dto.roleCodes.map((code) => ({ code })),
-        })
-      : await this.roleRepository.find({ where: { code: RoleCode.EMPLOYEE } });
-
     const user = this.userRepository.create({
       email: dto.email,
       password_hash: await bcrypt.hash(dto.password, 10),
       status: dto.status ?? 'ACTIVE',
-      roles,
+      role: dto.role ?? RoleCode.EMPLOYEE,
     });
 
     const created = await this.userRepository.save(user);
@@ -128,11 +103,7 @@ export class UsersService implements OnModuleInit {
       user.status = dto.status;
     }
 
-    if (dto.roleCodes?.length) {
-      user.roles = await this.roleRepository.find({
-        where: dto.roleCodes.map((code) => ({ code })),
-      });
-    }
+    if (dto.role !== undefined) user.role = dto.role;
 
     await this.userRepository.save(user);
     return this.findOneOrFail(id);

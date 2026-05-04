@@ -18,9 +18,7 @@
 
 - `auth`
 - `users`
-- `roles-permissions`
 - `employees`
-- `areas`
 - `settings`
 - `schedules`
 - `qr`
@@ -28,24 +26,17 @@
 - `incidents`
 - `reports`
 - `audit`
-- `notifications`
 
-## Modelo base de datos (tablas principales)
+## Modelo base de datos simplificado (8 tablas)
 
 - `users`
-- `roles`
-- `user_roles`
-- `areas`
 - `employees`
 - `system_settings`
 - `work_schedules`
-- `employee_schedule_assignments`
 - `qr_sessions`
 - `attendance_records`
-- `attendance_events`
 - `incident_requests`
 - `audit_logs`
-- `notifications`
 
 ## Reglas tecnicas de asistencia
 
@@ -58,9 +49,12 @@
 ## Seguridad
 
 - JWT access token + refresh token
-- RBAC por rol
+- RBAC por rol simple en `users.role`
 - Auditoria de operaciones sensibles
 
 ## Criterio de simplificacion
 
 No se implementa `branches`, `branch_id` ni modulo de sedes. Todo se rige por `system_settings` para centro de trabajo unico.
+No se implementa tabla de `areas`; se usa `employees.area_name` como texto.
+No se implementa tabla intermedia de horarios; se usa `employees.schedule_id`.
+No se implementa `attendance_events`; entrada y salida se registran en `attendance_records`.

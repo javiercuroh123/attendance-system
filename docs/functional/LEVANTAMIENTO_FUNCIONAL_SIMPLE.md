@@ -7,11 +7,10 @@ Desarrollar un sistema web y movil para registrar, controlar y supervisar la asi
 ## Alcance funcional incluido
 
 - Autenticacion de usuarios
-- Gestion de usuarios y roles
+- Gestion de usuarios con rol simple
 - Gestion de empleados
 - Configuracion general del sistema
-- Gestion de areas
-- Gestion y asignacion de horarios
+- Gestion de horarios y asignacion directa al empleado
 - Generacion y validacion de QR
 - Escaneo desde app movil
 - Registro de entrada y salida
@@ -51,3 +50,4 @@ Desarrollar un sistema web y movil para registrar, controlar y supervisar la asi
 ## Criterio de simplificacion
 
 El sistema opera con un unico centro de trabajo autorizado. No se implementa gestion multisede ni entidad `branches`.
+No se implementan tablas separadas de roles, areas, eventos de asistencia ni notificaciones internas en el MVP.
