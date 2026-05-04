@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as crypto from 'crypto';
 import { Repository } from 'typeorm';
 import { SystemSetting } from '../settings/entities/system-setting.entity';
+import { User } from '../users/entities/user.entity';
 import { CreateQrDto } from './dto/create-qr.dto';
 import { ValidateQrDto } from './dto/validate-qr.dto';
 import { QrSession } from './entities/qr.entity';
@@ -48,7 +49,7 @@ export class QrService {
     const expiresAt = new Date(now.getTime() + validitySeconds * 1000);
 
     const session = this.qrRepository.create({
-      issued_by: issuedBy,
+      issued_by_user: { id: issuedBy } as User,
       token_hash: this.hashToken(rawToken),
       starts_at: now,
       expires_at: expiresAt,

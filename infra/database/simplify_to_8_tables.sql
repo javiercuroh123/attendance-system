@@ -93,6 +93,66 @@ BEGIN
 END
 $$;
 
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint c
+    JOIN pg_attribute a
+      ON a.attrelid = c.conrelid
+     AND a.attnum = ANY(c.conkey)
+    WHERE c.contype = 'f'
+      AND c.conrelid = 'incident_requests'::regclass
+      AND c.confrelid = 'users'::regclass
+      AND a.attname = 'reviewed_by'
+  ) THEN
+    ALTER TABLE incident_requests
+      ADD CONSTRAINT fk_incident_requests_reviewed_by_users
+      FOREIGN KEY (reviewed_by)
+      REFERENCES users(id)
+      ON DELETE SET NULL;
+  END IF;
+END
+$$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint c
+    JOIN pg_attribute a
+      ON a.attrelid = c.conrelid
+     AND a.attnum = ANY(c.conkey)
+    WHERE c.contype = 'f'
+      AND c.conrelid = 'qr_sessions'::regclass
+      AND c.confrelid = 'users'::regclass
+      AND a.attname = 'issued_by'
+  ) THEN
+    ALTER TABLE qr_sessions
+      ADD CONSTRAINT fk_qr_sessions_issued_by_users
+      FOREIGN KEY (issued_by)
+      REFERENCES users(id)
+      ON DELETE RESTRICT;
+  END IF;
+END
+$$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'fk_audit_logs_actor_user_id_users'
+  ) THEN
+    ALTER TABLE audit_logs
+      ADD CONSTRAINT fk_audit_logs_actor_user_id_users
+      FOREIGN KEY (actor_user_id)
+      REFERENCES users(id)
+      ON DELETE RESTRICT;
+  END IF;
+END
+$$;
+
 -- 3) normalizar estados de asistencia al nuevo modelo
 UPDATE attendance_records
 SET status = 'PRESENT'

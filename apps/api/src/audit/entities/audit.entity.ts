@@ -2,15 +2,23 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
+  RelationId,
 } from 'typeorm';
+import { User } from '../../users/entities/user.entity';
 
 @Entity('audit_logs')
 export class AuditLog {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ type: 'uuid' })
+  @ManyToOne(() => User, { nullable: false, onDelete: 'RESTRICT' })
+  @JoinColumn({ name: 'actor_user_id' })
+  actor_user!: User;
+
+  @RelationId((audit: AuditLog) => audit.actor_user)
   actor_user_id!: string;
 
   @Column({ type: 'varchar' })

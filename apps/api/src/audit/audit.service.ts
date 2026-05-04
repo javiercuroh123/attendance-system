@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateAuditDto } from './dto/create-audit.dto';
 import { AuditLog } from './entities/audit.entity';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class AuditService {
@@ -13,7 +14,7 @@ export class AuditService {
 
   async create(dto: CreateAuditDto) {
     const entry = this.auditRepository.create({
-      actor_user_id: dto.actorUserId,
+      actor_user: { id: dto.actorUserId } as User,
       module: dto.module,
       action: dto.action,
       entity_name: dto.entityName,
