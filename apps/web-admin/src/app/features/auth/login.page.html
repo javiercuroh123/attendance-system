@@ -22,12 +22,12 @@
 
   <main class="auth-right">
     <div class="auth-box">
-      <h1>Iniciar sesion</h1>
+      <h2>Iniciar sesión</h2>
       <p>Panel administrativo — acceso restringido</p>
 
       <form class="auth-form" [formGroup]="form" (ngSubmit)="submit()">
         <div>
-          <label for="email">Correo electronico</label>
+          <label for="email">Correo electrónico</label>
           <input
             id="email"
             class="finput"
@@ -37,12 +37,12 @@
             placeholder="usuario@empresa.com"
           />
           @if (form.controls.email.invalid && form.controls.email.touched) {
-            <small class="field-error">Ingresa un correo valido.</small>
+            <small class="field-error">Ingresa un correo válido.</small>
           }
         </div>
 
         <div>
-          <label for="password">Contrasena</label>
+          <label for="password">Contraseña</label>
           <div class="password-wrap">
             <input
               id="password"
@@ -56,13 +56,13 @@
               type="button"
               class="toggle-password"
               (click)="togglePassword()"
-              [attr.aria-label]="showPassword() ? 'Ocultar contrasena' : 'Mostrar contrasena'"
+              [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
             >
               {{ showPassword() ? 'Ocultar' : 'Ver' }}
             </button>
           </div>
           @if (form.controls.password.invalid && form.controls.password.touched) {
-            <small class="field-error">La contrasena debe tener al menos 6 caracteres.</small>
+            <small class="field-error">La contraseña debe tener al menos 6 caracteres.</small>
           }
         </div>
 
@@ -76,14 +76,14 @@
       </form>
 
       <div class="auth-links">
-        <a routerLink="/auth/login">¿Olvidaste tu contrasena?</a>
-        <a href="mailto:soporte@empresa.com">Soporte tecnico</a>
+        <a routerLink="/auth/login">¿Olvidaste tu contraseña?</a>
+        <a href="mailto:soporte@empresa.com">Soporte técnico</a>
       </div>
 
       <div class="auth-modules">
         <p>
-          Modulo de autenticacion del panel web administrativo. Gestiona inicio
-          de sesion y renovacion de credenciales con JWT.
+          Módulo de autenticación del panel web administrativo. Gestiona inicio
+          de sesión y renovación de credenciales con JWT.
         </p>
       </div>
     </div>

@@ -71,7 +71,7 @@ export class LoginPage {
           }
 
           this.errorMessage.set(
-            'No se pudo iniciar sesion. Verifica tus credenciales e intenta nuevamente.',
+            'No se pudo iniciar sesión. Verifica tus credenciales e intenta nuevamente.',
           );
         },
       });
