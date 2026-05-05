@@ -345,7 +345,7 @@ a {
 }
 
 .tbl-wrap {
-  overflow-x: auto;
+  overflow-x: hidden;
 }
 
 table {
@@ -372,6 +372,7 @@ td {
   font-size: 12.5px;
   color: var(--slate-8);
   vertical-align: middle;
+  white-space: nowrap;
 }
 
 tr:last-child td {
@@ -451,6 +452,14 @@ tr:last-child td {
 @media (max-width: 1200px) {
   .g3 {
     grid-template-columns: 1fr;
+  }
+
+  .tbl-wrap {
+    overflow-x: auto;
+  }
+
+  table {
+    min-width: 980px;
   }
 }
 

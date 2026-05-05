@@ -36,7 +36,7 @@ export const routes: Routes = [
       },
       {
         path: 'employees',
-        data: { title: 'Empleados', subtitle: 'Gestión del personal' },
+        data: { title: 'Empleados', subtitle: 'employees' },
         loadComponent: () =>
           import('./features/employees/employees.page').then(
             (m) => m.EmployeesPage,
@@ -44,7 +44,7 @@ export const routes: Routes = [
       },
       {
         path: 'schedules',
-        data: { title: 'Horarios', subtitle: 'Turnos y tolerancias' },
+        data: { title: 'Horarios', subtitle: 'work_schedules' },
         loadComponent: () =>
           import('./features/schedules/schedules.page').then(
             (m) => m.SchedulesPage,
@@ -52,7 +52,7 @@ export const routes: Routes = [
       },
       {
         path: 'attendance',
-        data: { title: 'Asistencia', subtitle: 'Control diario del personal' },
+        data: { title: 'Asistencia', subtitle: 'attendance_records' },
         loadComponent: () =>
           import('./features/attendance/attendance.page').then(
             (m) => m.AttendancePage,

@@ -1,40 +1,86 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+
+interface AttendanceRow {
+  initials: string;
+  name: string;
+  date: string;
+  checkInAt: string;
+  checkOutAt: string;
+  workedHours: string;
+  status: 'PRESENT' | 'LATE' | 'ABSENT' | 'JUSTIFIED';
+  lateMinutes: string;
+  source: 'QR' | 'MANUAL' | null;
+  qrSession: string | null;
+}
 
 @Component({
   selector: 'app-attendance-page',
   standalone: true,
-  template: `
-    <section class="module-page">
-      <h2>Asistencia</h2>
-      <p>
-        Consulta diaria y por trabajador, con ajustes manuales controlados para
-        RR. HH. y administración.
-      </p>
-    </section>
-  `,
-  styles: `
-    .module-page {
-      background: #ffffff;
-      border: 1px solid #e9ecef;
-      border-radius: 14px;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-      padding: 20px;
-    }
-
-    .module-page h2 {
-      margin: 0 0 6px;
-      font-family: 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
-      font-size: 22px;
-      font-weight: 400;
-      color: #0d1117;
-    }
-
-    .module-page p {
-      margin: 0;
-      color: #6c757d;
-      font-size: 13px;
-      line-height: 1.55;
-    }
-  `,
+  templateUrl: './attendance.page.html',
+  styleUrl: './attendance.page.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AttendancePage {}
+export class AttendancePage {
+  readonly rows: AttendanceRow[] = [
+    {
+      initials: 'MA',
+      name: 'María Alvarado',
+      date: '05/05/2025',
+      checkInAt: '08:02:14',
+      checkOutAt: '—',
+      workedHours: '—',
+      status: 'PRESENT',
+      lateMinutes: '0',
+      source: 'QR',
+      qrSession: 'QRS-0041',
+    },
+    {
+      initials: 'CR',
+      name: 'Carlos Ramos',
+      date: '05/05/2025',
+      checkInAt: '08:18:07',
+      checkOutAt: '—',
+      workedHours: '—',
+      status: 'LATE',
+      lateMinutes: '18',
+      source: 'QR',
+      qrSession: 'QRS-0041',
+    },
+    {
+      initials: 'LP',
+      name: 'Lucía Paredes',
+      date: '05/05/2025',
+      checkInAt: '07:58:33',
+      checkOutAt: '17:04:11',
+      workedHours: '9h 05m',
+      status: 'PRESENT',
+      lateMinutes: '0',
+      source: 'QR',
+      qrSession: 'QRS-0041',
+    },
+    {
+      initials: 'JM',
+      name: 'Jorge Mendoza',
+      date: '05/05/2025',
+      checkInAt: '—',
+      checkOutAt: '—',
+      workedHours: '—',
+      status: 'ABSENT',
+      lateMinutes: '—',
+      source: null,
+      qrSession: null,
+    },
+    {
+      initials: 'AT',
+      name: 'Ana Torres',
+      date: '05/05/2025',
+      checkInAt: '—',
+      checkOutAt: '—',
+      workedHours: '—',
+      status: 'JUSTIFIED',
+      lateMinutes: '—',
+      source: 'MANUAL',
+      qrSession: null,
+    },
+  ];
+}

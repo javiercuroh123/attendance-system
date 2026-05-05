@@ -1,0 +1,88 @@
+<section class="ph">
+  <div class="ph-left">
+    <h2>Asistencia</h2>
+    <p>Tabla attendance_records — entradas, salidas y tardanzas</p>
+  </div>
+  <div class="ph-actions">
+    <button type="button" class="btn btn-outline">Filtrar fecha</button>
+    <button type="button" class="btn btn-dark">+ Ajuste manual</button>
+  </div>
+</section>
+
+<section class="search-row">
+  <div class="search-input-wrap">
+    <span class="search-icon">⌕</span>
+    <input class="finput" type="text" placeholder="Buscar empleado..." />
+  </div>
+
+  <div class="date-input-wrap">
+    <input class="finput date-input" type="text" value="05/05/2025" />
+    <span class="date-icon">◷</span>
+  </div>
+
+  <select class="finput select-input">
+    <option>Todos los estados</option>
+    <option>PRESENT</option>
+    <option>LATE</option>
+    <option>ABSENT</option>
+    <option>JUSTIFIED</option>
+  </select>
+</section>
+
+<section class="card">
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Empleado</th>
+          <th>Fecha</th>
+          <th>Entrada (check_in_at)</th>
+          <th>Salida (check_out_at)</th>
+          <th>Horas</th>
+          <th>Estado</th>
+          <th>Late min</th>
+          <th>Origen</th>
+          <th>QR sesión</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows; track row.name) {
+          <tr>
+            <td>
+              <div class="emp-cell">
+                <div class="emp-av">{{ row.initials }}</div>
+                <div class="emp-name">{{ row.name }}</div>
+              </div>
+            </td>
+            <td>{{ row.date }}</td>
+            <td>{{ row.checkInAt }}</td>
+            <td>{{ row.checkOutAt }}</td>
+            <td>{{ row.workedHours }}</td>
+            <td>
+              <span
+                class="badge"
+                [class.b-present]="row.status === 'PRESENT'"
+                [class.b-late]="row.status === 'LATE'"
+                [class.b-absent]="row.status === 'ABSENT'"
+                [class.b-justified]="row.status === 'JUSTIFIED'"
+              >
+                {{ row.status }}
+              </span>
+            </td>
+            <td>{{ row.lateMinutes }}</td>
+            <td>
+              @if (row.source === 'QR') {
+                <span class="badge b-qr">QR</span>
+              } @else if (row.source === 'MANUAL') {
+                <span class="badge b-manual">MANUAL</span>
+              } @else {
+                <span class="dash">—</span>
+              }
+            </td>
+            <td class="session-cell">{{ row.qrSession ?? '—' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

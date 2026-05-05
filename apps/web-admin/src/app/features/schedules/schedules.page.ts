@@ -1,40 +1,50 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+
+interface ScheduleRow {
+  code: string;
+  name: string;
+  start: string;
+  end: string;
+  tolerance: string;
+  days: string;
+  status: 'ACTIVE' | 'INACTIVE';
+}
 
 @Component({
   selector: 'app-schedules-page',
   standalone: true,
-  template: `
-    <section class="module-page">
-      <h2>Horarios</h2>
-      <p>
-        Configuración de turnos, tolerancias y días hábiles para control de
-        asistencia.
-      </p>
-    </section>
-  `,
-  styles: `
-    .module-page {
-      background: #ffffff;
-      border: 1px solid #e9ecef;
-      border-radius: 14px;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-      padding: 20px;
-    }
-
-    .module-page h2 {
-      margin: 0 0 6px;
-      font-family: 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
-      font-size: 22px;
-      font-weight: 400;
-      color: #0d1117;
-    }
-
-    .module-page p {
-      margin: 0;
-      color: #6c757d;
-      font-size: 13px;
-      line-height: 1.55;
-    }
-  `,
+  templateUrl: './schedules.page.html',
+  styleUrl: './schedules.page.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SchedulesPage {}
+export class SchedulesPage {
+  readonly rows: ScheduleRow[] = [
+    {
+      code: 'SCH-01',
+      name: 'Turno Mañana',
+      start: '08:00',
+      end: '17:00',
+      tolerance: '10 min',
+      days: 'Lun–Vie',
+      status: 'ACTIVE',
+    },
+    {
+      code: 'SCH-02',
+      name: 'Turno Tarde',
+      start: '14:00',
+      end: '22:00',
+      tolerance: '10 min',
+      days: 'Lun–Vie',
+      status: 'ACTIVE',
+    },
+    {
+      code: 'SCH-03',
+      name: 'Turno Noche',
+      start: '22:00',
+      end: '06:00',
+      tolerance: '15 min',
+      days: 'Lun–Dom',
+      status: 'INACTIVE',
+    },
+  ];
+}

@@ -1,0 +1,101 @@
+<section class="ph">
+  <div class="ph-left">
+    <h2>Empleados</h2>
+    <p>Tabla employees — datos del personal</p>
+  </div>
+  <div class="ph-actions">
+    <button type="button" class="btn btn-dark">+ Nuevo empleado</button>
+  </div>
+</section>
+
+<section class="search-row">
+  <div class="search-input-wrap">
+    <span class="search-icon">⌕</span>
+    <input class="finput" type="text" placeholder="Buscar por nombre, DNI o código..." />
+  </div>
+
+  <select class="finput select-input">
+    <option>Todos los roles</option>
+    <option>RRHH</option>
+    <option>SUPERVISOR</option>
+    <option>EMPLOYEE</option>
+  </select>
+
+  <select class="finput select-input">
+    <option>Todos los estados</option>
+    <option>ACTIVE</option>
+    <option>INACTIVE</option>
+  </select>
+</section>
+
+<section class="card">
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Empleado</th>
+          <th>DNI</th>
+          <th>Cargo / Área</th>
+          <th>Horario</th>
+          <th>Rol</th>
+          <th>Estado</th>
+          <th>Asistencia</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows; track row.code) {
+          <tr>
+            <td>
+              <div class="emp-cell">
+                <div class="emp-av">{{ row.initials }}</div>
+                <div>
+                  <div class="emp-name">{{ row.name }}</div>
+                  <div class="emp-sub">{{ row.code }}</div>
+                </div>
+              </div>
+            </td>
+            <td>{{ row.dni }}</td>
+            <td>{{ row.positionArea }}</td>
+            <td>{{ row.schedule }}</td>
+            <td>
+              <span
+                class="badge"
+                [class.b-rrhh]="row.role === 'RRHH'"
+                [class.b-sup]="row.role === 'SUPERVISOR'"
+                [class.b-emp]="row.role === 'EMPLOYEE'"
+              >
+                {{ row.role }}
+              </span>
+            </td>
+            <td>
+              <span
+                class="badge"
+                [class.b-active]="row.status === 'ACTIVE'"
+                [class.b-inactive]="row.status === 'INACTIVE'"
+              >
+                {{ row.status }}
+              </span>
+            </td>
+            <td>
+              <div class="asistencia-cell">
+                <div class="prog-bar">
+                  <div
+                    class="prog-fill"
+                    [class.f-mid]="row.attendancePct < 85 && row.attendancePct >= 60"
+                    [class.f-low]="row.attendancePct < 60"
+                    [style.width.%]="row.attendancePct"
+                  ></div>
+                </div>
+                <span>{{ row.attendancePct }}%</span>
+              </div>
+            </td>
+            <td>
+              <button type="button" class="btn btn-outline btn-xs">Editar</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

@@ -1,0 +1,105 @@
+<section class="ph">
+  <div class="ph-left">
+    <h2>Horarios</h2>
+    <p>Tabla work_schedules — turnos y tolerancias</p>
+  </div>
+  <div class="ph-actions">
+    <button type="button" class="btn btn-dark">+ Nuevo horario</button>
+  </div>
+</section>
+
+<section class="g2">
+  <article class="card">
+    <div class="card-head">
+      <h3>Turnos configurados</h3>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Entrada</th>
+            <th>Salida</th>
+            <th>Tolerancia</th>
+            <th>Días</th>
+            <th>Estado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows; track row.code) {
+            <tr>
+              <td><code class="code-cell">{{ row.code }}</code></td>
+              <td>{{ row.name }}</td>
+              <td>{{ row.start }}</td>
+              <td>{{ row.end }}</td>
+              <td>{{ row.tolerance }}</td>
+              <td>{{ row.days }}</td>
+              <td>
+                <span class="badge" [class.b-active]="row.status === 'ACTIVE'" [class.b-inactive]="row.status === 'INACTIVE'">
+                  {{ row.status }}
+                </span>
+              </td>
+              <td><button type="button" class="btn btn-outline btn-xs">Editar</button></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <article class="card">
+    <div class="card-head">
+      <h3>Registrar / Editar horario</h3>
+    </div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="fg fg-full">
+          <label class="lbl">Nombre del turno</label>
+          <input class="finput" type="text" placeholder="Ej: Turno especial" />
+        </div>
+
+        <div class="fg">
+          <label class="lbl">Código</label>
+          <input class="finput" type="text" placeholder="SCH-XX" />
+        </div>
+
+        <div class="fg">
+          <label class="lbl">Tolerancia (min)</label>
+          <input class="finput" type="number" value="10" />
+        </div>
+
+        <div class="fg">
+          <label class="lbl">Hora de entrada</label>
+          <div class="time-wrap">
+            <input class="finput" type="text" value="08:00 a.m." />
+            <span class="time-icon">◷</span>
+          </div>
+        </div>
+
+        <div class="fg">
+          <label class="lbl">Hora de salida</label>
+          <div class="time-wrap">
+            <input class="finput" type="text" value="05:00 p.m." />
+            <span class="time-icon">◷</span>
+          </div>
+        </div>
+
+        <div class="fg fg-full">
+          <label class="lbl">Días laborables</label>
+          <select class="finput">
+            <option>Lunes a Viernes</option>
+            <option>Lunes a Sábado</option>
+            <option>Todos los días</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-outline">Cancelar</button>
+        <button type="button" class="btn btn-dark">Guardar</button>
+      </div>
+    </div>
+  </article>
+</section>
