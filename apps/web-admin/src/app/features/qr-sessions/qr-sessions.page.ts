@@ -1,14 +1,14 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-settings-page',
+  selector: 'app-qr-sessions-page',
   standalone: true,
   template: `
     <section class="module-page">
-      <h2>Configuración General</h2>
+      <h2>Sesiones QR</h2>
       <p>
-        Parámetros globales del sistema: centro de trabajo, punto QR autorizado
-        y reglas operativas base.
+        Control de sesiones QR activas, expiradas o canceladas para marcación
+        segura de asistencia.
       </p>
     </section>
   `,
@@ -37,4 +37,4 @@ import { Component } from '@angular/core';
     }
   `,
 })
-export class SettingsPage {}
+export class QrSessionsPage {}

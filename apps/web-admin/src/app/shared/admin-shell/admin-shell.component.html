@@ -1,0 +1,110 @@
+<section class="dashboard-layout">
+  <button
+    type="button"
+    class="sidebar-overlay"
+    [class.visible]="sidebarOpen()"
+    aria-label="Cerrar menú"
+    (click)="closeSidebar()"
+  ></button>
+
+  <aside class="sidebar" [class.open]="sidebarOpen()">
+    <div class="sidebar-brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="2" width="6" height="6" rx="1" fill="#0d1117" opacity=".85" />
+          <rect x="10" y="2" width="6" height="6" rx="1" fill="#0d1117" opacity=".85" />
+          <rect x="2" y="10" width="6" height="6" rx="1" fill="#0d1117" opacity=".85" />
+          <rect x="10" y="10" width="3" height="3" rx=".5" fill="#0d1117" opacity=".85" />
+          <rect x="15" y="10" width="1" height="3" rx=".5" fill="#0d1117" opacity=".85" />
+          <rect x="10" y="15" width="3" height="1" rx=".5" fill="#0d1117" opacity=".85" />
+          <rect x="15" y="14" width="1" height="2" rx=".5" fill="#0d1117" opacity=".85" />
+          <rect x="13" y="13" width="1" height="1" rx=".5" fill="#0d1117" opacity=".85" />
+        </svg>
+      </div>
+      <div class="brand-name">Sistema de Asistencia QR</div>
+      <div class="brand-sub">Panel Administrativo</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a
+        class="nav-item"
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        (click)="closeSidebar()"
+      >
+        <span class="ni">▤</span>
+        Dashboard
+      </a>
+
+      <p class="nav-section">Gestión</p>
+      <a class="nav-item" routerLink="/employees" routerLinkActive="active" (click)="closeSidebar()">
+        <span class="ni">◈</span>
+        Empleados
+      </a>
+      <a class="nav-item" routerLink="/schedules" routerLinkActive="active" (click)="closeSidebar()">
+        <span class="ni">◷</span>
+        Horarios
+      </a>
+      <a class="nav-item" routerLink="/attendance" routerLinkActive="active" (click)="closeSidebar()">
+        <span class="ni">◎</span>
+        Asistencia
+      </a>
+      <a class="nav-item" routerLink="/incidents" routerLinkActive="active" (click)="closeSidebar()">
+        <span class="ni">◇</span>
+        Incidencias
+      </a>
+
+      <p class="nav-section">Operación</p>
+      <a class="nav-item" routerLink="/qr-sessions" routerLinkActive="active" (click)="closeSidebar()">
+        <span class="ni">⊞</span>
+        Sesiones QR
+      </a>
+      <a class="nav-item" routerLink="/reports" routerLinkActive="active" (click)="closeSidebar()">
+        <span class="ni">◰</span>
+        Reportes
+      </a>
+      <a class="nav-item" routerLink="/audit" routerLinkActive="active" (click)="closeSidebar()">
+        <span class="ni">◱</span>
+        Auditoría
+      </a>
+
+      <p class="nav-section">Sistema</p>
+      <a class="nav-item" routerLink="/settings" routerLinkActive="active" (click)="closeSidebar()">
+        <span class="ni">◉</span>
+        Configuración
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-row">
+        <div class="user-avatar">{{ userInitials() }}</div>
+        <div class="user-info">
+          <div class="user-name">{{ userEmail() }}</div>
+          <div class="user-role">{{ userRole() }}</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button type="button" class="menu-trigger" aria-label="Abrir menú" (click)="toggleSidebar()">
+          ☰
+        </button>
+        <div class="dot-live"></div>
+        <span class="topbar-title">{{ pageTitle() }}</span>
+        <span class="topbar-sub">{{ pageSubtitle() }}</span>
+      </div>
+      <div class="topbar-right">
+        <span class="topbar-date">{{ topbarDate }}</span>
+        <button type="button" class="btn btn-outline btn-sm" (click)="logout()">
+          Cerrar sesión
+        </button>
+      </div>
+    </header>
+
+    <main class="content"><router-outlet /></main>
+  </div>
+</section>

@@ -1,14 +1,14 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-settings-page',
+  selector: 'app-audit-page',
   standalone: true,
   template: `
     <section class="module-page">
-      <h2>Configuración General</h2>
+      <h2>Auditoría</h2>
       <p>
-        Parámetros globales del sistema: centro de trabajo, punto QR autorizado
-        y reglas operativas base.
+        Registro de acciones importantes realizadas por usuarios en los módulos
+        principales del sistema.
       </p>
     </section>
   `,
@@ -37,4 +37,4 @@ import { Component } from '@angular/core';
     }
   `,
 })
-export class SettingsPage {}
+export class AuditPage {}

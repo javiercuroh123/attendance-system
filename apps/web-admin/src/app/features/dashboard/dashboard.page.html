@@ -1,0 +1,146 @@
+<section class="ph">
+  <div class="ph-left">
+    <h2>Resumen de hoy</h2>
+    <p>{{ summaryDate }}</p>
+  </div>
+  <div class="ph-actions">
+    <button type="button" class="btn btn-outline">↓ Exportar</button>
+    <button type="button" class="btn btn-dark">↺ Actualizar</button>
+  </div>
+</section>
+
+<section class="stats">
+  @for (card of statCards; track card.label) {
+    <article class="stat">
+      <p class="stat-label">{{ card.label }}</p>
+      <p class="stat-val">{{ card.value }}</p>
+      <p class="stat-note">{{ card.note }} <b>{{ card.highlight }}</b></p>
+    </article>
+  }
+</section>
+
+<section class="g3">
+  <article class="card">
+    <div class="card-head">
+      <h3>Asistencia semanal</h3>
+      <a routerLink="/attendance">Ver en Asistencia →</a>
+    </div>
+    <div class="card-body">
+      <div class="week-days">
+        @for (item of weekBars; track item.label) {
+          <span>{{ item.label }}</span>
+        }
+      </div>
+      <div class="bar-chart">
+        @for (item of weekBars; track item.label) {
+          <div
+            class="bc-bar"
+            [class.fill]="item.fill"
+            [class.today]="item.today"
+            [style.height.%]="item.height"
+          ></div>
+        }
+      </div>
+      <div class="week-resume">
+        <span>21 · 18 · 22 · 17 · <b>19</b> presentes</span>
+        <span>Prom: <b>19.4</b></span>
+      </div>
+      <hr class="divider" />
+      @for (item of progressItems; track item.label) {
+        <div class="prog-row">
+          <span class="prog-label">{{ item.label }}</span>
+          <div class="prog-bar">
+            <div
+              class="prog-fill"
+              [class.f-mid]="item.tone === 'mid'"
+              [class.f-low]="item.tone === 'low'"
+              [style.width.%]="item.value"
+            ></div>
+          </div>
+          <span class="prog-pct">{{ item.value }}%</span>
+        </div>
+      }
+    </div>
+  </article>
+
+  <article class="card">
+    <div class="card-head">
+      <h3>Actividad reciente</h3>
+    </div>
+    <div class="card-body card-activity">
+      <div class="activity">
+        @for (item of activities; track item.text) {
+          <div class="act-item">
+            <div
+              class="act-dot"
+              [class.d-ok]="item.type === 'ok'"
+              [class.d-warn]="item.type === 'warn'"
+              [class.d-info]="item.type === 'info'"
+              [class.d-err]="item.type === 'err'"
+            ></div>
+            <div>
+              <div class="act-text">{{ item.text }}</div>
+              <div class="act-time">{{ item.timestamp }}</div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </article>
+</section>
+
+<section class="card records-card">
+  <div class="card-head">
+    <h3>Últimos registros — attendance_records</h3>
+    <a routerLink="/attendance">Ver todos →</a>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Empleado</th>
+          <th>Fecha</th>
+          <th>Entrada</th>
+          <th>Salida</th>
+          <th>Estado</th>
+          <th>Tardanza</th>
+          <th>Origen</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (record of attendanceRecords; track record.employee) {
+          <tr>
+            <td>
+              <div class="emp-cell">
+                <div class="emp-av">{{ record.initials }}</div>
+                <div>
+                  <div class="emp-name">{{ record.employee }}</div>
+                  <div class="emp-sub">{{ record.codeArea }}</div>
+                </div>
+              </div>
+            </td>
+            <td>{{ record.date }}</td>
+            <td>{{ record.checkIn }}</td>
+            <td>{{ record.checkOut }}</td>
+            <td>
+              <span
+                class="badge"
+                [class.b-present]="record.status === 'PRESENT'"
+                [class.b-late]="record.status === 'LATE'"
+                [class.b-absent]="record.status === 'ABSENT'"
+              >
+                {{ record.status }}
+              </span>
+            </td>
+            <td>{{ record.late }}</td>
+            <td>
+              <span class="badge b-source" [class.b-source-empty]="record.source === '—'">
+                {{ record.source }}
+              </span>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>
