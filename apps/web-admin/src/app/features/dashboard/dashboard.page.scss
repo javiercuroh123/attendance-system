@@ -75,6 +75,11 @@ a {
   cursor: pointer;
 }
 
+.btn:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
 .btn-dark {
   background: var(--ink);
   color: var(--white);
@@ -101,6 +106,19 @@ a {
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 14px;
   margin-bottom: 22px;
+}
+
+.feedback {
+  font-size: 12px;
+  margin: -8px 0 14px;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+}
+
+.feedback-error {
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  color: #9f1239;
 }
 
 .stat {
@@ -404,6 +422,11 @@ tr:last-child td {
 .b-absent {
   background: #fce4ec;
   color: #7b2d3f;
+}
+
+.b-justified {
+  background: #efeaff;
+  color: #4c1d95;
 }
 
 .b-source {

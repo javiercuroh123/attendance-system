@@ -68,6 +68,11 @@ p {
   cursor: pointer;
 }
 
+.btn:disabled {
+  opacity: 0.74;
+  cursor: not-allowed;
+}
+
 .btn-dark {
   background: var(--ink);
   color: var(--white);
@@ -92,6 +97,25 @@ p {
 .btn-xs {
   padding: 3px 8px;
   font-size: 11px;
+}
+
+.feedback {
+  font-size: 12px;
+  margin: -2px 0 12px;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+}
+
+.feedback-error {
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  color: #9f1239;
+}
+
+.feedback-success {
+  background: #ecfdf3;
+  border: 1px solid #bbf7d0;
+  color: #166534;
 }
 
 .g2 {
@@ -157,6 +181,12 @@ td {
 
 tr:last-child td {
   border-bottom: none;
+}
+
+.empty-state {
+  padding: 14px 0;
+  color: var(--slate-6);
+  font-size: 12px;
 }
 
 .code-cell {
@@ -274,5 +304,13 @@ tr:last-child td {
 
   .fg-full {
     grid-column: auto;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions .btn {
+    width: 100%;
   }
 }

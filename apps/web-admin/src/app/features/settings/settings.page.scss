@@ -77,6 +77,11 @@ p {
   cursor: pointer;
 }
 
+.btn:disabled {
+  opacity: 0.74;
+  cursor: not-allowed;
+}
+
 .btn-dark {
   background: var(--ink);
   color: var(--white);
@@ -84,6 +89,25 @@ p {
 
 .btn-dark:hover {
   background: #343a40;
+}
+
+.feedback {
+  font-size: 12px;
+  margin: -8px 0 12px;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+}
+
+.feedback-error {
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  color: #9f1239;
+}
+
+.feedback-success {
+  background: #ecfdf3;
+  border: 1px solid #bbf7d0;
+  color: #166534;
 }
 
 .g2 {
@@ -214,6 +238,10 @@ select.finput option {
 
 .toggle.on {
   background: var(--ink);
+}
+
+.toggle:disabled {
+  cursor: default;
 }
 
 .toggle::after {

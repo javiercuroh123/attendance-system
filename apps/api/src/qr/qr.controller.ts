@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuditService } from '../audit/audit.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -48,6 +56,13 @@ export class QrController {
   @ApiOperation({ summary: 'Obtener sesion QR por id' })
   getSession(@Param('id') id: string) {
     return this.qrService.getSession(id);
+  }
+
+  @Get('sessions')
+  @Roles(RoleCode.ADMIN, RoleCode.RRHH, RoleCode.SUPERVISOR)
+  @ApiOperation({ summary: 'Listar sesiones QR (con filtros simples)' })
+  listSessions(@Query() query: Record<string, string | undefined>) {
+    return this.qrService.listSessions(query);
   }
 
   @Post('validate')

@@ -37,6 +37,7 @@
 ## QR
 
 - `POST /qr/sessions`
+- `GET /qr/sessions`
 - `GET /qr/sessions/:id`
 - `POST /qr/validate`
 
@@ -67,4 +68,5 @@
 ## Audit
 
 - `GET /audit`
+- `GET /audit?limit=20&module=attendance`
 - `GET /audit/:entity/:id`

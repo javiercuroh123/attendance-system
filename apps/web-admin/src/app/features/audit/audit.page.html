@@ -4,30 +4,39 @@
     <p>Tabla <code>audit_logs</code> — trazabilidad de acciones importantes</p>
   </div>
   <div class="ph-actions">
-    <select class="finput">
-      <option>Todos los módulos</option>
-      <option>auth</option>
-      <option>employees</option>
-      <option>attendance</option>
-      <option>incidents</option>
-      <option>qr</option>
-      <option>settings</option>
+    <select
+      class="finput"
+      [ngModel]="moduleFilter()"
+      (ngModelChange)="setModuleFilter($event)"
+      [disabled]="isLoading()"
+    >
+      @for (option of moduleOptions; track option.value) {
+        <option [value]="option.value">{{ option.label }}</option>
+      }
     </select>
   </div>
 </section>
 
+@if (errorMessage()) {
+  <p class="feedback feedback-error">{{ errorMessage() }}</p>
+}
+
 <section class="card">
   <header class="card-head">
     <h3>Registro de eventos — audit_logs</h3>
-    <span>Mostrando últimos 20 registros</span>
+    <span>{{ entriesSummary() }}</span>
   </header>
 
   <div class="card-body">
-    @for (entry of auditEntries; track entry.module + entry.time) {
+    @if (entries().length === 0 && !isLoading()) {
+      <p class="empty-state">No se encontraron registros para el filtro seleccionado.</p>
+    }
+
+    @for (entry of entries(); track entry.id) {
       <article class="audit-row">
         <span class="audit-module">{{ entry.module }}</span>
         <div class="audit-main">
-          <div class="audit-action" [innerHTML]="entry.summaryHtml"></div>
+          <div class="audit-action">{{ entry.summary }}</div>
           <div class="audit-by">{{ entry.details }}</div>
         </div>
         <span class="audit-time">{{ entry.time }}</span>

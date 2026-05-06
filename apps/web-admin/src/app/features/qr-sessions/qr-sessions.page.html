@@ -4,9 +4,22 @@
     <p>Tabla qr_sessions — generación y validación de códigos</p>
   </div>
   <div class="ph-actions">
-    <button type="button" class="btn btn-dark">+ Generar sesión QR</button>
+    <button type="button" class="btn btn-outline" [disabled]="isLoading()" (click)="refreshSessions()">
+      ↺ {{ isLoading() ? 'Actualizando...' : 'Actualizar' }}
+    </button>
+    <button type="button" class="btn btn-dark" (click)="openCreateModal()">
+      + Generar sesión QR
+    </button>
   </div>
 </section>
+
+@if (errorMessage()) {
+  <p class="feedback feedback-error">{{ errorMessage() }}</p>
+}
+
+@if (successMessage()) {
+  <p class="feedback feedback-success">{{ successMessage() }}</p>
+}
 
 <section class="g3">
   <article class="card">
@@ -26,7 +39,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (row of rows; track row.id) {
+          @for (row of rows(); track row.id) {
             <tr>
               <td><code class="id-cell">{{ row.id }}</code></td>
               <td>{{ row.issuedBy }}</td>
@@ -44,6 +57,10 @@
                 </span>
               </td>
             </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="empty-cell">No hay sesiones QR registradas.</td>
+            </tr>
           }
         </tbody>
       </table>
@@ -52,7 +69,7 @@
 
   <article class="card">
     <div class="qr-panel">
-      <div class="qr-top">Sesión activa — {{ activeSessionId }}</div>
+      <div class="qr-top">Sesión activa — {{ activeSessionId() }}</div>
 
       <div class="qr-wrap">
         <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -95,9 +112,81 @@
         <span class="qr-count">{{ countdownDisplay() }}</span>
       </div>
 
-      <div class="qr-token">{{ activeSessionId }} · {{ activeSessionPoint }}</div>
+      <div class="qr-token">{{ activeSessionId() }} · {{ activeSessionPoint() }}</div>
 
-      <button type="button" class="btn btn-outline btn-full">↺ Regenerar sesión</button>
+      @if (visibleQrToken()) {
+        <div class="payload">
+          <span class="payload-title">Token visible</span>
+          <code>{{ visibleQrToken() }}</code>
+          <button type="button" class="btn btn-outline btn-full" (click)="copyVisiblePayload()">
+            Copiar payload
+          </button>
+        </div>
+      } @else {
+        <p class="payload-empty">
+          El token QR solo se muestra justo después de generar o regenerar la sesión.
+        </p>
+      }
+
+      <button
+        type="button"
+        class="btn btn-outline btn-full"
+        [disabled]="isGenerating()"
+        (click)="regenerateSession()"
+      >
+        ↺ {{ isGenerating() ? 'Generando...' : 'Regenerar sesión' }}
+      </button>
     </div>
   </article>
 </section>
+
+@if (isCreateModalOpen()) {
+  <section class="modal-backdrop" (click)="closeCreateModal()">
+    <article class="modal-card" (click)="$event.stopPropagation()">
+      <header class="modal-head">
+        <h3>Generar sesión QR</h3>
+        <button type="button" class="btn-icon" (click)="closeCreateModal()">✕</button>
+      </header>
+
+      <div class="modal-body">
+        <label class="field">
+          <span>Descripción del punto</span>
+          <input
+            class="finput"
+            type="text"
+            placeholder="Ej: Entrada principal"
+            [ngModel]="formPointDescription()"
+            (ngModelChange)="formPointDescription.set($event)"
+          />
+        </label>
+
+        <label class="field">
+          <span>Vigencia (segundos)</span>
+          <input
+            class="finput"
+            type="number"
+            min="30"
+            max="300"
+            [ngModel]="formValiditySeconds()"
+            (ngModelChange)="formValiditySeconds.set($event)"
+          />
+          <small>Rango permitido: 30 a 300 segundos.</small>
+        </label>
+      </div>
+
+      <footer class="modal-actions">
+        <button type="button" class="btn btn-outline" (click)="closeCreateModal()">
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn btn-dark"
+          [disabled]="isGenerating()"
+          (click)="submitCreateSession()"
+        >
+          {{ isGenerating() ? 'Generando...' : 'Generar sesión QR' }}
+        </button>
+      </footer>
+    </article>
+  </section>
+}

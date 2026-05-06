@@ -16,8 +16,13 @@ export class AuditController {
 
   @Get()
   @ApiOperation({ summary: 'Listar auditoría' })
-  findAll(@Query('limit') limit?: number) {
-    return this.auditService.findAll(limit);
+  findAll(@Query('limit') limitRaw?: string, @Query('module') module?: string) {
+    const parsedLimit = limitRaw ? Number(limitRaw) : undefined;
+    const limit = Number.isFinite(parsedLimit) ? parsedLimit : undefined;
+    return this.auditService.findAll({
+      limit,
+      module,
+    });
   }
 
   @Get(':entity/:id')

@@ -63,6 +63,19 @@ p {
   gap: 8px;
 }
 
+.feedback {
+  font-size: 12px;
+  margin: -8px 0 12px;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+}
+
+.feedback-error {
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  color: #9f1239;
+}
+
 .finput {
   width: 160px;
   height: 38px;
@@ -112,6 +125,12 @@ p {
 
 .card-body {
   padding: 6px 20px 16px;
+}
+
+.empty-state {
+  font-size: 12px;
+  color: var(--slate-6);
+  padding-top: 8px;
 }
 
 .audit-row {

@@ -4,27 +4,52 @@
     <p>Tabla employees — datos del personal</p>
   </div>
   <div class="ph-actions">
-    <button type="button" class="btn btn-dark">+ Nuevo empleado</button>
+    <button type="button" class="btn btn-outline" [disabled]="isLoading()" (click)="refresh()">
+      ↺ {{ isLoading() ? 'Actualizando...' : 'Actualizar' }}
+    </button>
+    <button
+      type="button"
+      class="btn btn-dark"
+      [disabled]="!canCreateEmployees() || isLoading()"
+      (click)="openCreateModal()"
+    >
+      + Nuevo empleado
+    </button>
   </div>
 </section>
+
+@if (errorMessage()) {
+  <p class="feedback feedback-error">{{ errorMessage() }}</p>
+}
+
+@if (successMessage()) {
+  <p class="feedback feedback-success">{{ successMessage() }}</p>
+}
 
 <section class="search-row">
   <div class="search-input-wrap">
     <span class="search-icon">⌕</span>
-    <input class="finput" type="text" placeholder="Buscar por nombre, DNI o código..." />
+    <input
+      class="finput"
+      type="text"
+      placeholder="Buscar por nombre, DNI o código..."
+      [ngModel]="searchTerm()"
+      (ngModelChange)="setSearchTerm($event)"
+    />
   </div>
 
-  <select class="finput select-input">
-    <option>Todos los roles</option>
-    <option>RRHH</option>
-    <option>SUPERVISOR</option>
-    <option>EMPLOYEE</option>
+  <select class="finput select-input" [ngModel]="roleFilter()" (ngModelChange)="setRoleFilter($event)">
+    <option value="ALL">Todos los roles</option>
+    <option value="ADMIN">ADMIN</option>
+    <option value="RRHH">RRHH</option>
+    <option value="SUPERVISOR">SUPERVISOR</option>
+    <option value="EMPLOYEE">EMPLOYEE</option>
   </select>
 
-  <select class="finput select-input">
-    <option>Todos los estados</option>
-    <option>ACTIVE</option>
-    <option>INACTIVE</option>
+  <select class="finput select-input" [ngModel]="statusFilter()" (ngModelChange)="setStatusFilter($event)">
+    <option value="ALL">Todos los estados</option>
+    <option value="ACTIVE">ACTIVE</option>
+    <option value="INACTIVE">INACTIVE</option>
   </select>
 </section>
 
@@ -44,7 +69,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (row of rows; track row.code) {
+        @for (row of filteredRows(); track row.id) {
           <tr>
             <td>
               <div class="emp-cell">
@@ -61,6 +86,7 @@
             <td>
               <span
                 class="badge"
+                [class.b-admin]="row.role === 'ADMIN'"
                 [class.b-rrhh]="row.role === 'RRHH'"
                 [class.b-sup]="row.role === 'SUPERVISOR'"
                 [class.b-emp]="row.role === 'EMPLOYEE'"
@@ -82,16 +108,29 @@
                 <div class="prog-bar">
                   <div
                     class="prog-fill"
-                    [class.f-mid]="row.attendancePct < 85 && row.attendancePct >= 60"
-                    [class.f-low]="row.attendancePct < 60"
-                    [style.width.%]="row.attendancePct"
+                    [class.f-mid]="(row.attendancePct ?? 0) < 85 && (row.attendancePct ?? 0) >= 60"
+                    [class.f-low]="(row.attendancePct ?? 0) < 60"
+                    [style.width.%]="row.attendancePct ?? 0"
                   ></div>
                 </div>
-                <span>{{ row.attendancePct }}%</span>
+                <span>{{ row.attendancePct === null ? '—' : row.attendancePct + '%' }}</span>
               </div>
             </td>
             <td>
-              <button type="button" class="btn btn-outline btn-xs">Editar</button>
+              <button
+                type="button"
+                class="btn btn-outline btn-xs"
+                [disabled]="!canEditEmployees()"
+                (click)="openEditModal(row.id)"
+              >
+                Editar
+              </button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="8">
+              <div class="empty-state">No hay empleados para los filtros seleccionados.</div>
             </td>
           </tr>
         }
@@ -99,3 +138,140 @@
     </table>
   </div>
 </section>
+
+@if (isFormModalOpen()) {
+  <section class="modal-backdrop" (click)="closeFormModal()">
+    <article class="modal-card" (click)="$event.stopPropagation()">
+      <header class="modal-head">
+        <h3>{{ formMode() === 'CREATE' ? 'Nuevo empleado' : 'Editar empleado' }}</h3>
+        <button type="button" class="btn-icon" (click)="closeFormModal()">✕</button>
+      </header>
+
+      @if (formErrorMessage()) {
+        <p class="feedback feedback-error">{{ formErrorMessage() }}</p>
+      }
+
+      <div class="modal-body">
+        @if (formMode() === 'CREATE' || isAdmin()) {
+          <label class="field">
+            <span>Usuario vinculado</span>
+            <select class="finput" [ngModel]="formUserId()" (ngModelChange)="formUserId.set($event)">
+              <option value="">Selecciona usuario...</option>
+              @for (user of availableUsers(); track user.id) {
+                <option [value]="user.id">
+                  {{ user.email }} · {{ user.role }} · {{ user.status }}
+                </option>
+              }
+            </select>
+          </label>
+        }
+
+        <div class="form-grid">
+          <label class="field">
+            <span>Código</span>
+            <input class="finput" [ngModel]="formCode()" (ngModelChange)="formCode.set($event)" />
+          </label>
+          <label class="field">
+            <span>DNI (8 dígitos)</span>
+            <input class="finput" [ngModel]="formDni()" (ngModelChange)="formDni.set($event)" />
+          </label>
+          <label class="field">
+            <span>Nombres</span>
+            <input
+              class="finput"
+              [ngModel]="formFirstName()"
+              (ngModelChange)="formFirstName.set($event)"
+            />
+          </label>
+          <label class="field">
+            <span>Apellidos</span>
+            <input
+              class="finput"
+              [ngModel]="formLastName()"
+              (ngModelChange)="formLastName.set($event)"
+            />
+          </label>
+          <label class="field">
+            <span>Teléfono</span>
+            <input class="finput" [ngModel]="formPhone()" (ngModelChange)="formPhone.set($event)" />
+          </label>
+          <label class="field">
+            <span>Área</span>
+            <input
+              class="finput"
+              [ngModel]="formAreaName()"
+              (ngModelChange)="formAreaName.set($event)"
+            />
+          </label>
+          <label class="field">
+            <span>Cargo</span>
+            <input
+              class="finput"
+              [ngModel]="formPosition()"
+              (ngModelChange)="formPosition.set($event)"
+            />
+          </label>
+          <label class="field">
+            <span>Fecha de ingreso</span>
+            <input
+              class="finput"
+              type="date"
+              [ngModel]="formHireDate()"
+              (ngModelChange)="formHireDate.set($event)"
+            />
+          </label>
+          <label class="field">
+            <span>Horario</span>
+            <select
+              class="finput"
+              [ngModel]="formScheduleId()"
+              (ngModelChange)="formScheduleId.set($event)"
+            >
+              <option value="NONE">Sin horario</option>
+              @for (schedule of schedulesRaw(); track schedule.id) {
+                <option [value]="schedule.id">
+                  {{ schedule.name }} ({{ schedule.start_time.slice(0, 5) }}-{{
+                    schedule.end_time.slice(0, 5)
+                  }})
+                </option>
+              }
+            </select>
+          </label>
+          <label class="field">
+            <span>Supervisor</span>
+            <select
+              class="finput"
+              [ngModel]="formSupervisorId()"
+              (ngModelChange)="formSupervisorId.set($event)"
+            >
+              <option value="NONE">Sin supervisor</option>
+              @for (supervisor of supervisorOptions(); track supervisor.id) {
+                <option [value]="supervisor.id">{{ supervisor.label }}</option>
+              }
+            </select>
+          </label>
+          <label class="field">
+            <span>Estado</span>
+            <select class="finput" [ngModel]="formStatus()" (ngModelChange)="formStatus.set($event)">
+              <option value="ACTIVE">ACTIVE</option>
+              <option value="INACTIVE">INACTIVE</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <footer class="modal-actions">
+        <button type="button" class="btn btn-outline" (click)="closeFormModal()">Cancelar</button>
+        <button type="button" class="btn btn-dark" [disabled]="isSaving()" (click)="submitForm()">
+          {{
+            isSaving()
+              ? 'Guardando...'
+              : formMode() === 'CREATE'
+                ? 'Crear empleado'
+                : 'Guardar cambios'
+          }}
+        </button>
+      </footer>
+    </article>
+  </section>
+}

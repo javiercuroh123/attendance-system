@@ -4,12 +4,58 @@
     <p>Tabla incident_requests — regularizaciones, permisos y justificaciones</p>
   </div>
   <div class="ph-actions">
-    <button type="button" class="btn btn-dark">+ Nueva solicitud</button>
+    <button type="button" class="btn btn-outline" [disabled]="isLoading()" (click)="refresh()">
+      ↺ {{ isLoading() ? 'Actualizando...' : 'Actualizar' }}
+    </button>
+    <button type="button" class="btn btn-dark" (click)="openCreateModal()">
+      + Nueva solicitud
+    </button>
   </div>
 </section>
 
+@if (errorMessage()) {
+  <p class="feedback feedback-error">{{ errorMessage() }}</p>
+}
+
+@if (successMessage()) {
+  <p class="feedback feedback-success">{{ successMessage() }}</p>
+}
+
+<section class="filters">
+  <div class="search-input-wrap">
+    <span class="search-icon">⌕</span>
+    <input
+      class="finput"
+      type="text"
+      placeholder="Buscar por empleado, código o tipo..."
+      [ngModel]="searchTerm()"
+      (ngModelChange)="setSearchTerm($event)"
+    />
+  </div>
+
+  <div class="date-input-wrap">
+    <input
+      class="finput"
+      type="date"
+      [ngModel]="attendanceDateFilter()"
+      (ngModelChange)="setAttendanceDateFilter($event)"
+    />
+  </div>
+
+  <select
+    class="finput select-input"
+    [ngModel]="statusFilter()"
+    (ngModelChange)="setStatusFilter($event)"
+  >
+    <option value="ALL">Todos los estados</option>
+    <option value="PENDING">PENDING</option>
+    <option value="APPROVED">APPROVED</option>
+    <option value="REJECTED">REJECTED</option>
+  </select>
+</section>
+
 <section class="stats">
-  @for (item of stats; track item.label) {
+  @for (item of stats(); track item.label) {
     <article class="stat">
       <p class="stat-label">{{ item.label }}</p>
       <p class="stat-val">{{ item.value }}</p>
@@ -19,7 +65,7 @@
 </section>
 
 <section class="inc-list">
-  @for (request of requests; track request.employee + request.type) {
+  @for (request of requests(); track request.id) {
     <article class="inc-card">
       <div class="inc-icon">{{ request.icon }}</div>
       <div class="inc-body">
@@ -38,11 +84,146 @@
         </span>
         @if (request.canReview) {
           <div class="inc-actions">
-            <button type="button" class="btn btn-outline btn-xs">Rechazar</button>
-            <button type="button" class="btn btn-dark btn-xs">Aprobar</button>
+            <button
+              type="button"
+              class="btn btn-outline btn-xs"
+              (click)="openResolveModal('REJECT', request)"
+            >
+              Rechazar
+            </button>
+            <button
+              type="button"
+              class="btn btn-dark btn-xs"
+              (click)="openResolveModal('APPROVE', request)"
+            >
+              Aprobar
+            </button>
           </div>
         }
       </div>
     </article>
+  } @empty {
+    <article class="inc-card inc-empty">
+      <p>No hay incidencias para los filtros seleccionados.</p>
+    </article>
   }
 </section>
+
+@if (isCreateModalOpen()) {
+  <section class="modal-backdrop" (click)="closeCreateModal()">
+    <article class="modal-card" (click)="$event.stopPropagation()">
+      <header class="modal-head">
+        <h3>Nueva solicitud de incidencia</h3>
+        <button type="button" class="btn-icon" (click)="closeCreateModal()">✕</button>
+      </header>
+
+      @if (createErrorMessage()) {
+        <p class="feedback feedback-error">{{ createErrorMessage() }}</p>
+      }
+
+      <div class="modal-body">
+        <label class="field">
+          <span>Fecha de asistencia</span>
+          <input
+            class="finput"
+            type="date"
+            [ngModel]="createAttendanceDate()"
+            (ngModelChange)="createAttendanceDate.set($event)"
+          />
+        </label>
+
+        <label class="field">
+          <span>Tipo de solicitud</span>
+          <select
+            class="finput"
+            [ngModel]="createRequestType()"
+            (ngModelChange)="createRequestType.set($event)"
+          >
+            <option value="REGULARIZATION">REGULARIZATION</option>
+            <option value="JUSTIFICATION">JUSTIFICATION</option>
+            <option value="PERMISSION">PERMISSION</option>
+            <option value="MISSING_CHECK_IN">MISSING_CHECK_IN</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Descripción</span>
+          <textarea
+            class="finput textarea"
+            rows="4"
+            placeholder="Describe el motivo de la solicitud..."
+            [ngModel]="createDescription()"
+            (ngModelChange)="createDescription.set($event)"
+          ></textarea>
+        </label>
+      </div>
+
+      <footer class="modal-actions">
+        <button type="button" class="btn btn-outline" (click)="closeCreateModal()">
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn btn-dark"
+          [disabled]="isCreating()"
+          (click)="submitCreate()"
+        >
+          {{ isCreating() ? 'Guardando...' : 'Crear solicitud' }}
+        </button>
+      </footer>
+    </article>
+  </section>
+}
+
+@if (isResolveModalOpen()) {
+  <section class="modal-backdrop" (click)="closeResolveModal()">
+    <article class="modal-card" (click)="$event.stopPropagation()">
+      <header class="modal-head">
+        <h3>
+          {{ resolveAction() === 'APPROVE' ? 'Aprobar incidencia' : 'Rechazar incidencia' }}
+        </h3>
+        <button type="button" class="btn-icon" (click)="closeResolveModal()">✕</button>
+      </header>
+
+      @if (resolveErrorMessage()) {
+        <p class="feedback feedback-error">{{ resolveErrorMessage() }}</p>
+      }
+
+      <div class="modal-body">
+        <p class="helper-text">{{ resolveIncidentLabel() }}</p>
+        <label class="field">
+          <span>Nota de resolución</span>
+          <textarea
+            class="finput textarea"
+            rows="4"
+            placeholder="Ej: Se valida documento adjunto..."
+            [ngModel]="resolveNote()"
+            (ngModelChange)="resolveNote.set($event)"
+          ></textarea>
+        </label>
+      </div>
+
+      <footer class="modal-actions">
+        <button type="button" class="btn btn-outline" (click)="closeResolveModal()">
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn"
+          [class.btn-dark]="resolveAction() === 'APPROVE'"
+          [class.btn-danger]="resolveAction() === 'REJECT'"
+          [disabled]="isResolving()"
+          (click)="submitResolve()"
+        >
+          {{
+            isResolving()
+              ? 'Guardando...'
+              : resolveAction() === 'APPROVE'
+                ? 'Aprobar'
+                : 'Rechazar'
+          }}
+        </button>
+      </footer>
+    </article>
+  </section>
+}

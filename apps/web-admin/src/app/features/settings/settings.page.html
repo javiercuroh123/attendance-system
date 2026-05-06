@@ -4,9 +4,24 @@
     <p>Tabla <code>system_settings</code> — parámetros generales del sistema</p>
   </div>
   <div class="ph-actions">
-    <button type="button" class="btn btn-dark">Guardar cambios</button>
+    <button
+      type="button"
+      class="btn btn-dark"
+      [disabled]="isLoading() || isSaving()"
+      (click)="saveChanges()"
+    >
+      {{ isSaving() ? 'Guardando...' : 'Guardar cambios' }}
+    </button>
   </div>
 </section>
+
+@if (errorMessage()) {
+  <p class="feedback feedback-error">{{ errorMessage() }}</p>
+}
+
+@if (successMessage()) {
+  <p class="feedback feedback-success">{{ successMessage() }}</p>
+}
 
 <section class="g2">
   <article class="card">
@@ -17,47 +32,101 @@
       <div class="form-grid">
         <div class="fg fg-full">
           <label class="lbl">Nombre de la empresa (company_name)</label>
-          <input class="finput" type="text" value="Consultora Informática S.A.C." />
+          <input
+            class="finput"
+            type="text"
+            [disabled]="isLoading() || isSaving()"
+            [ngModel]="companyName()"
+            (ngModelChange)="companyName.set($event)"
+          />
         </div>
 
         <div class="fg fg-full">
           <label class="lbl">Nombre del centro de trabajo (worksite_name)</label>
-          <input class="finput" type="text" value="Sede principal Lima" />
+          <input
+            class="finput"
+            type="text"
+            [disabled]="isLoading() || isSaving()"
+            [ngModel]="worksiteName()"
+            (ngModelChange)="worksiteName.set($event)"
+          />
         </div>
 
         <div class="fg fg-full">
           <label class="lbl">Dirección (worksite_address)</label>
-          <input class="finput" type="text" value="Av. Javier Prado Este 1234, San Isidro" />
+          <input
+            class="finput"
+            type="text"
+            [disabled]="isLoading() || isSaving()"
+            [ngModel]="worksiteAddress()"
+            (ngModelChange)="worksiteAddress.set($event)"
+          />
         </div>
 
         <div class="fg">
           <label class="lbl">Latitud (worksite_latitude)</label>
-          <input class="finput" type="text" value="-12.0964" />
+          <input
+            class="finput"
+            type="text"
+            [disabled]="isLoading() || isSaving()"
+            [ngModel]="worksiteLatitude()"
+            (ngModelChange)="worksiteLatitude.set($event)"
+          />
         </div>
 
         <div class="fg">
           <label class="lbl">Longitud (worksite_longitude)</label>
-          <input class="finput" type="text" value="-77.0428" />
+          <input
+            class="finput"
+            type="text"
+            [disabled]="isLoading() || isSaving()"
+            [ngModel]="worksiteLongitude()"
+            (ngModelChange)="worksiteLongitude.set($event)"
+          />
         </div>
 
         <div class="fg fg-full">
           <label class="lbl">Descripción punto QR (qr_point_description)</label>
-          <input class="finput" type="text" value="Recepción — entrada principal" />
+          <input
+            class="finput"
+            type="text"
+            [disabled]="isLoading() || isSaving()"
+            [ngModel]="qrPointDescription()"
+            (ngModelChange)="qrPointDescription.set($event)"
+          />
         </div>
 
         <div class="fg">
           <label class="lbl">Zona horaria (default_timezone)</label>
-          <select class="finput">
-            <option>America/Lima (GMT-5)</option>
-            <option>America/Bogota (GMT-5)</option>
+          <select
+            class="finput"
+            [disabled]="isLoading() || isSaving()"
+            [ngModel]="defaultTimezone()"
+            (ngModelChange)="defaultTimezone.set($event)"
+          >
+            @if (!timezoneOptions.includes(defaultTimezone())) {
+              <option [value]="defaultTimezone()">{{ defaultTimezone() }}</option>
+            }
+            @for (tz of timezoneOptions; track tz) {
+              <option [value]="tz">{{ tz }}</option>
+            }
           </select>
         </div>
 
         <div class="fg">
           <label class="lbl">Estado (status)</label>
-          <select class="finput">
-            <option>ACTIVE</option>
-            <option>INACTIVE</option>
+          <select
+            class="finput"
+            [disabled]="isLoading() || isSaving()"
+            [ngModel]="status()"
+            (ngModelChange)="status.set($event)"
+          >
+            @if (!statusOptions.includes(status())) {
+              <option [value]="status()">{{ status() }}</option>
+            }
+            @for (statusOption of statusOptions; track statusOption) {
+              <option [value]="statusOption">{{ statusOption }}</option>
+            }
           </select>
         </div>
       </div>
@@ -70,7 +139,7 @@
         <h3>Parámetros operativos</h3>
       </header>
       <div class="card-body card-body-compact">
-        @for (rule of operationalRules; track rule.id) {
+        @for (rule of operationalRules(); track rule.id) {
           <div class="cfg-row">
             <div class="cfg-left">
               <h4>{{ rule.title }}</h4>
@@ -82,7 +151,7 @@
               [class.on]="rule.enabled"
               [attr.aria-pressed]="rule.enabled"
               [attr.aria-label]="rule.title"
-              (click)="toggleRule(rule.id)"
+              disabled
             ></button>
           </div>
         }

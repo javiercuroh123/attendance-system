@@ -87,6 +87,30 @@ export class QrService {
     return session;
   }
 
+  async listSessions(query: Record<string, string | undefined>) {
+    const qb = this.qrRepository
+      .createQueryBuilder('qr')
+      .leftJoinAndSelect('qr.issued_by_user', 'issuedBy')
+      .orderBy('qr.created_at', 'DESC');
+
+    if (query.status) {
+      qb.andWhere('qr.status = :status', { status: query.status });
+    }
+
+    if (query.activeNow === 'true') {
+      const now = new Date();
+      qb.andWhere('qr.starts_at <= :now AND qr.expires_at >= :now', {
+        now,
+      });
+    }
+
+    const rawLimit = query.limit ? Number(query.limit) : 100;
+    const limit = Number.isNaN(rawLimit) ? 100 : Math.max(1, rawLimit);
+    qb.take(Math.min(limit, 300));
+
+    return qb.getMany();
+  }
+
   async validate(dto: ValidateQrDto) {
     const session = await this.qrRepository.findOne({
       where: { token_hash: this.hashToken(dto.qrToken), status: 'ACTIVE' },

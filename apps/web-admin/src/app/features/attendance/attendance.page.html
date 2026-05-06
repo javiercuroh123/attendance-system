@@ -4,29 +4,66 @@
     <p>Tabla attendance_records — entradas, salidas y tardanzas</p>
   </div>
   <div class="ph-actions">
-    <button type="button" class="btn btn-outline">Filtrar fecha</button>
-    <button type="button" class="btn btn-dark">+ Ajuste manual</button>
+    <button type="button" class="btn btn-outline" [disabled]="isLoading()" (click)="applyDateFilter()">
+      {{ isLoading() ? 'Filtrando...' : 'Filtrar fecha' }}
+    </button>
+    <button
+      type="button"
+      class="btn btn-dark"
+      [disabled]="!canManualAdjust()"
+      (click)="openManualAdjustment()"
+    >
+      + Ajuste manual
+    </button>
   </div>
 </section>
+
+@if (errorMessage()) {
+  <p class="feedback feedback-error">{{ errorMessage() }}</p>
+}
+
+@if (manualSuccessMessage()) {
+  <p class="feedback feedback-success">{{ manualSuccessMessage() }}</p>
+}
 
 <section class="search-row">
   <div class="search-input-wrap">
     <span class="search-icon">⌕</span>
-    <input class="finput" type="text" placeholder="Buscar empleado..." />
+    <input
+      class="finput"
+      type="text"
+      placeholder="Buscar empleado..."
+      [ngModel]="searchTerm()"
+      (ngModelChange)="onSearchChange($event)"
+    />
   </div>
 
   <div class="date-input-wrap">
-    <input class="finput date-input" type="text" value="05/05/2025" />
+    <input
+      class="finput date-input"
+      type="date"
+      [ngModel]="selectedDate()"
+      (ngModelChange)="onDateChange($event)"
+    />
     <span class="date-icon">◷</span>
   </div>
 
-  <select class="finput select-input">
-    <option>Todos los estados</option>
-    <option>PRESENT</option>
-    <option>LATE</option>
-    <option>ABSENT</option>
-    <option>JUSTIFIED</option>
+  <select
+    class="finput select-input"
+    [ngModel]="selectedStatus()"
+    (ngModelChange)="onStatusChange($event)"
+  >
+    <option value="ALL">Todos los estados</option>
+    <option value="PRESENT">PRESENT</option>
+    <option value="INCOMPLETE">INCOMPLETE</option>
+    <option value="LATE">LATE</option>
+    <option value="ABSENT">ABSENT</option>
+    <option value="JUSTIFIED">JUSTIFIED</option>
   </select>
+
+  <button type="button" class="btn btn-outline btn-sm" [disabled]="isLoading()" (click)="refreshAttendance()">
+    ↺ Actualizar
+  </button>
 </section>
 
 <section class="card">
@@ -46,12 +83,15 @@
         </tr>
       </thead>
       <tbody>
-        @for (row of rows; track row.name) {
+        @for (row of rows(); track row.employeeId) {
           <tr>
             <td>
               <div class="emp-cell">
                 <div class="emp-av">{{ row.initials }}</div>
-                <div class="emp-name">{{ row.name }}</div>
+                <div>
+                  <div class="emp-name">{{ row.name }}</div>
+                  <div class="emp-sub">{{ row.employeeCode }}</div>
+                </div>
               </div>
             </td>
             <td>{{ row.date }}</td>
@@ -59,13 +99,7 @@
             <td>{{ row.checkOutAt }}</td>
             <td>{{ row.workedHours }}</td>
             <td>
-              <span
-                class="badge"
-                [class.b-present]="row.status === 'PRESENT'"
-                [class.b-late]="row.status === 'LATE'"
-                [class.b-absent]="row.status === 'ABSENT'"
-                [class.b-justified]="row.status === 'JUSTIFIED'"
-              >
+              <span class="badge" [ngClass]="statusClass(row.status)">
                 {{ row.status }}
               </span>
             </td>
@@ -81,8 +115,91 @@
             </td>
             <td class="session-cell">{{ row.qrSession ?? '—' }}</td>
           </tr>
+        } @empty {
+          <tr>
+            <td colspan="9" class="empty-cell">
+              No hay registros para la fecha o filtros seleccionados.
+            </td>
+          </tr>
         }
       </tbody>
     </table>
   </div>
 </section>
+
+@if (isManualModalOpen()) {
+  <section class="modal-backdrop" (click)="closeManualAdjustment()">
+    <article class="modal-card" (click)="$event.stopPropagation()">
+      <header class="modal-head">
+        <h3>Ajuste manual de asistencia</h3>
+        <button type="button" class="btn-icon" (click)="closeManualAdjustment()">✕</button>
+      </header>
+
+      @if (manualErrorMessage()) {
+        <p class="feedback feedback-error">{{ manualErrorMessage() }}</p>
+      }
+
+      <div class="modal-body">
+        <label class="field">
+          <span>Registro</span>
+          <select
+            class="finput"
+            [ngModel]="manualFormRecordId()"
+            (ngModelChange)="manualFormRecordId.set($event)"
+          >
+            @for (record of recordsWithId(); track record.employeeId) {
+              <option [value]="record.id">
+                {{ record.name }} · {{ record.date }} · {{ record.status }}
+              </option>
+            }
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Nueva hora de entrada (opcional)</span>
+          <input
+            class="finput"
+            type="datetime-local"
+            [ngModel]="manualFormCheckIn()"
+            (ngModelChange)="manualFormCheckIn.set($event)"
+          />
+        </label>
+
+        <label class="field">
+          <span>Nueva hora de salida (opcional)</span>
+          <input
+            class="finput"
+            type="datetime-local"
+            [ngModel]="manualFormCheckOut()"
+            (ngModelChange)="manualFormCheckOut.set($event)"
+          />
+        </label>
+
+        <label class="field">
+          <span>Motivo</span>
+          <textarea
+            class="finput textarea"
+            rows="3"
+            placeholder="Ej: Corrección por registro omitido"
+            [ngModel]="manualFormReason()"
+            (ngModelChange)="manualFormReason.set($event)"
+          ></textarea>
+        </label>
+      </div>
+
+      <footer class="modal-actions">
+        <button type="button" class="btn btn-outline" (click)="closeManualAdjustment()">
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn btn-dark"
+          [disabled]="isApplyingManualAdjustment()"
+          (click)="submitManualAdjustment()"
+        >
+          {{ isApplyingManualAdjustment() ? 'Guardando...' : 'Guardar ajuste' }}
+        </button>
+      </footer>
+    </article>
+  </section>
+}

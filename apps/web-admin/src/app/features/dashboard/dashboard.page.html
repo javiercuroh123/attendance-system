@@ -4,13 +4,26 @@
     <p>{{ summaryDate }}</p>
   </div>
   <div class="ph-actions">
-    <button type="button" class="btn btn-outline">↓ Exportar</button>
-    <button type="button" class="btn btn-dark">↺ Actualizar</button>
+    <button type="button" class="btn btn-outline" (click)="exportTodayReport()">
+      ↓ Exportar
+    </button>
+    <button
+      type="button"
+      class="btn btn-dark"
+      [disabled]="isLoading()"
+      (click)="refreshDashboard()"
+    >
+      ↺ {{ isLoading() ? 'Actualizando...' : 'Actualizar' }}
+    </button>
   </div>
 </section>
 
+@if (errorMessage()) {
+  <p class="feedback feedback-error">{{ errorMessage() }}</p>
+}
+
 <section class="stats">
-  @for (card of statCards; track card.label) {
+  @for (card of statCards(); track card.label) {
     <article class="stat">
       <p class="stat-label">{{ card.label }}</p>
       <p class="stat-val">{{ card.value }}</p>
@@ -27,12 +40,12 @@
     </div>
     <div class="card-body">
       <div class="week-days">
-        @for (item of weekBars; track item.label) {
+        @for (item of weekBars(); track item.label) {
           <span>{{ item.label }}</span>
         }
       </div>
       <div class="bar-chart">
-        @for (item of weekBars; track item.label) {
+        @for (item of weekBars(); track item.label) {
           <div
             class="bc-bar"
             [class.fill]="item.fill"
@@ -42,11 +55,11 @@
         }
       </div>
       <div class="week-resume">
-        <span>21 · 18 · 22 · 17 · <b>19</b> presentes</span>
-        <span>Prom: <b>19.4</b></span>
+        <span>{{ weekResumeText() }}</span>
+        <span>Prom: <b>{{ weekAverageText() }}</b></span>
       </div>
       <hr class="divider" />
-      @for (item of progressItems; track item.label) {
+      @for (item of progressItems(); track item.label) {
         <div class="prog-row">
           <span class="prog-label">{{ item.label }}</span>
           <div class="prog-bar">
@@ -69,7 +82,7 @@
     </div>
     <div class="card-body card-activity">
       <div class="activity">
-        @for (item of activities; track item.text) {
+        @for (item of activities(); track item.text) {
           <div class="act-item">
             <div
               class="act-dot"
@@ -108,7 +121,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (record of attendanceRecords; track record.employee) {
+        @for (record of attendanceRecords(); track record.employee) {
           <tr>
             <td>
               <div class="emp-cell">
@@ -123,12 +136,7 @@
             <td>{{ record.checkIn }}</td>
             <td>{{ record.checkOut }}</td>
             <td>
-              <span
-                class="badge"
-                [class.b-present]="record.status === 'PRESENT'"
-                [class.b-late]="record.status === 'LATE'"
-                [class.b-absent]="record.status === 'ABSENT'"
-              >
+              <span class="badge" [ngClass]="statusClass(record.status)">
                 {{ record.status }}
               </span>
             </td>

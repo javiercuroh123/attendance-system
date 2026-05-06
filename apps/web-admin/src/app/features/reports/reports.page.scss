@@ -70,6 +70,11 @@ p {
   cursor: pointer;
 }
 
+.btn:disabled {
+  opacity: 0.74;
+  cursor: not-allowed;
+}
+
 .btn-dark {
   background: var(--ink);
   color: var(--white);
@@ -94,6 +99,25 @@ p {
 .btn-xs {
   padding: 3px 8px;
   font-size: 11px;
+}
+
+.feedback {
+  font-size: 12px;
+  margin: -2px 0 12px;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+}
+
+.feedback-error {
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  color: #9f1239;
+}
+
+.feedback-success {
+  background: #ecfdf3;
+  border: 1px solid #bbf7d0;
+  color: #166534;
 }
 
 .g2 {
@@ -222,6 +246,66 @@ p {
 .report-item-left p {
   font-size: 11.5px;
   color: var(--slate-5);
+}
+
+.report-empty {
+  justify-content: center;
+  color: var(--slate-6);
+  font-size: 12px;
+}
+
+.preview-card {
+  margin-top: 16px;
+}
+
+.preview-meta {
+  font-size: 12px;
+  color: var(--slate-6);
+  margin-bottom: 10px;
+}
+
+.preview-meta b {
+  color: var(--ink);
+}
+
+.preview-empty {
+  font-size: 12px;
+  color: var(--slate-6);
+}
+
+.tbl-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  padding: 9px 12px;
+  text-align: left;
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--slate-5);
+  border-bottom: 1px solid var(--slate-2);
+  white-space: nowrap;
+  background: var(--slate-0);
+}
+
+td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--slate-1);
+  font-size: 12px;
+  color: var(--slate-7);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+tr:last-child td {
+  border-bottom: none;
 }
 
 @media (max-width: 1020px) {

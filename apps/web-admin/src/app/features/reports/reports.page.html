@@ -4,10 +4,27 @@
     <p>Generación de informes — endpoints /reports/*</p>
   </div>
   <div class="ph-actions">
-    <button type="button" class="btn btn-outline">↓ Exportar CSV</button>
-    <button type="button" class="btn btn-dark">↓ Exportar Excel</button>
+    <button type="button" class="btn btn-outline" [disabled]="isExporting()" (click)="exportCsv()">
+      ↓ {{ isExporting() ? 'Exportando...' : 'Exportar CSV' }}
+    </button>
+    <button
+      type="button"
+      class="btn btn-dark"
+      [disabled]="isExporting()"
+      (click)="exportExcelCompatible()"
+    >
+      ↓ {{ isExporting() ? 'Exportando...' : 'Exportar Excel' }}
+    </button>
   </div>
 </section>
+
+@if (errorMessage()) {
+  <p class="feedback feedback-error">{{ errorMessage() }}</p>
+}
+
+@if (successMessage()) {
+  <p class="feedback feedback-success">{{ successMessage() }}</p>
+}
 
 <section class="g2">
   <article class="card">
@@ -19,7 +36,12 @@
         <div class="fg">
           <label class="lbl">Fecha inicio</label>
           <div class="field-wrap">
-            <input class="finput with-icon" type="text" value="01/05/2025" />
+            <input
+              class="finput with-icon"
+              type="date"
+              [ngModel]="fromDate()"
+              (ngModelChange)="fromDate.set($event)"
+            />
             <span class="field-icon">◷</span>
           </div>
         </div>
@@ -27,37 +49,56 @@
         <div class="fg">
           <label class="lbl">Fecha fin</label>
           <div class="field-wrap">
-            <input class="finput with-icon" type="text" value="31/05/2025" />
+            <input
+              class="finput with-icon"
+              type="date"
+              [ngModel]="toDate()"
+              (ngModelChange)="toDate.set($event)"
+            />
             <span class="field-icon">◷</span>
           </div>
         </div>
 
         <div class="fg fg-full">
           <label class="lbl">Tipo de reporte</label>
-          <select class="finput">
-            <option>Asistencia general (daily)</option>
-            <option>Reporte mensual (monthly)</option>
-            <option>Tardanzas (late)</option>
-            <option>Ausencias (absences)</option>
-            <option>Exportación completa (export)</option>
+          <select class="finput" [ngModel]="reportType()" (ngModelChange)="reportType.set($event)">
+            <option value="daily">Asistencia general (daily)</option>
+            <option value="monthly">Reporte mensual (monthly)</option>
+            <option value="late">Tardanzas (late)</option>
+            <option value="absences">Ausencias (absences)</option>
           </select>
         </div>
 
         <div class="fg fg-full">
           <label class="lbl">Empleado (opcional)</label>
-          <select class="finput">
-            <option>Todos los empleados</option>
-            <option>María Alvarado</option>
-            <option>Carlos Ramos</option>
-            <option>Lucía Paredes</option>
-            <option>Jorge Mendoza</option>
+          <select
+            class="finput"
+            [disabled]="!canUseEmployeeFilter() || isLoadingEmployees()"
+            [ngModel]="selectedEmployeeId()"
+            (ngModelChange)="selectedEmployeeId.set($event)"
+          >
+            <option value="ALL">Todos los empleados</option>
+            @for (employee of employees(); track employee.id) {
+              <option [value]="employee.id">
+                {{ employee.first_name }} {{ employee.last_name }} · {{ employee.code }}
+              </option>
+            }
           </select>
         </div>
       </div>
 
       <div class="form-actions">
-        <button type="button" class="btn btn-outline">Vista previa</button>
-        <button type="button" class="btn btn-dark">Generar reporte</button>
+        <button
+          type="button"
+          class="btn btn-outline"
+          [disabled]="isLoadingPreview()"
+          (click)="previewReport()"
+        >
+          {{ isLoadingPreview() ? 'Cargando...' : 'Vista previa' }}
+        </button>
+        <button type="button" class="btn btn-dark" [disabled]="isExporting()" (click)="generateReport()">
+          {{ isExporting() ? 'Generando...' : 'Generar reporte' }}
+        </button>
       </div>
     </div>
   </article>
@@ -68,16 +109,58 @@
     </div>
     <div class="card-body reports-body">
       <div class="report-list">
-        @for (report of recentReports; track report.title) {
+        @for (report of recentReports(); track report.id) {
           <div class="report-item">
             <div class="report-item-left">
               <h4>{{ report.title }}</h4>
               <p>{{ report.meta }}</p>
             </div>
-            <button type="button" class="btn btn-outline btn-xs">↓ Descargar</button>
+            <button type="button" class="btn btn-outline btn-xs" (click)="downloadRecent(report)">
+              ↓ Descargar
+            </button>
+          </div>
+        } @empty {
+          <div class="report-item report-empty">
+            <p>Aún no hay reportes exportados en esta sesión.</p>
           </div>
         }
       </div>
     </div>
   </article>
+</section>
+
+<section class="card preview-card">
+  <div class="card-head">
+    <h3>Vista previa del reporte</h3>
+  </div>
+  <div class="card-body">
+    @if (preview()) {
+      <p class="preview-meta">
+        <b>{{ preview()!.title }}</b> · {{ preview()!.meta }}
+      </p>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              @for (column of preview()!.columns; track column) {
+                <th>{{ column }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of preview()!.rows.slice(0, 20); track $index) {
+              <tr>
+                @for (column of preview()!.columns; track column) {
+                  <td>{{ row[column] }}</td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <p class="preview-empty">Usa “Vista previa” para consultar datos reales del reporte.</p>
+    }
+  </div>
 </section>
