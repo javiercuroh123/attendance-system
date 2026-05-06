@@ -151,6 +151,13 @@ export class DashboardPage {
     return 'b-absent';
   }
 
+  isCompactStatValue(value: string): boolean {
+    const normalized = value.trim();
+    if (!normalized || normalized === '—') return false;
+
+    return /[a-zA-Z]/.test(normalized);
+  }
+
   private loadDashboard(): void {
     if (this.isLoading()) return;
 

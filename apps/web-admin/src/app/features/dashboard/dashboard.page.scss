@@ -127,6 +127,8 @@ a {
   border-radius: var(--r-lg);
   padding: 18px 20px;
   box-shadow: var(--shadow-xs);
+  display: flex;
+  flex-direction: column;
 }
 
 .stat-label {
@@ -145,11 +147,22 @@ a {
   line-height: 1;
   color: var(--ink);
   margin-bottom: 6px;
+  min-height: 40px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.stat-val-compact {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: 0.2px;
 }
 
 .stat-note {
   font-size: 11px;
   color: var(--slate-5);
+  margin-top: auto;
 }
 
 .stat-note b {

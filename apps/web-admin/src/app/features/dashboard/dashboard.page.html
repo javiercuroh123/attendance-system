@@ -28,7 +28,9 @@
   @for (card of statCards(); track card.label) {
     <article class="stat">
       <p class="stat-label">{{ card.label }}</p>
-      <p class="stat-val">{{ card.value }}</p>
+      <p class="stat-val" [class.stat-val-compact]="isCompactStatValue(card.value)">
+        {{ card.value }}
+      </p>
       <p class="stat-note">{{ card.note }} <b>{{ card.highlight }}</b></p>
     </article>
   }
