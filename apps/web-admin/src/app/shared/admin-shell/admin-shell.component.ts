@@ -11,6 +11,16 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs';
 import { AuthSessionService } from '../../core/auth/auth-session.service';
+import { AppRole, getUserRoles, hasAnyRole } from '../../core/auth/role-access';
+
+interface NavLink {
+  route: string;
+  label: string;
+  icon: string;
+  section: 'ROOT' | 'MANAGEMENT' | 'OPERATIONS' | 'SYSTEM';
+  roles: readonly AppRole[];
+  exact?: boolean;
+}
 
 @Component({
   selector: 'app-admin-shell',
@@ -23,9 +33,88 @@ export class AdminShellComponent {
   private readonly authSession = inject(AuthSessionService);
   private readonly router = inject(Router);
 
+  private readonly navLinks: NavLink[] = [
+    {
+      route: '/dashboard',
+      label: 'Dashboard',
+      icon: '▤',
+      section: 'ROOT',
+      roles: ['ADMIN', 'RRHH', 'SUPERVISOR', 'EMPLOYEE'],
+      exact: true,
+    },
+    {
+      route: '/users',
+      label: 'Usuarios',
+      icon: '◫',
+      section: 'MANAGEMENT',
+      roles: ['ADMIN'],
+    },
+    {
+      route: '/employees',
+      label: 'Empleados',
+      icon: '◈',
+      section: 'MANAGEMENT',
+      roles: ['ADMIN', 'RRHH', 'SUPERVISOR'],
+    },
+    {
+      route: '/schedules',
+      label: 'Horarios',
+      icon: '◷',
+      section: 'MANAGEMENT',
+      roles: ['ADMIN', 'RRHH', 'SUPERVISOR'],
+    },
+    {
+      route: '/attendance',
+      label: 'Asistencia',
+      icon: '◎',
+      section: 'MANAGEMENT',
+      roles: ['ADMIN', 'RRHH', 'SUPERVISOR', 'EMPLOYEE'],
+    },
+    {
+      route: '/incidents',
+      label: 'Incidencias',
+      icon: '◇',
+      section: 'MANAGEMENT',
+      roles: ['ADMIN', 'RRHH', 'SUPERVISOR', 'EMPLOYEE'],
+    },
+    {
+      route: '/qr-sessions',
+      label: 'Sesiones QR',
+      icon: '⊞',
+      section: 'OPERATIONS',
+      roles: ['ADMIN', 'RRHH', 'SUPERVISOR'],
+    },
+    {
+      route: '/reports',
+      label: 'Reportes',
+      icon: '◰',
+      section: 'OPERATIONS',
+      roles: ['ADMIN', 'RRHH', 'SUPERVISOR'],
+    },
+    {
+      route: '/audit',
+      label: 'Auditoría',
+      icon: '◱',
+      section: 'OPERATIONS',
+      roles: ['ADMIN', 'RRHH'],
+    },
+    {
+      route: '/settings',
+      label: 'Configuración',
+      icon: '◉',
+      section: 'SYSTEM',
+      roles: ['ADMIN', 'RRHH', 'SUPERVISOR'],
+    },
+  ];
+
   readonly sidebarOpen = signal(false);
   readonly session = this.authSession.session;
   readonly topbarDate = this.formatTopbarDate(new Date());
+  readonly userRoles = computed(() => getUserRoles(this.session()?.user));
+  readonly rootLinks = computed(() => this.filterNavLinks('ROOT'));
+  readonly managementLinks = computed(() => this.filterNavLinks('MANAGEMENT'));
+  readonly operationLinks = computed(() => this.filterNavLinks('OPERATIONS'));
+  readonly systemLinks = computed(() => this.filterNavLinks('SYSTEM'));
 
   private readonly routeDataSignal = toSignal(
     this.router.events.pipe(
@@ -48,12 +137,7 @@ export class AdminShellComponent {
   );
 
   readonly userRole = computed(
-    () =>
-      (
-        this.session()?.user.role ??
-        this.session()?.user.roles[0] ??
-        'ADMIN'
-      ).toUpperCase(),
+    () => this.userRoles()[0] ?? 'NO_ROLE',
   );
 
   readonly userInitials = computed(() => {
@@ -84,6 +168,12 @@ export class AdminShellComponent {
       year: 'numeric',
     });
     return formatter.format(date);
+  }
+
+  private filterNavLinks(section: NavLink['section']): NavLink[] {
+    return this.navLinks.filter(
+      (item) => item.section === section && hasAnyRole(this.userRoles(), item.roles),
+    );
   }
 
   private getCurrentRouteData(route: ActivatedRouteSnapshot): {

@@ -4,11 +4,14 @@ import {
   ChangeDetectionStrategy,
   Component,
   PLATFORM_ID,
+  computed,
   inject,
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { catchError, finalize, forkJoin, of } from 'rxjs';
+import { AuthSessionService } from '../../core/auth/auth-session.service';
+import { AppRole, getUserRoles, hasAnyRole } from '../../core/auth/role-access';
 import {
   DashboardApiService,
   DashboardAttendanceRecord,
@@ -72,10 +75,18 @@ interface ActivityCandidate {
 export class DashboardPage {
   private readonly dashboardApi = inject(DashboardApiService);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly authSession = inject(AuthSessionService);
 
   readonly summaryDate = this.formatSummaryDate(new Date());
   readonly isLoading = signal(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly userRoles = computed<AppRole[]>(() =>
+    getUserRoles(this.authSession.session()?.user),
+  );
+  readonly canUsePrivilegedDashboard = computed(() =>
+    hasAnyRole(this.userRoles(), ['ADMIN', 'RRHH', 'SUPERVISOR']),
+  );
+  readonly canExportReport = computed(() => this.canUsePrivilegedDashboard());
 
   readonly statCards = signal<StatCard[]>([
     { label: 'Empleados activos', value: '0', note: 'Estado', highlight: 'ACTIVE' },
@@ -107,6 +118,11 @@ export class DashboardPage {
   }
 
   exportTodayReport(): void {
+    if (!this.canExportReport()) {
+      this.errorMessage.set('Tu rol no tiene permisos para exportar reportes.');
+      return;
+    }
+
     const todayIso = this.toIsoDate(new Date());
     this.dashboardApi.exportDailyReport(todayIso).subscribe({
       next: (response) => {
@@ -138,6 +154,14 @@ export class DashboardPage {
   private loadDashboard(): void {
     if (this.isLoading()) return;
 
+    if (this.canUsePrivilegedDashboard()) {
+      this.loadPrivilegedDashboard();
+      return;
+    }
+    this.loadEmployeeDashboard();
+  }
+
+  private loadPrivilegedDashboard(): void {
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
@@ -240,23 +264,151 @@ export class DashboardPage {
             this.buildRecentActivity(todayAttendance, incidents, audit),
           );
         },
-        error: (error: HttpErrorResponse) => {
-          const backendMessage = error.error?.message;
+        error: (error: HttpErrorResponse) => this.setDashboardLoadError(error),
+      });
+  }
 
-          if (Array.isArray(backendMessage) && backendMessage.length > 0) {
-            this.errorMessage.set(backendMessage.join(' · '));
-            return;
-          }
+  private loadEmployeeDashboard(): void {
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
 
-          if (typeof backendMessage === 'string' && backendMessage.trim()) {
-            this.errorMessage.set(backendMessage);
-            return;
-          }
+    const now = new Date();
+    const todayIso = this.toIsoDate(now);
+    const weekRange = this.getWeekRange(now);
 
-          this.errorMessage.set(
-            'No se pudieron cargar los datos del dashboard desde el backend.',
+    forkJoin({
+      myAttendance: this.dashboardApi.getMyAttendance(),
+      myIncidents: this.dashboardApi.getMyIncidents().pipe(catchError(() => of([]))),
+    })
+      .pipe(finalize(() => this.isLoading.set(false)))
+      .subscribe({
+        next: ({ myAttendance, myIncidents }) => {
+          const todayRows = myAttendance.filter((item) => item.attendance_date === todayIso);
+          const latestToday = [...todayRows].sort(
+            (a, b) =>
+              this.getAttendanceEventDate(b).getTime() -
+              this.getAttendanceEventDate(a).getTime(),
+          )[0];
+
+          const monthAttendance = myAttendance.filter((item) =>
+            this.isSameMonthIsoDate(item.attendance_date, now),
           );
+          const monthLate = monthAttendance.filter((item) =>
+            this.isLateStatus(item.status),
+          ).length;
+
+          const pendingIncidents = myIncidents.filter(
+            (item) => item.status.toUpperCase() === 'PENDING',
+          ).length;
+          const approvedIncidentsMonth = myIncidents.filter(
+            (item) =>
+              item.status.toUpperCase() === 'APPROVED' &&
+              this.isSameMonthDateTime(item.created_at, now),
+          ).length;
+
+          const checkInText = latestToday?.check_in_at
+            ? this.formatTime(latestToday.check_in_at)
+            : '—';
+          const checkOutText = latestToday?.check_out_at
+            ? this.formatTime(latestToday.check_out_at)
+            : '—';
+          const todayStatus = latestToday
+            ? this.normalizeAttendanceStatus(latestToday.status)
+            : 'ABSENT';
+
+          this.statCards.set([
+            {
+              label: 'Estado de hoy',
+              value: todayStatus === 'ABSENT' ? 'SIN MARCA' : todayStatus,
+              note: 'Entrada',
+              highlight: checkInText,
+            },
+            {
+              label: 'Salida de hoy',
+              value: checkOutText === '—' ? 'PENDIENTE' : checkOutText,
+              note: 'Estado',
+              highlight: checkOutText === '—' ? 'INCOMPLETO' : 'OK',
+            },
+            {
+              label: 'Registros (mes)',
+              value: String(monthAttendance.length),
+              note: 'Fuente',
+              highlight: 'attendance/me',
+            },
+            {
+              label: 'Tardanzas (mes)',
+              value: String(monthLate),
+              note: 'Estado',
+              highlight: 'LATE',
+            },
+            {
+              label: 'Incidencias pendientes',
+              value: String(pendingIncidents),
+              note: 'Aprobadas (mes)',
+              highlight: String(approvedIncidentsMonth),
+            },
+          ]);
+
+          const weekRows = myAttendance.filter(
+            (item) =>
+              item.attendance_date >= weekRange.from &&
+              item.attendance_date <= weekRange.to,
+          );
+
+          const weekDays = this.getWeekDates(now);
+          let onTimeDays = 0;
+          let lateDays = 0;
+          let missingDays = 0;
+
+          for (const day of weekDays) {
+            const iso = this.toIsoDate(day);
+            const dayRows = weekRows.filter((item) => item.attendance_date === iso);
+            const dayRecord = [...dayRows].sort(
+              (a, b) =>
+                this.getAttendanceEventDate(b).getTime() -
+                this.getAttendanceEventDate(a).getTime(),
+            )[0];
+
+            if (!dayRecord) {
+              missingDays += 1;
+              continue;
+            }
+
+            if (this.isLateStatus(dayRecord.status)) {
+              lateDays += 1;
+              continue;
+            }
+
+            if (this.isAttendanceMarked(dayRecord)) {
+              onTimeDays += 1;
+            } else {
+              missingDays += 1;
+            }
+          }
+
+          this.progressItems.set([
+            {
+              label: 'A tiempo',
+              value: this.calculatePercentage(onTimeDays, weekDays.length),
+              tone: 'default',
+            },
+            {
+              label: 'Tardanza',
+              value: this.calculatePercentage(lateDays, weekDays.length),
+              tone: 'mid',
+            },
+            {
+              label: 'Sin marcación',
+              value: this.calculatePercentage(missingDays, weekDays.length),
+              tone: 'low',
+            },
+          ]);
+
+          this.updateWeekSummaryForEmployee(weekRows, now);
+          this.attendanceRecords.set(this.mapAttendanceRows(myAttendance));
+          this.activities.set(this.buildRecentActivity(myAttendance, myIncidents, []));
         },
+        error: (error: HttpErrorResponse) => this.setDashboardLoadError(error),
       });
   }
 
@@ -414,6 +566,36 @@ export class DashboardPage {
     this.weekAverageText.set(average.toFixed(1));
   }
 
+  private updateWeekSummaryForEmployee(
+    rows: DashboardAttendanceRecord[],
+    today: Date,
+  ): void {
+    const weekDays = this.getWeekDates(today);
+    const dayLabels = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+    const todayIso = this.toIsoDate(today);
+
+    const counts: number[] = weekDays.map((day) => {
+      const dayIso = this.toIsoDate(day);
+      const hasMarking = rows.some(
+        (row) => row.attendance_date === dayIso && this.isAttendanceMarked(row),
+      );
+      return hasMarking ? 1 : 0;
+    });
+
+    this.weekBars.set(
+      weekDays.map((date, index) => ({
+        label: dayLabels[index],
+        height: counts[index] > 0 ? 100 : 8,
+        fill: counts[index] > 0,
+        today: this.toIsoDate(date) === todayIso,
+      })),
+    );
+
+    this.weekResumeText.set(`${counts.join(' · ')} marcaciones`);
+    const total = counts.reduce((acc, current) => acc + current, 0);
+    this.weekAverageText.set((total / counts.length).toFixed(1));
+  }
+
   private getWeekRange(date: Date): { from: string; to: string } {
     const weekDays = this.getWeekDates(date);
     return {
@@ -562,6 +744,39 @@ export class DashboardPage {
       month: '2-digit',
     });
     return `${dateText} · ${clock}`;
+  }
+
+  private isSameMonthIsoDate(value: string, now: Date): boolean {
+    const [yearRaw, monthRaw] = value.split('-').map(Number);
+    if (!yearRaw || !monthRaw) return false;
+    return yearRaw === now.getFullYear() && monthRaw === now.getMonth() + 1;
+  }
+
+  private isSameMonthDateTime(value: string, now: Date): boolean {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return false;
+    return (
+      date.getFullYear() === now.getFullYear() &&
+      date.getMonth() === now.getMonth()
+    );
+  }
+
+  private setDashboardLoadError(error: HttpErrorResponse): void {
+    const backendMessage = error.error?.message;
+
+    if (Array.isArray(backendMessage) && backendMessage.length > 0) {
+      this.errorMessage.set(backendMessage.join(' · '));
+      return;
+    }
+
+    if (typeof backendMessage === 'string' && backendMessage.trim()) {
+      this.errorMessage.set(backendMessage);
+      return;
+    }
+
+    this.errorMessage.set(
+      'No se pudieron cargar los datos del dashboard desde el backend.',
+    );
   }
 
   private toIsoDate(value: Date): string {

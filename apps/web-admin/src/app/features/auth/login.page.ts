@@ -9,6 +9,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AuthApiService } from '../../core/auth/auth-api.service';
 import { AuthSessionService } from '../../core/auth/auth-session.service';
+import { getDefaultRouteForUser } from '../../core/auth/role-access';
 
 @Component({
   selector: 'app-login-page',
@@ -54,7 +55,8 @@ export class LoginPage {
         next: (response) => {
           this.authSession.setSession(response);
           const redirectTo =
-            this.route.snapshot.queryParamMap.get('redirect') ?? '/dashboard';
+            this.route.snapshot.queryParamMap.get('redirect') ??
+            getDefaultRouteForUser(response.user);
           void this.router.navigateByUrl(redirectTo);
         },
         error: (error: HttpErrorResponse) => {

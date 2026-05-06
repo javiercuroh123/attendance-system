@@ -26,58 +26,48 @@
     </div>
 
     <nav class="sidebar-nav">
-      <a
-        class="nav-item"
-        routerLink="/dashboard"
-        routerLinkActive="active"
-        [routerLinkActiveOptions]="{ exact: true }"
-        (click)="closeSidebar()"
-      >
-        <span class="ni">▤</span>
-        Dashboard
-      </a>
+      @for (link of rootLinks(); track link.route) {
+        <a
+          class="nav-item"
+          [routerLink]="link.route"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: link.exact ?? false }"
+          (click)="closeSidebar()"
+        >
+          <span class="ni">{{ link.icon }}</span>
+          {{ link.label }}
+        </a>
+      }
 
-      <p class="nav-section">Gestión</p>
-      <a class="nav-item" routerLink="/users" routerLinkActive="active" (click)="closeSidebar()">
-        <span class="ni">◫</span>
-        Usuarios
-      </a>
-      <a class="nav-item" routerLink="/employees" routerLinkActive="active" (click)="closeSidebar()">
-        <span class="ni">◈</span>
-        Empleados
-      </a>
-      <a class="nav-item" routerLink="/schedules" routerLinkActive="active" (click)="closeSidebar()">
-        <span class="ni">◷</span>
-        Horarios
-      </a>
-      <a class="nav-item" routerLink="/attendance" routerLinkActive="active" (click)="closeSidebar()">
-        <span class="ni">◎</span>
-        Asistencia
-      </a>
-      <a class="nav-item" routerLink="/incidents" routerLinkActive="active" (click)="closeSidebar()">
-        <span class="ni">◇</span>
-        Incidencias
-      </a>
+      @if (managementLinks().length > 0) {
+        <p class="nav-section">Gestión</p>
+        @for (link of managementLinks(); track link.route) {
+          <a class="nav-item" [routerLink]="link.route" routerLinkActive="active" (click)="closeSidebar()">
+            <span class="ni">{{ link.icon }}</span>
+            {{ link.label }}
+          </a>
+        }
+      }
 
-      <p class="nav-section">Operación</p>
-      <a class="nav-item" routerLink="/qr-sessions" routerLinkActive="active" (click)="closeSidebar()">
-        <span class="ni">⊞</span>
-        Sesiones QR
-      </a>
-      <a class="nav-item" routerLink="/reports" routerLinkActive="active" (click)="closeSidebar()">
-        <span class="ni">◰</span>
-        Reportes
-      </a>
-      <a class="nav-item" routerLink="/audit" routerLinkActive="active" (click)="closeSidebar()">
-        <span class="ni">◱</span>
-        Auditoría
-      </a>
+      @if (operationLinks().length > 0) {
+        <p class="nav-section">Operación</p>
+        @for (link of operationLinks(); track link.route) {
+          <a class="nav-item" [routerLink]="link.route" routerLinkActive="active" (click)="closeSidebar()">
+            <span class="ni">{{ link.icon }}</span>
+            {{ link.label }}
+          </a>
+        }
+      }
 
-      <p class="nav-section">Sistema</p>
-      <a class="nav-item" routerLink="/settings" routerLinkActive="active" (click)="closeSidebar()">
-        <span class="ni">◉</span>
-        Configuración
-      </a>
+      @if (systemLinks().length > 0) {
+        <p class="nav-section">Sistema</p>
+        @for (link of systemLinks(); track link.route) {
+          <a class="nav-item" [routerLink]="link.route" routerLinkActive="active" (click)="closeSidebar()">
+            <span class="ni">{{ link.icon }}</span>
+            {{ link.label }}
+          </a>
+        }
+      }
     </nav>
 
     <div class="sidebar-footer">

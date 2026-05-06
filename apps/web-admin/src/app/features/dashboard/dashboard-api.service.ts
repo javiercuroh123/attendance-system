@@ -96,8 +96,20 @@ export class DashboardApiService {
     );
   }
 
+  getMyAttendance(): Observable<DashboardAttendanceRecord[]> {
+    return this.http.get<DashboardAttendanceRecord[]>(`${this.baseUrl}/attendance/me`, {
+      headers: this.authHeaders(),
+    });
+  }
+
   getIncidents(): Observable<DashboardIncident[]> {
     return this.http.get<DashboardIncident[]>(`${this.baseUrl}/incidents`, {
+      headers: this.authHeaders(),
+    });
+  }
+
+  getMyIncidents(): Observable<DashboardIncident[]> {
+    return this.http.get<DashboardIncident[]>(`${this.baseUrl}/incidents/me`, {
       headers: this.authHeaders(),
     });
   }

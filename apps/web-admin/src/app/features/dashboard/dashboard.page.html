@@ -4,9 +4,11 @@
     <p>{{ summaryDate }}</p>
   </div>
   <div class="ph-actions">
-    <button type="button" class="btn btn-outline" (click)="exportTodayReport()">
-      ↓ Exportar
-    </button>
+    @if (canExportReport()) {
+      <button type="button" class="btn btn-outline" (click)="exportTodayReport()">
+        ↓ Exportar
+      </button>
+    }
     <button
       type="button"
       class="btn btn-dark"
