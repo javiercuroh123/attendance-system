@@ -1,40 +1,77 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+
+interface IncidentStat {
+  label: string;
+  value: string;
+  note: string;
+  highlight: string;
+}
+
+interface IncidentRequest {
+  icon: string;
+  employee: string;
+  type: 'REGULARIZATION' | 'JUSTIFICATION' | 'PERMISSION';
+  description: string;
+  date: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  canReview: boolean;
+}
 
 @Component({
   selector: 'app-incidents-page',
   standalone: true,
-  template: `
-    <section class="module-page">
-      <h2>Incidencias</h2>
-      <p>
-        Gestión de regularizaciones, permisos y justificaciones con aprobación
-        o rechazo.
-      </p>
-    </section>
-  `,
-  styles: `
-    .module-page {
-      background: #ffffff;
-      border: 1px solid #e9ecef;
-      border-radius: 14px;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-      padding: 20px;
-    }
-
-    .module-page h2 {
-      margin: 0 0 6px;
-      font-family: 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
-      font-size: 22px;
-      font-weight: 400;
-      color: #0d1117;
-    }
-
-    .module-page p {
-      margin: 0;
-      color: #6c757d;
-      font-size: 13px;
-      line-height: 1.55;
-    }
-  `,
+  templateUrl: './incidents.page.html',
+  styleUrl: './incidents.page.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class IncidentsPage {}
+export class IncidentsPage {
+  readonly stats: IncidentStat[] = [
+    { label: 'Pendientes', value: '4', note: 'Estado', highlight: 'PENDING' },
+    { label: 'Aprobadas (mes)', value: '11', note: 'Estado', highlight: 'APPROVED' },
+    { label: 'Rechazadas (mes)', value: '2', note: 'Estado', highlight: 'REJECTED' },
+    { label: 'Regularizaciones', value: '7', note: 'Tipo', highlight: 'REGULARIZATION' },
+  ];
+
+  readonly requests: IncidentRequest[] = [
+    {
+      icon: '📋',
+      employee: 'Carlos Ramos',
+      type: 'REGULARIZATION',
+      description:
+        'Olvido de marcación el 03/05/2025. Solicita registrar entrada 08:05 AM. Presenta justificación por corte de luz.',
+      date: '03 May 2025',
+      status: 'PENDING',
+      canReview: true,
+    },
+    {
+      icon: '📝',
+      employee: 'Ana Torres',
+      type: 'JUSTIFICATION',
+      description:
+        'Certificado médico presentado. Periodo: 02–04 mayo 2025. Adjunta documento escaneado.',
+      date: '02–04 May 2025',
+      status: 'APPROVED',
+      canReview: false,
+    },
+    {
+      icon: '🗓',
+      employee: 'María Alvarado',
+      type: 'PERMISSION',
+      description:
+        'Solicita permiso por trámite notarial el 07/05/2025 (medio día, mañana). Revisado por supervisor.',
+      date: '07 May 2025',
+      status: 'PENDING',
+      canReview: true,
+    },
+    {
+      icon: '✗',
+      employee: 'Jorge Mendoza',
+      type: 'REGULARIZATION',
+      description:
+        'Solicitud rechazada. No presentó respaldo de la ausencia del 28/04/2025. Nota: reincidencia.',
+      date: '28 Abr 2025',
+      status: 'REJECTED',
+      canReview: false,
+    },
+  ];
+}

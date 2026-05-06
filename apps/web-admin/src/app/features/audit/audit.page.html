@@ -1,0 +1,37 @@
+<section class="ph">
+  <div class="ph-left">
+    <h2>Auditoría</h2>
+    <p>Tabla <code>audit_logs</code> — trazabilidad de acciones importantes</p>
+  </div>
+  <div class="ph-actions">
+    <select class="finput">
+      <option>Todos los módulos</option>
+      <option>auth</option>
+      <option>employees</option>
+      <option>attendance</option>
+      <option>incidents</option>
+      <option>qr</option>
+      <option>settings</option>
+    </select>
+  </div>
+</section>
+
+<section class="card">
+  <header class="card-head">
+    <h3>Registro de eventos — audit_logs</h3>
+    <span>Mostrando últimos 20 registros</span>
+  </header>
+
+  <div class="card-body">
+    @for (entry of auditEntries; track entry.module + entry.time) {
+      <article class="audit-row">
+        <span class="audit-module">{{ entry.module }}</span>
+        <div class="audit-main">
+          <div class="audit-action" [innerHTML]="entry.summaryHtml"></div>
+          <div class="audit-by">{{ entry.details }}</div>
+        </div>
+        <span class="audit-time">{{ entry.time }}</span>
+      </article>
+    }
+  </div>
+</section>

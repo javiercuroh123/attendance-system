@@ -1,40 +1,30 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+
+interface RecentReport {
+  title: string;
+  meta: string;
+}
 
 @Component({
   selector: 'app-reports-page',
   standalone: true,
-  template: `
-    <section class="module-page">
-      <h2>Reportes</h2>
-      <p>
-        Reportes diarios, mensuales, tardanzas y faltas con filtros por fecha,
-        empleado y área.
-      </p>
-    </section>
-  `,
-  styles: `
-    .module-page {
-      background: #ffffff;
-      border: 1px solid #e9ecef;
-      border-radius: 14px;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-      padding: 20px;
-    }
-
-    .module-page h2 {
-      margin: 0 0 6px;
-      font-family: 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
-      font-size: 22px;
-      font-weight: 400;
-      color: #0d1117;
-    }
-
-    .module-page p {
-      margin: 0;
-      color: #6c757d;
-      font-size: 13px;
-      line-height: 1.55;
-    }
-  `,
+  templateUrl: './reports.page.html',
+  styleUrl: './reports.page.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ReportsPage {}
+export class ReportsPage {
+  readonly recentReports: RecentReport[] = [
+    {
+      title: 'Asistencia general — Abril 2025',
+      meta: 'Generado 01/05 · 24 empleados · monthly',
+    },
+    {
+      title: 'Tardanzas — Q1 2025',
+      meta: 'Generado 02/04 · late · todos los dpts.',
+    },
+    {
+      title: 'Ausencias — Marzo 2025',
+      meta: 'Generado 01/04 · absences · export',
+    },
+  ];
+}

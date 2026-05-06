@@ -1,0 +1,189 @@
+:host {
+  --white: #ffffff;
+  --slate-0: #f8f9fa;
+  --slate-1: #f1f3f5;
+  --slate-2: #e9ecef;
+  --slate-3: #dee2e6;
+  --slate-4: #ced4da;
+  --slate-5: #adb5bd;
+  --slate-6: #6c757d;
+  --slate-7: #495057;
+  --ink: #0d1117;
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+.ph {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.ph-left h2 {
+  font-family: 'Instrument Serif', 'Iowan Old Style', 'Palatino Linotype',
+    'Book Antiqua', serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--ink);
+  margin-bottom: 3px;
+}
+
+.ph-left p {
+  font-size: 12.5px;
+  color: var(--slate-6);
+}
+
+.ph-left code {
+  font-family: 'IBM Plex Mono', 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.98em;
+  color: var(--slate-6);
+  background: none;
+}
+
+.ph-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.finput {
+  width: 160px;
+  height: 38px;
+  border: 1px solid var(--slate-3);
+  border-radius: var(--r-sm);
+  background: var(--white);
+  color: #343a40;
+  font-size: 12.5px;
+  padding: 0 12px;
+  outline: none;
+}
+
+.finput:focus {
+  border-color: #c5d3e0;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+}
+
+.card {
+  background: var(--white);
+  border: 1px solid var(--slate-2);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-xs);
+  overflow: hidden;
+}
+
+.card-head {
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--slate-1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.card-head h3 {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: 0.1px;
+}
+
+.card-head span {
+  font-size: 11px;
+  color: var(--slate-4);
+}
+
+.card-body {
+  padding: 6px 20px 16px;
+}
+
+.audit-row {
+  display: flex;
+  gap: 14px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--slate-1);
+  align-items: flex-start;
+}
+
+.audit-row:last-child {
+  border-bottom: none;
+}
+
+.audit-module {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--slate-5);
+  background: var(--slate-1);
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+  margin-top: 1px;
+}
+
+.audit-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.audit-action {
+  font-size: 12.5px;
+  color: var(--ink);
+}
+
+.audit-by {
+  font-size: 11px;
+  color: var(--slate-5);
+  margin-top: 2px;
+}
+
+.audit-time {
+  font-size: 11px;
+  color: var(--slate-4);
+  flex-shrink: 0;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .card-head {
+    align-items: flex-start;
+  }
+
+  .audit-row {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .audit-time {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .ph-actions {
+    width: 100%;
+  }
+
+  .finput {
+    width: 100%;
+  }
+}

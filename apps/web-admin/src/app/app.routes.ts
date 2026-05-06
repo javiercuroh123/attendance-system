@@ -60,7 +60,7 @@ export const routes: Routes = [
       },
       {
         path: 'incidents',
-        data: { title: 'Incidencias', subtitle: 'Regularizaciones y permisos' },
+        data: { title: 'Incidencias', subtitle: 'incident_requests' },
         loadComponent: () =>
           import('./features/incidents/incidents.page').then(
             (m) => m.IncidentsPage,
@@ -74,7 +74,7 @@ export const routes: Routes = [
       },
       {
         path: 'qr-sessions',
-        data: { title: 'Sesiones QR', subtitle: 'Generación y control de códigos' },
+        data: { title: 'Sesiones QR', subtitle: 'qr_sessions' },
         loadComponent: () =>
           import('./features/qr-sessions/qr-sessions.page').then(
             (m) => m.QrSessionsPage,
@@ -82,13 +82,13 @@ export const routes: Routes = [
       },
       {
         path: 'audit',
-        data: { title: 'Auditoría', subtitle: 'Trazabilidad de cambios' },
+        data: { title: 'Auditoría', subtitle: 'audit_logs' },
         loadComponent: () =>
           import('./features/audit/audit.page').then((m) => m.AuditPage),
       },
       {
         path: 'settings',
-        data: { title: 'Configuración', subtitle: 'Parámetros globales' },
+        data: { title: 'Configuración', subtitle: 'system_settings' },
         loadComponent: () =>
           import('./features/settings/settings.page').then(
             (m) => m.SettingsPage,

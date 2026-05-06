@@ -1,0 +1,48 @@
+<section class="ph">
+  <div class="ph-left">
+    <h2>Incidencias</h2>
+    <p>Tabla incident_requests — regularizaciones, permisos y justificaciones</p>
+  </div>
+  <div class="ph-actions">
+    <button type="button" class="btn btn-dark">+ Nueva solicitud</button>
+  </div>
+</section>
+
+<section class="stats">
+  @for (item of stats; track item.label) {
+    <article class="stat">
+      <p class="stat-label">{{ item.label }}</p>
+      <p class="stat-val">{{ item.value }}</p>
+      <p class="stat-note">{{ item.note }} <b>{{ item.highlight }}</b></p>
+    </article>
+  }
+</section>
+
+<section class="inc-list">
+  @for (request of requests; track request.employee + request.type) {
+    <article class="inc-card">
+      <div class="inc-icon">{{ request.icon }}</div>
+      <div class="inc-body">
+        <h4>{{ request.employee }} — {{ request.type }}</h4>
+        <p>{{ request.description }}</p>
+      </div>
+      <div class="inc-meta">
+        <span class="inc-date">{{ request.date }}</span>
+        <span
+          class="badge"
+          [class.b-pending]="request.status === 'PENDING'"
+          [class.b-approved]="request.status === 'APPROVED'"
+          [class.b-rejected]="request.status === 'REJECTED'"
+        >
+          {{ request.status }}
+        </span>
+        @if (request.canReview) {
+          <div class="inc-actions">
+            <button type="button" class="btn btn-outline btn-xs">Rechazar</button>
+            <button type="button" class="btn btn-dark btn-xs">Aprobar</button>
+          </div>
+        }
+      </div>
+    </article>
+  }
+</section>

@@ -1,0 +1,108 @@
+<section class="ph">
+  <div class="ph-left">
+    <h2>Configuración</h2>
+    <p>Tabla <code>system_settings</code> — parámetros generales del sistema</p>
+  </div>
+  <div class="ph-actions">
+    <button type="button" class="btn btn-dark">Guardar cambios</button>
+  </div>
+</section>
+
+<section class="g2">
+  <article class="card">
+    <header class="card-head">
+      <h3>Datos de la empresa y centro de trabajo</h3>
+    </header>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="fg fg-full">
+          <label class="lbl">Nombre de la empresa (company_name)</label>
+          <input class="finput" type="text" value="Consultora Informática S.A.C." />
+        </div>
+
+        <div class="fg fg-full">
+          <label class="lbl">Nombre del centro de trabajo (worksite_name)</label>
+          <input class="finput" type="text" value="Sede principal Lima" />
+        </div>
+
+        <div class="fg fg-full">
+          <label class="lbl">Dirección (worksite_address)</label>
+          <input class="finput" type="text" value="Av. Javier Prado Este 1234, San Isidro" />
+        </div>
+
+        <div class="fg">
+          <label class="lbl">Latitud (worksite_latitude)</label>
+          <input class="finput" type="text" value="-12.0964" />
+        </div>
+
+        <div class="fg">
+          <label class="lbl">Longitud (worksite_longitude)</label>
+          <input class="finput" type="text" value="-77.0428" />
+        </div>
+
+        <div class="fg fg-full">
+          <label class="lbl">Descripción punto QR (qr_point_description)</label>
+          <input class="finput" type="text" value="Recepción — entrada principal" />
+        </div>
+
+        <div class="fg">
+          <label class="lbl">Zona horaria (default_timezone)</label>
+          <select class="finput">
+            <option>America/Lima (GMT-5)</option>
+            <option>America/Bogota (GMT-5)</option>
+          </select>
+        </div>
+
+        <div class="fg">
+          <label class="lbl">Estado (status)</label>
+          <select class="finput">
+            <option>ACTIVE</option>
+            <option>INACTIVE</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <div class="right-col">
+    <article class="card">
+      <header class="card-head">
+        <h3>Parámetros operativos</h3>
+      </header>
+      <div class="card-body card-body-compact">
+        @for (rule of operationalRules; track rule.id) {
+          <div class="cfg-row">
+            <div class="cfg-left">
+              <h4>{{ rule.title }}</h4>
+              <p>{{ rule.description }}</p>
+            </div>
+            <button
+              type="button"
+              class="toggle"
+              [class.on]="rule.enabled"
+              [attr.aria-pressed]="rule.enabled"
+              [attr.aria-label]="rule.title"
+              (click)="toggleRule(rule.id)"
+            ></button>
+          </div>
+        }
+      </div>
+    </article>
+
+    <article class="card">
+      <header class="card-head">
+        <h3>Stack tecnológico</h3>
+      </header>
+      <div class="card-body">
+        <div class="stack-list">
+          @for (item of stackItems; track item.label) {
+            <div class="stack-row">
+              <span class="stack-key">{{ item.label }}</span>
+              <span class="stack-val">{{ item.value }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </article>
+  </div>
+</section>

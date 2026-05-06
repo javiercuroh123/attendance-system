@@ -1,0 +1,83 @@
+<section class="ph">
+  <div class="ph-left">
+    <h2>Reportes</h2>
+    <p>Generación de informes — endpoints /reports/*</p>
+  </div>
+  <div class="ph-actions">
+    <button type="button" class="btn btn-outline">↓ Exportar CSV</button>
+    <button type="button" class="btn btn-dark">↓ Exportar Excel</button>
+  </div>
+</section>
+
+<section class="g2">
+  <article class="card">
+    <div class="card-head">
+      <h3>Parámetros del reporte</h3>
+    </div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="fg">
+          <label class="lbl">Fecha inicio</label>
+          <div class="field-wrap">
+            <input class="finput with-icon" type="text" value="01/05/2025" />
+            <span class="field-icon">◷</span>
+          </div>
+        </div>
+
+        <div class="fg">
+          <label class="lbl">Fecha fin</label>
+          <div class="field-wrap">
+            <input class="finput with-icon" type="text" value="31/05/2025" />
+            <span class="field-icon">◷</span>
+          </div>
+        </div>
+
+        <div class="fg fg-full">
+          <label class="lbl">Tipo de reporte</label>
+          <select class="finput">
+            <option>Asistencia general (daily)</option>
+            <option>Reporte mensual (monthly)</option>
+            <option>Tardanzas (late)</option>
+            <option>Ausencias (absences)</option>
+            <option>Exportación completa (export)</option>
+          </select>
+        </div>
+
+        <div class="fg fg-full">
+          <label class="lbl">Empleado (opcional)</label>
+          <select class="finput">
+            <option>Todos los empleados</option>
+            <option>María Alvarado</option>
+            <option>Carlos Ramos</option>
+            <option>Lucía Paredes</option>
+            <option>Jorge Mendoza</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-outline">Vista previa</button>
+        <button type="button" class="btn btn-dark">Generar reporte</button>
+      </div>
+    </div>
+  </article>
+
+  <article class="card">
+    <div class="card-head">
+      <h3>Reportes recientes</h3>
+    </div>
+    <div class="card-body reports-body">
+      <div class="report-list">
+        @for (report of recentReports; track report.title) {
+          <div class="report-item">
+            <div class="report-item-left">
+              <h4>{{ report.title }}</h4>
+              <p>{{ report.meta }}</p>
+            </div>
+            <button type="button" class="btn btn-outline btn-xs">↓ Descargar</button>
+          </div>
+        }
+      </div>
+    </div>
+  </article>
+</section>
