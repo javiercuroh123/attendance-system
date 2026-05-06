@@ -26,6 +26,7 @@
 - `POST /employees`
 - `GET /employees/:id`
 - `PATCH /employees/:id`
+- `GET /employees/:id/attendance`
 
 ## Schedules
 
@@ -54,6 +55,7 @@
 - `POST /incidents`
 - `GET /incidents/me`
 - `GET /incidents`
+- `GET /incidents/:id`
 - `PATCH /incidents/:id/approve`
 - `PATCH /incidents/:id/reject`
 

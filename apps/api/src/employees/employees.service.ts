@@ -1,10 +1,14 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { AttendanceRecord } from '../attendance/entities/attendance.entity';
+import { RoleCode } from '../common/enums/role-code.enum';
+import type { AuthenticatedUser } from '../common/interfaces/authenticated-user.interface';
 import { Schedule } from '../schedules/entities/schedule.entity';
 import { User } from '../users/entities/user.entity';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
@@ -16,11 +20,30 @@ export class EmployeesService {
   constructor(
     @InjectRepository(Employee)
     private readonly employeeRepository: Repository<Employee>,
+    @InjectRepository(AttendanceRecord)
+    private readonly attendanceRepository: Repository<AttendanceRecord>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(Schedule)
     private readonly scheduleRepository: Repository<Schedule>,
   ) {}
+
+  private isSupervisorScopedUser(currentUser: AuthenticatedUser) {
+    return (
+      currentUser.roles.includes(RoleCode.SUPERVISOR) &&
+      !currentUser.roles.includes(RoleCode.ADMIN) &&
+      !currentUser.roles.includes(RoleCode.RRHH)
+    );
+  }
+
+  private isEmployeeScopedUser(currentUser: AuthenticatedUser) {
+    return (
+      currentUser.roles.includes(RoleCode.EMPLOYEE) &&
+      !currentUser.roles.includes(RoleCode.ADMIN) &&
+      !currentUser.roles.includes(RoleCode.RRHH) &&
+      !currentUser.roles.includes(RoleCode.SUPERVISOR)
+    );
+  }
 
   private async findScheduleOrFail(scheduleId: string) {
     const schedule = await this.scheduleRepository.findOne({
@@ -74,14 +97,24 @@ export class EmployeesService {
     return this.employeeRepository.save(employee);
   }
 
-  findAll() {
+  async findAll(currentUser?: AuthenticatedUser) {
+    if (currentUser && this.isSupervisorScopedUser(currentUser)) {
+      const supervisor = await this.findByUserId(currentUser.userId);
+
+      return this.employeeRepository.find({
+        where: [{ supervisor: { id: supervisor.id } }, { id: supervisor.id }],
+        relations: ['user', 'supervisor', 'schedule'],
+        order: { first_name: 'ASC' },
+      });
+    }
+
     return this.employeeRepository.find({
       relations: ['user', 'supervisor', 'schedule'],
       order: { first_name: 'ASC' },
     });
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, currentUser?: AuthenticatedUser) {
     const employee = await this.employeeRepository.findOne({
       where: { id },
       relations: ['user', 'supervisor', 'schedule'],
@@ -89,6 +122,18 @@ export class EmployeesService {
 
     if (!employee) {
       throw new NotFoundException('Empleado no encontrado');
+    }
+
+    if (currentUser && this.isSupervisorScopedUser(currentUser)) {
+      const supervisor = await this.findByUserId(currentUser.userId);
+      const isOwnRecord = employee.id === supervisor.id;
+      const isTeamRecord = employee.supervisor?.id === supervisor.id;
+
+      if (!isOwnRecord && !isTeamRecord) {
+        throw new ForbiddenException(
+          'Solo puedes consultar empleados de tu equipo asignado',
+        );
+      }
     }
 
     return employee;
@@ -137,5 +182,47 @@ export class EmployeesService {
     }
 
     return this.employeeRepository.save(employee);
+  }
+
+  async findAttendanceByEmployeeId(
+    id: string,
+    currentUser: AuthenticatedUser,
+    query: Record<string, string | undefined>,
+  ) {
+    const employee = await this.findOne(id, currentUser);
+
+    if (this.isEmployeeScopedUser(currentUser)) {
+      const ownEmployee = await this.findByUserId(currentUser.userId);
+      if (ownEmployee.id !== employee.id) {
+        throw new ForbiddenException('Solo puedes consultar tu propia asistencia');
+      }
+    }
+
+    const qb = this.attendanceRepository
+      .createQueryBuilder('attendance')
+      .leftJoinAndSelect('attendance.employee', 'employee')
+      .leftJoinAndSelect('attendance.qr_session', 'qrSession')
+      .where('employee.id = :employeeId', { employeeId: employee.id })
+      .orderBy('attendance.attendance_date', 'DESC');
+
+    if (query.from) {
+      qb.andWhere('attendance.attendance_date >= :from', { from: query.from });
+    }
+
+    if (query.to) {
+      qb.andWhere('attendance.attendance_date <= :to', { to: query.to });
+    }
+
+    if (query.status) {
+      qb.andWhere('attendance.status = :status', { status: query.status });
+    }
+
+    const rawLimit = query.limit ? Number(query.limit) : 120;
+    const safeLimit = Number.isFinite(rawLimit)
+      ? Math.min(Math.max(rawLimit, 1), 365)
+      : 120;
+    qb.take(safeLimit);
+
+    return qb.getMany();
   }
 }

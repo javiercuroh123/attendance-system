@@ -10,13 +10,9 @@ import { AuditService } from '../audit/audit.service';
 import { AttendanceStatus } from '../common/enums/attendance-status.enum';
 import { RoleCode } from '../common/enums/role-code.enum';
 import type { AuthenticatedUser } from '../common/interfaces/authenticated-user.interface';
-import {
-  combineDateAndTime,
-  diffMinutes,
-  toIsoDate,
-} from '../common/utils/date.utils';
 import { Employee } from '../employees/entities/employee.entity';
 import { QrService } from '../qr/qr.service';
+import { SettingsService } from '../settings/settings.service';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { ManualAdjustmentDto } from './dto/manual-adjustment.dto';
 import { AttendanceRecord } from './entities/attendance.entity';
@@ -30,6 +26,7 @@ export class AttendanceService {
     private readonly employeeRepository: Repository<Employee>,
     private readonly qrService: QrService,
     private readonly auditService: AuditService,
+    private readonly settingsService: SettingsService,
   ) {}
 
   private async getEmployeeByUserId(userId: string) {
@@ -56,17 +53,83 @@ export class AttendanceService {
     return employee.schedule;
   }
 
+  private async getDefaultTimezone() {
+    try {
+      const settings = await this.settingsService.getActive();
+      const timezone = settings.default_timezone?.trim();
+      return timezone || 'America/Lima';
+    } catch {
+      return 'America/Lima';
+    }
+  }
+
+  private getDateTimePartsInTimezone(date: Date, timezone: string) {
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hourCycle: 'h23',
+    });
+
+    const parts = formatter.formatToParts(date);
+    const find = (type: Intl.DateTimeFormatPartTypes) =>
+      parts.find((item) => item.type === type)?.value ?? '00';
+
+    return {
+      year: Number(find('year')),
+      month: Number(find('month')),
+      day: Number(find('day')),
+      hours: Number(find('hour')),
+      minutes: Number(find('minute')),
+      seconds: Number(find('second')),
+    };
+  }
+
+  private getAttendanceDateForTimezone(date: Date, timezone: string): string {
+    const parts = this.getDateTimePartsInTimezone(date, timezone);
+    return `${parts.year}-${String(parts.month).padStart(2, '0')}-${String(
+      parts.day,
+    ).padStart(2, '0')}`;
+  }
+
+  private parseTimeToTotalSeconds(time: string): number {
+    const [hoursRaw, minutesRaw, secondsRaw = '0'] = time.split(':');
+    const hours = Number(hoursRaw);
+    const minutes = Number(minutesRaw);
+    const seconds = Number(secondsRaw);
+    return hours * 3600 + minutes * 60 + seconds;
+  }
+
+  private isSupervisorScopedUser(currentUser: AuthenticatedUser) {
+    return (
+      currentUser.roles.includes(RoleCode.SUPERVISOR) &&
+      !currentUser.roles.includes(RoleCode.ADMIN) &&
+      !currentUser.roles.includes(RoleCode.RRHH)
+    );
+  }
+
   private calculateLateStatus(
     checkInTime: Date,
     startTime: string,
     toleranceMinutes: number,
+    timezone: string,
   ) {
-    const scheduledStart = combineDateAndTime(checkInTime, startTime);
-    const lateThreshold = new Date(
-      scheduledStart.getTime() + toleranceMinutes * 60000,
-    );
+    const checkInParts = this.getDateTimePartsInTimezone(checkInTime, timezone);
+    const currentTotalSeconds =
+      checkInParts.hours * 3600 + checkInParts.minutes * 60 + checkInParts.seconds;
+
+    const scheduledTotalSeconds =
+      this.parseTimeToTotalSeconds(startTime) + toleranceMinutes * 60;
+
     const lateMinutes =
-      checkInTime > lateThreshold ? diffMinutes(checkInTime, lateThreshold) : 0;
+      currentTotalSeconds > scheduledTotalSeconds
+        ? Math.floor((currentTotalSeconds - scheduledTotalSeconds) / 60)
+        : 0;
+
     return {
       lateMinutes,
       status:
@@ -78,7 +141,8 @@ export class AttendanceService {
     const qrSession = await this.qrService.findActiveSessionByToken(dto.qrToken);
     const employee = await this.getEmployeeByUserId(currentUser.userId);
     const now = new Date();
-    const today = toIsoDate(now);
+    const timezone = await this.getDefaultTimezone();
+    const today = this.getAttendanceDateForTimezone(now, timezone);
     const schedule = this.getScheduleOrFail(employee);
 
     let record = await this.attendanceRepository.findOne({
@@ -91,6 +155,7 @@ export class AttendanceService {
         now,
         schedule.start_time,
         schedule.tolerance_minutes,
+        timezone,
       );
 
       record = this.attendanceRepository.create({
@@ -173,11 +238,7 @@ export class AttendanceService {
     if (query.status)
       qb.andWhere('attendance.status = :status', { status: query.status });
 
-    if (
-      currentUser.roles.includes(RoleCode.SUPERVISOR) &&
-      !currentUser.roles.includes(RoleCode.ADMIN) &&
-      !currentUser.roles.includes(RoleCode.RRHH)
-    ) {
+    if (this.isSupervisorScopedUser(currentUser)) {
       const supervisorEmployee = await this.getEmployeeByUserId(
         currentUser.userId,
       );
@@ -192,7 +253,13 @@ export class AttendanceService {
   async findOne(id: string, currentUser: AuthenticatedUser) {
     const record = await this.attendanceRepository.findOne({
       where: { id },
-      relations: ['employee', 'employee.user', 'employee.schedule', 'qr_session'],
+      relations: [
+        'employee',
+        'employee.user',
+        'employee.schedule',
+        'employee.supervisor',
+        'qr_session',
+      ],
     });
 
     if (!record) {
@@ -210,6 +277,21 @@ export class AttendanceService {
       }
     }
 
+    if (this.isSupervisorScopedUser(currentUser)) {
+      const supervisorEmployee = await this.getEmployeeByUserId(
+        currentUser.userId,
+      );
+
+      const isOwnRecord = record.employee.id === supervisorEmployee.id;
+      const isTeamRecord = record.employee.supervisor?.id === supervisorEmployee.id;
+
+      if (!isOwnRecord && !isTeamRecord) {
+        throw new ForbiddenException(
+          'Solo puedes ver asistencia de tu equipo asignado',
+        );
+      }
+    }
+
     return record;
   }
 
@@ -220,6 +302,7 @@ export class AttendanceService {
   ) {
     let record = await this.findOne(id, currentUser);
     const schedule = record.employee.schedule;
+    const timezone = await this.getDefaultTimezone();
     const previous = {
       checkInAt: record.check_in_at?.toISOString() ?? null,
       checkOutAt: record.check_out_at?.toISOString() ?? null,
@@ -239,6 +322,7 @@ export class AttendanceService {
         record.check_in_at,
         schedule.start_time,
         schedule.tolerance_minutes,
+        timezone,
       );
       record.late_minutes = outcome.lateMinutes;
       record.status = record.check_out_at ? AttendanceStatus.PRESENT : outcome.status;

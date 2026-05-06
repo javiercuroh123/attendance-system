@@ -53,6 +53,13 @@ export class IncidentsController {
     return this.incidentsService.findAll(user, query);
   }
 
+  @Get(':id')
+  @Roles(RoleCode.ADMIN, RoleCode.RRHH, RoleCode.SUPERVISOR, RoleCode.EMPLOYEE)
+  @ApiOperation({ summary: 'Obtener incidencia por id' })
+  findOne(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.incidentsService.findOneForUser(id, user);
+  }
+
   @Patch(':id/approve')
   @Roles(RoleCode.ADMIN, RoleCode.RRHH, RoleCode.SUPERVISOR)
   @ApiOperation({ summary: 'Aprobar regularización' })

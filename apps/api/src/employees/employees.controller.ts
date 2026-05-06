@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -51,15 +52,26 @@ export class EmployeesController {
   @Get()
   @Roles(RoleCode.ADMIN, RoleCode.RRHH, RoleCode.SUPERVISOR)
   @ApiOperation({ summary: 'Listar empleados' })
-  findAll() {
-    return this.employeesService.findAll();
+  findAll(@CurrentUser() user: AuthenticatedUser) {
+    return this.employeesService.findAll(user);
   }
 
   @Get(':id')
   @Roles(RoleCode.ADMIN, RoleCode.RRHH, RoleCode.SUPERVISOR)
   @ApiOperation({ summary: 'Obtener empleado por id' })
-  findOne(@Param('id') id: string) {
-    return this.employeesService.findOne(id);
+  findOne(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.employeesService.findOne(id, user);
+  }
+
+  @Get(':id/attendance')
+  @Roles(RoleCode.ADMIN, RoleCode.RRHH, RoleCode.SUPERVISOR, RoleCode.EMPLOYEE)
+  @ApiOperation({ summary: 'Obtener historial de asistencia de un empleado' })
+  findAttendance(
+    @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() query: Record<string, string | undefined>,
+  ) {
+    return this.employeesService.findAttendanceByEmployeeId(id, user, query);
   }
 
   @Patch(':id')
