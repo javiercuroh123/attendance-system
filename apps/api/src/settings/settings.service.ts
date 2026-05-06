@@ -12,9 +12,11 @@ export class SettingsService {
   ) {}
 
   private async ensureRecord() {
-    let settings = await this.settingsRepository.findOne({
+    const latest = await this.settingsRepository.find({
       order: { created_at: 'DESC' },
+      take: 1,
     });
+    let settings = latest[0];
 
     if (!settings) {
       settings = this.settingsRepository.create({
