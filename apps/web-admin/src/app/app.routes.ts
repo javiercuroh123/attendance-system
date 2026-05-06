@@ -35,6 +35,12 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'users',
+        data: { title: 'Usuarios', subtitle: 'users' },
+        loadComponent: () =>
+          import('./features/users/users.page').then((m) => m.UsersPage),
+      },
+      {
         path: 'employees',
         data: { title: 'Empleados', subtitle: 'employees' },
         loadComponent: () =>
