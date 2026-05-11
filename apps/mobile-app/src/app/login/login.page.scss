@@ -1,8 +1,231 @@
-h2 {
-  margin-top: 1rem;
-  font-size: 1.4rem;
+:host {
+  --bg-primary: #0b1120;
+  --bg-surface: #1a2332;
+  --border-color: #2a3a50;
+  --text-primary: #f1f5f9;
+  --text-secondary: #8b9db8;
+  --text-muted: #5a6f8a;
+  --accent: #10b981;
+  --accent-dark: #059669;
+  --accent-glow: rgba(16, 185, 129, 0.25);
+  --danger: #ef4444;
+  --danger-glow: rgba(239, 68, 68, 0.2);
+  display: block;
+  min-height: 100%;
 }
 
-p {
-  margin-bottom: 1.25rem;
+ion-content.login-content {
+  --background: var(--bg-primary);
+  --color: var(--text-primary);
+  font-family: 'Poppins', 'Segoe UI', sans-serif;
+}
+
+.login-wrapper {
+  position: relative;
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(40px, env(safe-area-inset-top, 0px)) 28px
+    max(24px, env(safe-area-inset-bottom, 0px));
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 30% 16%, rgba(16, 185, 129, 0.12), transparent 45%),
+    radial-gradient(circle at 74% 84%, rgba(14, 165, 233, 0.08), transparent 42%),
+    var(--bg-primary);
+}
+
+.login-panel {
+  width: min(100%, 360px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+  animation: login-enter 420ms ease-out both;
+}
+
+.login-logo {
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  display: grid;
+  place-items: center;
+  color: #fff;
+  box-shadow: 0 0 30px var(--accent-glow);
+  margin-bottom: 16px;
+}
+
+.login-logo ion-icon {
+  font-size: 34px;
+}
+
+.login-brand {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.3px;
+  color: var(--text-primary);
+}
+
+.login-brand span {
+  color: var(--accent);
+}
+
+.login-tagline {
+  margin: 8px 0 36px;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.login-form {
+  width: 100%;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.input-shell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 50px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border-color);
+  background: var(--bg-surface);
+  transition: border-color 220ms ease, box-shadow 220ms ease;
+}
+
+.input-shell:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.input-shell.invalid {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px var(--danger-glow);
+}
+
+.field-icon {
+  position: absolute;
+  left: 14px;
+  color: var(--text-muted);
+  font-size: 17px;
+  pointer-events: none;
+  transition: color 220ms ease;
+}
+
+.input-shell:focus-within .field-icon {
+  color: var(--accent);
+}
+
+.input-shell input {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 15px;
+  padding: 0 44px;
+  font-family: inherit;
+}
+
+.input-shell input::placeholder {
+  color: var(--text-muted);
+}
+
+.toggle-password {
+  position: absolute;
+  right: 14px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text-muted);
+  display: grid;
+  place-items: center;
+  padding: 4px;
+}
+
+.toggle-password ion-icon {
+  font-size: 18px;
+}
+
+.login-button {
+  width: 100%;
+  margin-top: 6px;
+  height: 50px;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 4px 18px var(--accent-glow);
+  transition: transform 140ms ease, opacity 220ms ease, box-shadow 220ms ease;
+}
+
+.login-button:active {
+  transform: scale(0.98);
+}
+
+.login-button:disabled {
+  opacity: 0.76;
+}
+
+.spinner {
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.32);
+  border-top-color: #fff;
+  animation: spin 0.7s linear infinite;
+}
+
+.field-error {
+  margin: 5px 0 0;
+  font-size: 11px;
+  color: #f87171;
+}
+
+.login-footer {
+  margin: 32px 0 0;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes login-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

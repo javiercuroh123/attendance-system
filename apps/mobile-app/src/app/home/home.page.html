@@ -1,26 +1,125 @@
-  <ion-header>
-    <ion-toolbar>
-      <ion-title>Inicio</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="true" [scrollY]="false" class="home-content">
+  <div class="home-shell">
+    <header class="home-header">
+      <div class="header-left">
+        <div class="home-avatar" aria-hidden="true">{{ employeeInitials }}</div>
+        <div class="home-greeting-text">
+          <h1>{{ greeting }}</h1>
+          <p>{{ employeeName }}</p>
+        </div>
+      </div>
 
-  <ion-content class="ion-padding">
-    <h2>Panel Movil</h2>
-    <p>Accesos rapidos para marcacion y seguimiento personal.</p>
+      <button type="button" class="header-icon-btn" aria-label="Notificaciones">
+        <ion-icon name="notifications-outline"></ion-icon>
+      </button>
+    </header>
 
-    <div class="actions">
-      <ion-button expand="block" routerLink="/scan">Escanear QR</ion-button>
-      <ion-button expand="block" fill="outline" routerLink="/my-attendance">
-        Mi asistencia
-      </ion-button>
-      <ion-button expand="block" fill="outline" routerLink="/incidents">
-        Incidencias
-      </ion-button>
-      <ion-button expand="block" fill="outline" routerLink="/profile">
-        Perfil
-      </ion-button>
-      <ion-button expand="block" color="medium" fill="clear" routerLink="/login">
-        Cerrar sesion
-      </ion-button>
-    </div>
-  </ion-content>
+    <main class="home-body">
+      <section class="home-clock" aria-live="polite">
+        <p class="home-clock-time">{{ currentTime }}</p>
+        <p class="home-clock-date">{{ currentDate }}</p>
+      </section>
+
+      <section class="status-card" [ngClass]="'status-' + statusClass">
+        <div class="status-card-header">
+          <h2>Estado de hoy</h2>
+          <span class="status-badge" [ngClass]="statusClass">{{ statusLabel }}</span>
+        </div>
+
+        <div class="status-times">
+          <article class="status-time-item check-in" [class.empty]="checkInTime === '--:--'">
+            <ion-icon name="log-in-outline"></ion-icon>
+            <p class="time">{{ checkInTime }}</p>
+            <p class="label">Entrada</p>
+          </article>
+
+          <article class="status-time-item check-out" [class.empty]="checkOutTime === '--:--'">
+            <ion-icon name="log-out-outline"></ion-icon>
+            <p class="time">{{ checkOutTime }}</p>
+            <p class="label">Salida</p>
+          </article>
+        </div>
+      </section>
+
+      <button type="button" class="qr-scan-btn" routerLink="/scan" aria-label="Escanear codigo QR">
+        <span class="pulse-ring" aria-hidden="true"></span>
+        <ion-icon name="qr-code-outline"></ion-icon>
+        <span>Escanear QR</span>
+      </button>
+
+      <section class="quick-grid" aria-label="Accesos rapidos">
+        <button type="button" class="quick-card" routerLink="/my-attendance">
+          <span class="quick-card-icon green" aria-hidden="true">
+            <ion-icon name="calendar-clear-outline"></ion-icon>
+          </span>
+          <h3>Mi Asistencia</h3>
+          <p>Historial de marcaciones</p>
+        </button>
+
+        <button type="button" class="quick-card" routerLink="/incidents">
+          <span class="quick-card-icon amber" aria-hidden="true">
+            <ion-icon name="document-text-outline"></ion-icon>
+          </span>
+          <h3>Incidencias</h3>
+          <p>Solicitar regularizacion</p>
+        </button>
+
+        <button type="button" class="quick-card" routerLink="/profile">
+          <span class="quick-card-icon blue" aria-hidden="true">
+            <ion-icon name="person-circle-outline"></ion-icon>
+          </span>
+          <h3>Mi Perfil</h3>
+          <p>Datos personales</p>
+        </button>
+
+        <button type="button" class="quick-card" routerLink="/my-attendance">
+          <span class="quick-card-icon red" aria-hidden="true">
+            <ion-icon name="time-outline"></ion-icon>
+          </span>
+          <h3>Mi Horario</h3>
+          <p>Horario asignado</p>
+        </button>
+      </section>
+
+      <section class="summary-section">
+        <h2>Resumen de {{ monthLabel }}</h2>
+        <div class="summary-row">
+          <article class="summary-item">
+            <p class="num green">{{ punctualCount }}</p>
+            <p class="lbl">Puntual</p>
+          </article>
+          <article class="summary-item">
+            <p class="num amber">{{ lateCount }}</p>
+            <p class="lbl">Tardanzas</p>
+          </article>
+          <article class="summary-item">
+            <p class="num red">{{ absentCount }}</p>
+            <p class="lbl">Faltas</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <nav class="tab-bar" aria-label="Navegacion principal">
+      <button type="button" class="tab-item active" aria-current="page" routerLink="/home">
+        <ion-icon name="home-outline"></ion-icon>
+        <span>Inicio</span>
+      </button>
+
+      <button type="button" class="tab-item" routerLink="/my-attendance">
+        <ion-icon name="calendar-number-outline"></ion-icon>
+        <span>Asistencia</span>
+      </button>
+
+      <button type="button" class="tab-item" routerLink="/incidents">
+        <ion-icon name="document-text-outline"></ion-icon>
+        <span>Incidencias</span>
+      </button>
+
+      <button type="button" class="tab-item" routerLink="/profile">
+        <ion-icon name="person-outline"></ion-icon>
+        <span>Perfil</span>
+      </button>
+    </nav>
+  </div>
+</ion-content>

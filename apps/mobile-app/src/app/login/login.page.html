@@ -1,12 +1,63 @@
-  <ion-header>
-    <ion-toolbar>
-      <ion-title>Login</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="true" class="login-content">
+  <div class="login-wrapper">
+    <section class="login-panel" aria-label="Acceso al sistema de asistencia">
+      <div class="login-logo" aria-hidden="true">
+        <ion-icon name="qr-code-outline"></ion-icon>
+      </div>
 
-  <ion-content class="ion-padding">
-    <h2>Sistema de Asistencia QR</h2>
-    <p>Ingreso movil para empleados y supervisores.</p>
+      <h1 class="login-brand">Asistencia<span>QR</span></h1>
+      <p class="login-tagline">Sistema de Control de Asistencia</p>
 
-    <ion-button expand="block" routerLink="/home">Iniciar sesion (demo)</ion-button>
-  </ion-content>
+      <form class="login-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+        <div class="form-group">
+          <label for="email">Correo electronico</label>
+          <div class="input-shell" [class.invalid]="showEmailError">
+            <ion-icon name="mail-outline" class="field-icon" aria-hidden="true"></ion-icon>
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              placeholder="usuario@empresa.com"
+              autocomplete="email"
+              [disabled]="isSubmitting"
+              [attr.aria-invalid]="showEmailError"
+            />
+          </div>
+          <p class="field-error" *ngIf="showEmailError">Ingrese un correo valido</p>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Contrasena</label>
+          <div class="input-shell" [class.invalid]="showPasswordError">
+            <ion-icon name="lock-closed-outline" class="field-icon" aria-hidden="true"></ion-icon>
+            <input
+              id="password"
+              [type]="showPassword ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="Ingrese su contrasena"
+              autocomplete="current-password"
+              [disabled]="isSubmitting"
+              [attr.aria-invalid]="showPasswordError"
+            />
+            <button
+              type="button"
+              class="toggle-password"
+              [attr.aria-label]="showPassword ? 'Ocultar contrasena' : 'Mostrar contrasena'"
+              (click)="togglePasswordVisibility()"
+            >
+              <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+            </button>
+          </div>
+          <p class="field-error" *ngIf="showPasswordError">La contrasena es requerida</p>
+        </div>
+
+        <button type="submit" class="login-button" [disabled]="isSubmitting">
+          <span class="spinner" *ngIf="isSubmitting" aria-hidden="true"></span>
+          <span>{{ isSubmitting ? 'Validando...' : 'Iniciar Sesion' }}</span>
+        </button>
+      </form>
+
+      <p class="login-footer">v1.0.0 &middot; Control de Asistencia con QR</p>
+    </section>
+  </div>
+</ion-content>
