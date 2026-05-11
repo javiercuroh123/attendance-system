@@ -34,6 +34,7 @@ ion-content.home-content {
   display: flex;
   flex-direction: column;
   height: 100%;
+  width: 100%;
   max-width: 480px;
   margin: 0 auto;
   overflow: hidden;
@@ -135,7 +136,7 @@ ion-content.home-content {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 0 16px max(18px, env(safe-area-inset-bottom, 0px));
+  padding: 16px 16px max(18px, env(safe-area-inset-bottom, 0px));
   -webkit-overflow-scrolling: touch;
 }
 
@@ -517,6 +518,124 @@ ion-content.home-content {
   transform: translateX(-50%);
   background: var(--accent);
   border-radius: 0 0 4px 4px;
+}
+
+@media (min-width: 768px) {
+  .home-shell {
+    max-width: 860px;
+  }
+
+  .home-header {
+    padding: max(18px, env(safe-area-inset-top, 0px)) 24px 14px;
+  }
+
+  .home-body {
+    padding: 18px 24px max(22px, env(safe-area-inset-bottom, 0px));
+  }
+
+  .home-clock {
+    margin: 0 0 22px;
+  }
+
+  .home-clock-time {
+    font-size: clamp(52px, 7vw, 72px);
+  }
+
+  .home-clock-date {
+    font-size: 16px;
+  }
+
+  .status-card {
+    padding: 18px;
+  }
+
+  .qr-scan-btn {
+    min-height: 58px;
+    font-size: 19px;
+  }
+
+  .quick-grid {
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .quick-card {
+    min-height: 136px;
+    padding: 16px;
+  }
+
+  .quick-card h3 {
+    font-size: 15px;
+  }
+
+  .quick-card p {
+    font-size: 12px;
+  }
+
+  .summary-section h2 {
+    font-size: 20px;
+  }
+
+  .summary-item .num {
+    font-size: 38px;
+  }
+
+  .tab-bar {
+    height: 76px;
+    padding: 0 14px max(8px, env(safe-area-inset-bottom, 0px));
+  }
+
+  .tab-item ion-icon {
+    font-size: 22px;
+  }
+
+  .tab-item span {
+    font-size: 11px;
+  }
+}
+
+@media (min-width: 1100px) {
+  .home-shell {
+    max-width: 1180px;
+  }
+
+  .home-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    grid-template-areas:
+      'clock clock'
+      'status quick'
+      'scan quick'
+      'summary summary';
+    gap: 18px 24px;
+    align-content: start;
+  }
+
+  .home-clock {
+    grid-area: clock;
+    margin: 0;
+  }
+
+  .status-card {
+    grid-area: status;
+    margin: 0;
+  }
+
+  .qr-scan-btn {
+    grid-area: scan;
+    margin: 0;
+  }
+
+  .quick-grid {
+    grid-area: quick;
+    margin: 0;
+    align-self: start;
+  }
+
+  .summary-section {
+    grid-area: summary;
+    margin: 2px 0 0;
+  }
 }
 
 @media (max-width: 360px) {
