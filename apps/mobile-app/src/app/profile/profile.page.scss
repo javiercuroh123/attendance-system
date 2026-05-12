@@ -87,11 +87,14 @@ ion-content.profile-content {
   width: 80px;
   height: 80px;
   border-radius: 999px;
-  display: grid;
-  place-items: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   margin: 0 auto 12px;
   font-size: 32px;
   font-weight: 700;
+  line-height: 1;
+  text-align: center;
   color: #fff;
   background: linear-gradient(135deg, var(--accent), var(--accent-dark));
   box-shadow: 0 0 25px var(--accent-glow);
