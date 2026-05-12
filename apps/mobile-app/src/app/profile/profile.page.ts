@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IonContent, IonIcon } from '@ionic/angular/standalone';
 import { PageHeaderComponent } from '../shared/page-header/page-header.component';
-import { TabFooterComponent } from '../shared/tab-footer/tab-footer.component';
 import { addIcons } from 'ionicons';
 import {
   briefcaseOutline,
@@ -23,7 +22,7 @@ import {
   selector: 'app-profile',
   templateUrl: './profile.page.html',
   styleUrls: ['./profile.page.scss'],
-  imports: [IonContent, IonIcon, RouterLink, PageHeaderComponent, TabFooterComponent],
+  imports: [IonContent, IonIcon, RouterLink, PageHeaderComponent],
 })
 export class ProfilePage {
   protected readonly employeeInitials = 'CM';

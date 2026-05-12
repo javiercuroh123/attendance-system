@@ -3,7 +3,6 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IonContent, IonIcon } from '@ionic/angular/standalone';
 import { PageHeaderComponent } from '../shared/page-header/page-header.component';
-import { TabFooterComponent } from '../shared/tab-footer/tab-footer.component';
 import { addIcons } from 'ionicons';
 import { fileTrayOutline } from 'ionicons/icons';
 
@@ -30,7 +29,6 @@ interface IncidentItem {
     NgClass,
     FormsModule,
     PageHeaderComponent,
-    TabFooterComponent,
   ],
 })
 export class IncidentsPage {

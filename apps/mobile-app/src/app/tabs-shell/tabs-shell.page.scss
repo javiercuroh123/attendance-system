@@ -1,0 +1,23 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.tabs-shell {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #0b1120;
+}
+
+.tabs-content {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  display: block;
+}
+
+.tabs-outlet {
+  display: block;
+  height: 100%;
+}

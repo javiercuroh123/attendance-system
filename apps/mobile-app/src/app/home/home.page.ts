@@ -3,7 +3,6 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IonContent, IonIcon } from '@ionic/angular/standalone';
 import { PageHeaderComponent } from '../shared/page-header/page-header.component';
-import { TabFooterComponent } from '../shared/tab-footer/tab-footer.component';
 import { addIcons } from 'ionicons';
 import {
   calendarClearOutline,
@@ -28,7 +27,6 @@ type HomeStatus = 'none' | 'present' | 'late' | 'incomplete';
     RouterLink,
     NgClass,
     PageHeaderComponent,
-    TabFooterComponent,
   ],
 })
 export class HomePage implements OnInit, OnDestroy {
