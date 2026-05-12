@@ -1,0 +1,42 @@
+<nav class="tab-bar" aria-label="Navegacion principal">
+  <button
+    type="button"
+    class="tab-item"
+    routerLink="/home"
+    routerLinkActive="active"
+    [routerLinkActiveOptions]="{ exact: true }"
+  >
+    <ion-icon name="home-outline"></ion-icon>
+    <span>Inicio</span>
+  </button>
+
+  <button
+    type="button"
+    class="tab-item"
+    routerLink="/my-attendance"
+    routerLinkActive="active"
+  >
+    <ion-icon name="calendar-number-outline"></ion-icon>
+    <span>Asistencia</span>
+  </button>
+
+  <button
+    type="button"
+    class="tab-item"
+    routerLink="/incidents"
+    routerLinkActive="active"
+  >
+    <ion-icon name="document-text-outline"></ion-icon>
+    <span>Incidencias</span>
+  </button>
+
+  <button
+    type="button"
+    class="tab-item"
+    routerLink="/profile"
+    routerLinkActive="active"
+  >
+    <ion-icon name="person-outline"></ion-icon>
+    <span>Perfil</span>
+  </button>
+</nav>

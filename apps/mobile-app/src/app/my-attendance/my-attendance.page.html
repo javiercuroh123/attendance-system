@@ -150,26 +150,6 @@
       </section>
     </main>
 
-    <nav class="tab-bar" aria-label="Navegacion principal">
-      <button type="button" class="tab-item" routerLink="/home">
-        <ion-icon name="home-outline"></ion-icon>
-        <span>Inicio</span>
-      </button>
-
-      <button type="button" class="tab-item active" aria-current="page" routerLink="/my-attendance">
-        <ion-icon name="calendar-number-outline"></ion-icon>
-        <span>Asistencia</span>
-      </button>
-
-      <button type="button" class="tab-item" routerLink="/incidents">
-        <ion-icon name="document-text-outline"></ion-icon>
-        <span>Incidencias</span>
-      </button>
-
-      <button type="button" class="tab-item" routerLink="/profile">
-        <ion-icon name="person-outline"></ion-icon>
-        <span>Perfil</span>
-      </button>
-    </nav>
+    <app-tab-footer></app-tab-footer>
   </div>
 </ion-content>

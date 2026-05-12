@@ -1,23 +1,20 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IonContent, IonIcon } from '@ionic/angular/standalone';
+import { TabFooterComponent } from '../shared/tab-footer/tab-footer.component';
 import { addIcons } from 'ionicons';
 import {
   briefcaseOutline,
   businessOutline,
-  calendarNumberOutline,
   calendarOutline,
   callOutline,
   chevronForwardOutline,
   codeSlashOutline,
-  documentTextOutline,
-  homeOutline,
   idCardOutline,
   informationCircleOutline,
   keyOutline,
   logOutOutline,
   mailOutline,
-  personOutline,
   timeOutline,
 } from 'ionicons/icons';
 
@@ -25,7 +22,7 @@ import {
   selector: 'app-profile',
   templateUrl: './profile.page.html',
   styleUrls: ['./profile.page.scss'],
-  imports: [IonContent, IonIcon, RouterLink],
+  imports: [IonContent, IonIcon, RouterLink, TabFooterComponent],
 })
 export class ProfilePage {
   protected readonly employeeInitials = 'CM';
@@ -46,10 +43,6 @@ export class ProfilePage {
       informationCircleOutline,
       logOutOutline,
       chevronForwardOutline,
-      homeOutline,
-      calendarNumberOutline,
-      documentTextOutline,
-      personOutline,
     });
   }
 

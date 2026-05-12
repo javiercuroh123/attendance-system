@@ -1,16 +1,10 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { IonContent, IonIcon } from '@ionic/angular/standalone';
+import { TabFooterComponent } from '../shared/tab-footer/tab-footer.component';
 import { addIcons } from 'ionicons';
-import {
-  calendarNumberOutline,
-  documentTextOutline,
-  fileTrayOutline,
-  homeOutline,
-  personOutline,
-} from 'ionicons/icons';
+import { fileTrayOutline } from 'ionicons/icons';
 
 type IncidentTab = 'list' | 'form';
 type IncidentType = 'REGULARIZATION' | 'PERMISSION' | 'JUSTIFICATION';
@@ -27,7 +21,7 @@ interface IncidentItem {
   selector: 'app-incidents',
   templateUrl: './incidents.page.html',
   styleUrls: ['./incidents.page.scss'],
-  imports: [IonContent, IonIcon, RouterLink, NgIf, NgFor, NgClass, FormsModule],
+  imports: [IonContent, IonIcon, NgIf, NgFor, NgClass, FormsModule, TabFooterComponent],
 })
 export class IncidentsPage {
   protected activeTab: IncidentTab = 'form';
@@ -62,10 +56,6 @@ export class IncidentsPage {
   constructor() {
     addIcons({
       fileTrayOutline,
-      homeOutline,
-      calendarNumberOutline,
-      documentTextOutline,
-      personOutline,
     });
   }
 

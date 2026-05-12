@@ -2,17 +2,15 @@ import { NgClass } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IonContent, IonIcon } from '@ionic/angular/standalone';
+import { TabFooterComponent } from '../shared/tab-footer/tab-footer.component';
 import { addIcons } from 'ionicons';
 import {
   calendarClearOutline,
-  calendarNumberOutline,
   documentTextOutline,
-  homeOutline,
   logInOutline,
   logOutOutline,
   notificationsOutline,
   personCircleOutline,
-  personOutline,
   qrCodeOutline,
   timeOutline,
 } from 'ionicons/icons';
@@ -23,7 +21,7 @@ type HomeStatus = 'none' | 'present' | 'late' | 'incomplete';
   selector: 'app-home',
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
-  imports: [IonContent, IonIcon, RouterLink, NgClass],
+  imports: [IonContent, IonIcon, RouterLink, NgClass, TabFooterComponent],
 })
 export class HomePage implements OnInit, OnDestroy {
   protected readonly employeeName = 'Carlos Mendoza';
@@ -75,9 +73,6 @@ export class HomePage implements OnInit, OnDestroy {
       documentTextOutline,
       personCircleOutline,
       timeOutline,
-      homeOutline,
-      calendarNumberOutline,
-      personOutline,
     });
   }
 

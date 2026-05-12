@@ -1,15 +1,44 @@
-  <ion-header>
-    <ion-toolbar>
-      <ion-title>Escanear QR</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="true" [scrollY]="false" class="scan-content">
+  <div class="scan-shell">
+    <header class="scan-header">
+      <div class="header-left">
+        <button type="button" class="back-btn" routerLink="/home" aria-label="Volver">
+          <ion-icon name="arrow-back-outline"></ion-icon>
+        </button>
+        <h1>Escanear QR</h1>
+      </div>
+    </header>
 
-  <ion-content class="ion-padding">
-    <p>
-      Aqui se integra la camara para leer QR dinamico y enviar la marcacion al
-      backend.
-    </p>
+    <main class="scan-body">
+      <section class="qr-scanner-area">
+        <div class="qr-viewfinder" aria-hidden="true">
+          <span class="corner tl"></span>
+          <span class="corner tr"></span>
+          <span class="corner bl"></span>
+          <span class="corner br"></span>
+          <span class="qr-scan-line"></span>
+        </div>
 
-    <ion-button expand="block">Simular marcacion</ion-button>
-    <ion-button expand="block" fill="clear" routerLink="/home">Volver</ion-button>
-  </ion-content>
+        <div class="qr-instructions">
+          <p>Coloca el codigo QR dentro del marco</p>
+          <small>El escaneo se realizara automaticamente</small>
+        </div>
+
+        <button type="button" class="simulate-btn" (click)="simulateScan()">
+          <ion-icon name="flash-outline"></ion-icon>
+          <span>Simular Escaneo</span>
+        </button>
+      </section>
+    </main>
+
+    <div class="qr-result-overlay" [class.show]="showResult" [attr.aria-hidden]="!showResult">
+      <div class="qr-result-card">
+        <div class="qr-result-icon">
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+        </div>
+        <h2>Marcacion registrada</h2>
+        <p>Se envio correctamente tu asistencia.</p>
+      </div>
+    </div>
+  </div>
+</ion-content>

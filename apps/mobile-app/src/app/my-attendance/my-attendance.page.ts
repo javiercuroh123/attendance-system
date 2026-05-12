@@ -1,19 +1,15 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { IonContent, IonIcon } from '@ionic/angular/standalone';
+import { TabFooterComponent } from '../shared/tab-footer/tab-footer.component';
 import { addIcons } from 'ionicons';
 import {
   alertCircleOutline,
   calendarClearOutline,
-  calendarNumberOutline,
   chevronBackOutline,
   chevronForwardOutline,
-  documentTextOutline,
-  homeOutline,
   logInOutline,
   logOutOutline,
-  personOutline,
   syncOutline,
 } from 'ionicons/icons';
 
@@ -52,7 +48,7 @@ interface AttendanceListItem extends AttendanceRecord {
   selector: 'app-my-attendance',
   templateUrl: './my-attendance.page.html',
   styleUrls: ['./my-attendance.page.scss'],
-  imports: [IonContent, IonIcon, RouterLink, NgIf, NgFor, NgClass],
+  imports: [IonContent, IonIcon, NgIf, NgFor, NgClass, TabFooterComponent],
 })
 export class MyAttendancePage {
   protected readonly weekdays = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'];
@@ -284,10 +280,6 @@ export class MyAttendancePage {
       logOutOutline,
       alertCircleOutline,
       calendarClearOutline,
-      homeOutline,
-      calendarNumberOutline,
-      documentTextOutline,
-      personOutline,
     });
 
     const now = new Date();
