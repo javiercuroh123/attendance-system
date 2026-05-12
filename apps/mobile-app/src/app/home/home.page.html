@@ -1,7 +1,7 @@
 <ion-content [fullscreen]="true" [scrollY]="false" class="home-content">
   <div class="home-shell">
-    <header class="home-header">
-      <div class="header-left">
+    <app-page-header>
+      <div header-left class="header-left">
         <div class="home-avatar" aria-hidden="true">{{ employeeInitials }}</div>
         <div class="home-greeting-text">
           <h1>{{ greeting }}</h1>
@@ -9,10 +9,10 @@
         </div>
       </div>
 
-      <button type="button" class="header-icon-btn" aria-label="Notificaciones">
+      <button header-right type="button" class="header-icon-btn" aria-label="Notificaciones">
         <ion-icon name="notifications-outline"></ion-icon>
       </button>
-    </header>
+    </app-page-header>
 
     <main class="home-body">
       <section class="home-clock" aria-live="polite">

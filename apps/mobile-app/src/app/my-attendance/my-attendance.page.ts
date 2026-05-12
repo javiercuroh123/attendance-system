@@ -1,6 +1,7 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Component } from '@angular/core';
 import { IonContent, IonIcon } from '@ionic/angular/standalone';
+import { PageHeaderComponent } from '../shared/page-header/page-header.component';
 import { TabFooterComponent } from '../shared/tab-footer/tab-footer.component';
 import { addIcons } from 'ionicons';
 import {
@@ -48,7 +49,15 @@ interface AttendanceListItem extends AttendanceRecord {
   selector: 'app-my-attendance',
   templateUrl: './my-attendance.page.html',
   styleUrls: ['./my-attendance.page.scss'],
-  imports: [IonContent, IonIcon, NgIf, NgFor, NgClass, TabFooterComponent],
+  imports: [
+    IonContent,
+    IonIcon,
+    NgIf,
+    NgFor,
+    NgClass,
+    PageHeaderComponent,
+    TabFooterComponent,
+  ],
 })
 export class MyAttendancePage {
   protected readonly weekdays = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'];

@@ -1,8 +1,9 @@
 <ion-content [fullscreen]="true" [scrollY]="false" class="attendance-content">
   <div class="attendance-shell">
-    <header class="attendance-topbar">
-      <h1>Mi Asistencia</h1>
+    <app-page-header>
+      <h1 header-left class="page-title">Mi Asistencia</h1>
       <button
+        header-right
         type="button"
         class="header-icon-btn"
         aria-label="Actualizar"
@@ -10,7 +11,7 @@
       >
         <ion-icon name="sync-outline"></ion-icon>
       </button>
-    </header>
+    </app-page-header>
 
     <main class="attendance-body">
       <section class="attendance-left-pane">

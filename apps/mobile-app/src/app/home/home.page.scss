@@ -55,17 +55,6 @@ ion-content.home-content {
   animation: ambient-shift 16s ease-in-out infinite alternate;
 }
 
-.home-header {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: max(14px, env(safe-area-inset-top, 0px)) 16px 10px;
-  border-bottom: 1px solid rgba(42, 58, 80, 0.55);
-}
-
 .header-left {
   display: flex;
   align-items: center;
@@ -476,10 +465,6 @@ ion-content.home-content {
     max-width: 860px;
   }
 
-  .home-header {
-    padding: max(18px, env(safe-area-inset-top, 0px)) 24px 14px;
-  }
-
   .home-body {
     padding: 18px 24px max(22px, env(safe-area-inset-bottom, 0px));
   }
@@ -578,11 +563,6 @@ ion-content.home-content {
 }
 
 @media (max-width: 360px) {
-  .home-header {
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-
   .home-body {
     padding-left: 12px;
     padding-right: 12px;

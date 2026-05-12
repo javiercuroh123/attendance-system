@@ -2,6 +2,7 @@ import { NgClass } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IonContent, IonIcon } from '@ionic/angular/standalone';
+import { PageHeaderComponent } from '../shared/page-header/page-header.component';
 import { TabFooterComponent } from '../shared/tab-footer/tab-footer.component';
 import { addIcons } from 'ionicons';
 import {
@@ -21,7 +22,14 @@ type HomeStatus = 'none' | 'present' | 'late' | 'incomplete';
   selector: 'app-home',
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
-  imports: [IonContent, IonIcon, RouterLink, NgClass, TabFooterComponent],
+  imports: [
+    IonContent,
+    IonIcon,
+    RouterLink,
+    NgClass,
+    PageHeaderComponent,
+    TabFooterComponent,
+  ],
 })
 export class HomePage implements OnInit, OnDestroy {
   protected readonly employeeName = 'Carlos Mendoza';
