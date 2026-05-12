@@ -1,28 +1,134 @@
-  <ion-header>
-    <ion-toolbar>
-      <ion-title>Perfil</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="true" [scrollY]="false" class="profile-content">
+  <div class="profile-shell">
+    <header class="profile-topbar">
+      <h1>Mi Perfil</h1>
+    </header>
 
-  <ion-content class="ion-padding">
-    <ion-list>
-      <ion-item>
-        <ion-label>
-          <h3>Nombre</h3>
-          <p>Empleado Demo</p>
-        </ion-label>
-      </ion-item>
-      <ion-item>
-        <ion-label>
-          <h3>Area</h3>
-          <p>Operaciones</p>
-        </ion-label>
-      </ion-item>
-      <ion-item>
-        <ion-label>
-          <h3>Cargo</h3>
-          <p>Tecnico</p>
-        </ion-label>
-      </ion-item>
-    </ion-list>
-  </ion-content>
+    <main class="profile-body">
+      <section class="profile-header">
+        <div class="profile-avatar" aria-hidden="true">{{ employeeInitials }}</div>
+        <h2 class="profile-name">{{ employeeName }}</h2>
+        <p class="profile-role">{{ employeeRole }}</p>
+      </section>
+
+      <section class="profile-section personal-section">
+        <h3 class="profile-section-title">Informacion Personal</h3>
+        <div class="profile-card">
+          <article class="profile-item">
+            <ion-icon name="id-card-outline"></ion-icon>
+            <div class="item-content">
+              <p class="item-label">DNI</p>
+              <p class="item-value">45678901</p>
+            </div>
+          </article>
+
+          <article class="profile-item">
+            <ion-icon name="mail-outline"></ion-icon>
+            <div class="item-content">
+              <p class="item-label">Correo</p>
+              <p class="item-value">carlos.mendoza@empresa.com</p>
+            </div>
+          </article>
+
+          <article class="profile-item">
+            <ion-icon name="call-outline"></ion-icon>
+            <div class="item-content">
+              <p class="item-label">Telefono</p>
+              <p class="item-value">987 654 321</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="profile-section labor-section">
+        <h3 class="profile-section-title">Informacion Laboral</h3>
+        <div class="profile-card">
+          <article class="profile-item">
+            <ion-icon name="code-slash-outline"></ion-icon>
+            <div class="item-content">
+              <p class="item-label">Codigo</p>
+              <p class="item-value">EMP-001</p>
+            </div>
+          </article>
+
+          <article class="profile-item">
+            <ion-icon name="briefcase-outline"></ion-icon>
+            <div class="item-content">
+              <p class="item-label">Cargo</p>
+              <p class="item-value">Analista de Sistemas</p>
+            </div>
+          </article>
+
+          <article class="profile-item">
+            <ion-icon name="business-outline"></ion-icon>
+            <div class="item-content">
+              <p class="item-label">Area</p>
+              <p class="item-value">Tecnologia</p>
+            </div>
+          </article>
+
+          <article class="profile-item">
+            <ion-icon name="time-outline"></ion-icon>
+            <div class="item-content">
+              <p class="item-label">Horario</p>
+              <p class="item-value">08:00 - 17:00</p>
+            </div>
+          </article>
+
+          <article class="profile-item">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <div class="item-content">
+              <p class="item-label">Fecha de ingreso</p>
+              <p class="item-value">15/03/2023</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="profile-section actions-section">
+        <h3 class="profile-section-title">Acciones</h3>
+        <div class="profile-card">
+          <button type="button" class="profile-action" (click)="onUtilityAction()">
+            <ion-icon class="accent-warning" name="key-outline"></ion-icon>
+            <span>Cambiar contrasena</span>
+            <ion-icon class="arrow" name="chevron-forward-outline"></ion-icon>
+          </button>
+
+          <button type="button" class="profile-action" (click)="onUtilityAction()">
+            <ion-icon class="accent-info" name="information-circle-outline"></ion-icon>
+            <span>Acerca de la app</span>
+            <ion-icon class="arrow" name="chevron-forward-outline"></ion-icon>
+          </button>
+
+          <button type="button" class="profile-action danger" routerLink="/login">
+            <ion-icon name="log-out-outline"></ion-icon>
+            <span>Cerrar sesion</span>
+            <ion-icon class="arrow" name="chevron-forward-outline"></ion-icon>
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <nav class="tab-bar" aria-label="Navegacion principal">
+      <button type="button" class="tab-item" routerLink="/home">
+        <ion-icon name="home-outline"></ion-icon>
+        <span>Inicio</span>
+      </button>
+
+      <button type="button" class="tab-item" routerLink="/my-attendance">
+        <ion-icon name="calendar-number-outline"></ion-icon>
+        <span>Asistencia</span>
+      </button>
+
+      <button type="button" class="tab-item" routerLink="/incidents">
+        <ion-icon name="document-text-outline"></ion-icon>
+        <span>Incidencias</span>
+      </button>
+
+      <button type="button" class="tab-item active" aria-current="page" routerLink="/profile">
+        <ion-icon name="person-outline"></ion-icon>
+        <span>Perfil</span>
+      </button>
+    </nav>
+  </div>
+</ion-content>

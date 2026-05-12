@@ -1,3 +1,541 @@
-ion-list {
-  margin-top: 0.75rem;
+:host {
+  --bg-primary: #0b1120;
+  --bg-secondary: #111827;
+  --bg-card: #172033;
+  --bg-surface: #1a2332;
+  --bg-elevated: #1f2d3d;
+  --border-color: #2a3a50;
+  --border-light: #1e2d42;
+  --text-primary: #f1f5f9;
+  --text-secondary: #8b9db8;
+  --text-muted: #5a6f8a;
+  --accent: #10b981;
+  --accent-light: #34d399;
+  --accent-dark: #059669;
+  --accent-glow: rgba(16, 185, 129, 0.25);
+  --warning: #f59e0b;
+  --warning-light: #fbbf24;
+  --danger: #ef4444;
+  --danger-light: #f87171;
+  --info: #0ea5e9;
+  --info-light: #38bdf8;
+  display: block;
+  min-height: 100%;
+}
+
+ion-content.attendance-content {
+  --background: var(--bg-primary);
+  --color: var(--text-primary);
+  font-family: 'Poppins', 'Segoe UI', sans-serif;
+}
+
+.attendance-shell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  overflow: hidden;
+  background: var(--bg-primary);
+}
+
+.attendance-shell::before {
+  content: '';
+  position: absolute;
+  inset: -42% -42% auto;
+  width: 184%;
+  height: 184%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 28% 18%, rgba(16, 185, 129, 0.12), transparent 42%),
+    radial-gradient(circle at 72% 82%, rgba(14, 165, 233, 0.08), transparent 48%);
+  animation: ambient-shift 16s ease-in-out infinite alternate;
+}
+
+.attendance-topbar {
+  position: relative;
+  z-index: 2;
+  padding: max(14px, env(safe-area-inset-top, 0px)) 16px 12px;
+  border-bottom: 1px solid rgba(42, 58, 80, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.attendance-topbar h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.header-icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid var(--border-light);
+  background: rgba(26, 35, 50, 0.9);
+  color: var(--text-secondary);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.header-icon-btn ion-icon {
+  font-size: 19px;
+}
+
+.header-icon-btn:active {
+  transform: scale(0.96);
+}
+
+.attendance-body {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 14px 16px max(20px, env(safe-area-inset-bottom, 0px));
+  -webkit-overflow-scrolling: touch;
+}
+
+.attendance-body::-webkit-scrollbar {
+  width: 4px;
+}
+
+.attendance-body::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 999px;
+}
+
+.attendance-left-pane {
+  margin-bottom: 16px;
+}
+
+.attendance-month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.attendance-month-nav h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.month-nav-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  background: rgba(26, 35, 50, 0.9);
+  color: var(--text-secondary);
+  display: grid;
+  place-items: center;
+}
+
+.month-nav-btn ion-icon {
+  font-size: 14px;
+}
+
+.month-nav-btn:active {
+  transform: scale(0.96);
+}
+
+.mini-calendar {
+  background: rgba(23, 32, 51, 0.95);
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.cal-weekdays span {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.cal-days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.cal-day {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  position: relative;
+}
+
+.cal-day.empty {
+  visibility: hidden;
+}
+
+.cal-day.today {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+}
+
+.cal-day.has-attendance::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+}
+
+.cal-day.att-present::after {
+  background: var(--accent);
+}
+
+.cal-day.att-late::after {
+  background: var(--warning);
+}
+
+.cal-day.att-absent::after {
+  background: var(--danger);
+}
+
+.cal-day.att-incomplete::after {
+  background: var(--info);
+}
+
+.cal-day.weekend {
+  color: var(--text-muted);
+  opacity: 0.55;
+}
+
+.filter-chips {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.filter-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.filter-chip {
+  border: 1px solid var(--border-light);
+  border-radius: 999px;
+  background: rgba(26, 35, 50, 0.9);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 14px;
+}
+
+.filter-chip.active {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: rgba(16, 185, 129, 0.15);
+}
+
+.record-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.record-item {
+  background: rgba(23, 32, 51, 0.95);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.record-item:active {
+  background: var(--bg-elevated);
+}
+
+.record-date-col {
+  width: 48px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.record-date-col .day {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.record-date-col .month {
+  margin: 1px 0 0;
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.record-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.record-info .times {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.record-info .times span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.record-info .times ion-icon {
+  font-size: 12px;
+}
+
+.record-info .times .check-in {
+  color: var(--accent);
+}
+
+.record-info .times .check-out {
+  color: var(--info);
+}
+
+.record-info .late-info {
+  margin: 2px 0 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--warning);
+}
+
+.record-info .late-info ion-icon {
+  font-size: 12px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.status-badge.present {
+  color: var(--accent-light);
+  background: rgba(16, 185, 129, 0.15);
+}
+
+.status-badge.late {
+  color: var(--warning-light);
+  background: rgba(245, 158, 11, 0.15);
+}
+
+.status-badge.absent {
+  color: var(--danger-light);
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.status-badge.incomplete {
+  color: var(--info-light);
+  background: rgba(14, 165, 233, 0.15);
+}
+
+.status-badge.justified {
+  color: var(--accent-light);
+  background: rgba(16, 185, 129, 0.15);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 44px 20px;
+}
+
+.empty-state ion-icon {
+  font-size: 40px;
+  color: var(--text-muted);
+  opacity: 0.65;
+}
+
+.empty-state h3 {
+  margin: 10px 0 4px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.tab-bar {
+  position: relative;
+  z-index: 3;
+  height: 70px;
+  padding: 0 4px max(4px, env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--border-light);
+  background: rgba(17, 24, 39, 0.97);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: center;
+}
+
+.tab-item {
+  position: relative;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  min-height: 100%;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.tab-item ion-icon {
+  font-size: 20px;
+}
+
+.tab-item span {
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.tab-item.active {
+  color: var(--accent);
+}
+
+.tab-item.active::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto auto 50%;
+  width: 30px;
+  height: 3px;
+  transform: translateX(-50%);
+  background: var(--accent);
+  border-radius: 0 0 4px 4px;
+}
+
+@media (min-width: 768px) {
+  .attendance-shell {
+    max-width: 860px;
+  }
+
+  .attendance-topbar {
+    padding: max(18px, env(safe-area-inset-top, 0px)) 24px 14px;
+  }
+
+  .attendance-body {
+    padding: 20px 24px max(22px, env(safe-area-inset-bottom, 0px));
+  }
+
+  .attendance-month-nav h2 {
+    font-size: 17px;
+  }
+
+  .mini-calendar {
+    padding: 16px;
+  }
+
+  .record-date-col .day {
+    font-size: 22px;
+  }
+
+  .tab-bar {
+    height: 76px;
+    padding: 0 14px max(8px, env(safe-area-inset-bottom, 0px));
+  }
+
+  .tab-item ion-icon {
+    font-size: 22px;
+  }
+
+  .tab-item span {
+    font-size: 11px;
+  }
+}
+
+@media (min-width: 1100px) {
+  .attendance-shell {
+    max-width: 1180px;
+  }
+
+  .attendance-body {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 18px 24px;
+    align-content: start;
+  }
+
+  .attendance-left-pane {
+    margin-bottom: 0;
+  }
+}
+
+@media (max-width: 360px) {
+  .attendance-topbar {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .attendance-body {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .record-item {
+    align-items: flex-start;
+  }
+
+  .status-badge {
+    margin-top: 2px;
+  }
+}
+
+@keyframes ambient-shift {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  100% {
+    transform: translate(-4%, 3%) rotate(3deg);
+  }
 }

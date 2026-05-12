@@ -1,14 +1,121 @@
-  <ion-header>
-    <ion-toolbar>
-      <ion-title>Incidencias</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="true" [scrollY]="false" class="incidents-content">
+  <div class="incidents-shell">
+    <header class="incidents-topbar">
+      <h1>Incidencias</h1>
+    </header>
 
-  <ion-content class="ion-padding">
-    <p>
-      En este modulo el empleado registra regularizaciones por olvidos o
-      correcciones de marcacion.
-    </p>
+    <main class="incidents-body">
+      <section class="incidents-tabs" aria-label="Navegacion interna de incidencias">
+        <button
+          type="button"
+          class="incidents-tab"
+          [class.active]="activeTab === 'list'"
+          (click)="setTab('list')"
+        >
+          Mis Solicitudes
+        </button>
 
-    <ion-button expand="block">Nueva solicitud</ion-button>
-  </ion-content>
+        <button
+          type="button"
+          class="incidents-tab"
+          [class.active]="activeTab === 'form'"
+          (click)="setTab('form')"
+        >
+          Nueva Solicitud
+        </button>
+      </section>
+
+      <section *ngIf="activeTab === 'list'" class="incident-list-view">
+        <div class="incident-list" *ngIf="incidents.length > 0; else noIncidents">
+          <article class="incident-item" *ngFor="let incident of incidents">
+            <div class="incident-item-header">
+              <span class="incident-type" [ngClass]="typeClass(incident.type)">
+                {{ typeLabel(incident.type) }}
+              </span>
+              <span class="incident-status" [ngClass]="statusClass(incident.status)">
+                {{ statusLabel(incident.status) }}
+              </span>
+            </div>
+            <p class="incident-item-date">{{ incident.dateLabel }}</p>
+            <p class="incident-item-desc">{{ incident.description }}</p>
+          </article>
+        </div>
+
+        <ng-template #noIncidents>
+          <div class="empty-state">
+            <ion-icon name="file-tray-outline"></ion-icon>
+            <h3>Sin solicitudes registradas</h3>
+            <p>Cuando registres una incidencia, aparecera aqui.</p>
+          </div>
+        </ng-template>
+      </section>
+
+      <section *ngIf="activeTab === 'form'" class="incident-form-view">
+        <form class="incident-form" (submit)="$event.preventDefault()" novalidate>
+          <div class="form-group">
+            <label for="incidentDate">Fecha de asistencia</label>
+            <input
+              id="incidentDate"
+              type="date"
+              class="form-input"
+              name="incidentDate"
+              [(ngModel)]="form.attendanceDate"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="incidentType">Tipo de solicitud</label>
+            <select
+              id="incidentType"
+              class="form-select"
+              name="incidentType"
+              [(ngModel)]="form.requestType"
+            >
+              <option value="">Seleccionar tipo...</option>
+              <option value="REGULARIZATION">Regularizacion</option>
+              <option value="PERMISSION">Permiso</option>
+              <option value="JUSTIFICATION">Justificacion</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="incidentDesc">Descripcion del motivo</label>
+            <textarea
+              id="incidentDesc"
+              class="form-textarea"
+              name="incidentDesc"
+              [(ngModel)]="form.description"
+              placeholder="Describa el motivo de su solicitud..."
+            ></textarea>
+          </div>
+
+          <button type="button" class="submit-btn" (click)="submitIncident()">
+            Enviar Solicitud
+          </button>
+        </form>
+      </section>
+    </main>
+
+    <nav class="tab-bar" aria-label="Navegacion principal">
+      <button type="button" class="tab-item" routerLink="/home">
+        <ion-icon name="home-outline"></ion-icon>
+        <span>Inicio</span>
+      </button>
+
+      <button type="button" class="tab-item" routerLink="/my-attendance">
+        <ion-icon name="calendar-number-outline"></ion-icon>
+        <span>Asistencia</span>
+      </button>
+
+      <button type="button" class="tab-item active" aria-current="page" routerLink="/incidents">
+        <ion-icon name="document-text-outline"></ion-icon>
+        <span>Incidencias</span>
+      </button>
+
+      <button type="button" class="tab-item" routerLink="/profile">
+        <ion-icon name="person-outline"></ion-icon>
+        <span>Perfil</span>
+      </button>
+    </nav>
+  </div>
+</ion-content>
