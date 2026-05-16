@@ -255,6 +255,23 @@ ion-content.attendance-content {
   gap: 10px;
 }
 
+.feedback-error {
+  margin: 0 0 10px;
+  color: var(--danger-light);
+  font-size: 12px;
+}
+
+.loading-state {
+  margin: 0 0 10px;
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+  background: rgba(23, 32, 51, 0.92);
+  padding: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-align: center;
+}
+
 .record-item {
   background: rgba(23, 32, 51, 0.95);
   border: 1px solid var(--border-light);

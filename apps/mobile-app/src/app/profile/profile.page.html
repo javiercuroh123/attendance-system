@@ -5,6 +5,9 @@
     </app-page-header>
 
     <main class="profile-body">
+      <p class="feedback-error" *ngIf="errorMessage">{{ errorMessage }}</p>
+      <div class="loading-state" *ngIf="isLoading">Cargando perfil...</div>
+
       <section class="profile-header">
         <div class="profile-avatar" aria-hidden="true">{{ employeeInitials }}</div>
         <h2 class="profile-name">{{ employeeName }}</h2>
@@ -18,7 +21,7 @@
             <ion-icon name="id-card-outline"></ion-icon>
             <div class="item-content">
               <p class="item-label">DNI</p>
-              <p class="item-value">45678901</p>
+              <p class="item-value">{{ profile.dni }}</p>
             </div>
           </article>
 
@@ -26,7 +29,7 @@
             <ion-icon name="mail-outline"></ion-icon>
             <div class="item-content">
               <p class="item-label">Correo</p>
-              <p class="item-value">carlos.mendoza@empresa.com</p>
+              <p class="item-value">{{ profile.email }}</p>
             </div>
           </article>
 
@@ -34,7 +37,7 @@
             <ion-icon name="call-outline"></ion-icon>
             <div class="item-content">
               <p class="item-label">Telefono</p>
-              <p class="item-value">987 654 321</p>
+              <p class="item-value">{{ profile.phone }}</p>
             </div>
           </article>
         </div>
@@ -47,7 +50,7 @@
             <ion-icon name="code-slash-outline"></ion-icon>
             <div class="item-content">
               <p class="item-label">Codigo</p>
-              <p class="item-value">EMP-001</p>
+              <p class="item-value">{{ profile.code }}</p>
             </div>
           </article>
 
@@ -55,7 +58,7 @@
             <ion-icon name="briefcase-outline"></ion-icon>
             <div class="item-content">
               <p class="item-label">Cargo</p>
-              <p class="item-value">Analista de Sistemas</p>
+              <p class="item-value">{{ profile.position }}</p>
             </div>
           </article>
 
@@ -63,7 +66,7 @@
             <ion-icon name="business-outline"></ion-icon>
             <div class="item-content">
               <p class="item-label">Area</p>
-              <p class="item-value">Tecnologia</p>
+              <p class="item-value">{{ profile.area }}</p>
             </div>
           </article>
 
@@ -71,7 +74,7 @@
             <ion-icon name="time-outline"></ion-icon>
             <div class="item-content">
               <p class="item-label">Horario</p>
-              <p class="item-value">08:00 - 17:00</p>
+              <p class="item-value">{{ profile.schedule }}</p>
             </div>
           </article>
 
@@ -79,7 +82,7 @@
             <ion-icon name="calendar-outline"></ion-icon>
             <div class="item-content">
               <p class="item-label">Fecha de ingreso</p>
-              <p class="item-value">15/03/2023</p>
+              <p class="item-value">{{ profile.hireDate }}</p>
             </div>
           </article>
         </div>
@@ -100,7 +103,7 @@
             <ion-icon class="arrow" name="chevron-forward-outline"></ion-icon>
           </button>
 
-          <button type="button" class="profile-action danger" routerLink="/login">
+          <button type="button" class="profile-action danger" (click)="logout()">
             <ion-icon name="log-out-outline"></ion-icon>
             <span>Cerrar sesion</span>
             <ion-icon class="arrow" name="chevron-forward-outline"></ion-icon>

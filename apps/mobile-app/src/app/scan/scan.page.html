@@ -21,12 +21,29 @@
 
         <div class="qr-instructions">
           <p>Coloca el codigo QR dentro del marco</p>
-          <small>El escaneo se realizara automaticamente</small>
+          <small>Ingresa el qrToken (o el JSON completo del QR) para marcar</small>
         </div>
 
-        <button type="button" class="simulate-btn" (click)="simulateScan()">
+        <label class="token-label" for="qrToken">Token QR</label>
+        <input
+          id="qrToken"
+          class="token-input"
+          type="text"
+          [(ngModel)]="qrToken"
+          placeholder="Pega aqui el qrToken o JSON"
+          [disabled]="isSubmitting"
+        />
+
+        <p class="scan-error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+        <button
+          type="button"
+          class="simulate-btn"
+          (click)="submitAttendanceCheck()"
+          [disabled]="isSubmitting"
+        >
           <ion-icon name="flash-outline"></ion-icon>
-          <span>Simular Escaneo</span>
+          <span>{{ isSubmitting ? 'Enviando...' : 'Registrar Marcacion' }}</span>
         </button>
       </section>
     </main>
@@ -36,8 +53,8 @@
         <div class="qr-result-icon">
           <ion-icon name="checkmark-circle-outline"></ion-icon>
         </div>
-        <h2>Marcacion registrada</h2>
-        <p>Se envio correctamente tu asistencia.</p>
+        <h2>{{ resultTitle }}</h2>
+        <p>{{ resultDescription }}</p>
       </div>
     </div>
   </div>

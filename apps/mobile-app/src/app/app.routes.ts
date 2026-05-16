@@ -1,18 +1,22 @@
 import { Routes } from '@angular/router';
+import { authGuard, loginRedirectGuard } from './core/auth/auth.guard';
 
 export const routes: Routes = [
   {
     path: 'login',
     loadComponent: () => import('./login/login.page').then((m) => m.LoginPage),
+    canActivate: [loginRedirectGuard],
   },
   {
     path: 'scan',
     loadComponent: () => import('./scan/scan.page').then((m) => m.ScanPage),
+    canActivate: [authGuard],
   },
   {
     path: '',
     loadComponent: () =>
       import('./tabs-shell/tabs-shell.page').then((m) => m.TabsShellPage),
+    canActivate: [authGuard],
     children: [
       {
         path: 'home',

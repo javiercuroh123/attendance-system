@@ -55,6 +55,8 @@
           <span class="spinner" *ngIf="isSubmitting" aria-hidden="true"></span>
           <span>{{ isSubmitting ? 'Validando...' : 'Iniciar Sesion' }}</span>
         </button>
+
+        <p class="form-error" *ngIf="errorMessage">{{ errorMessage }}</p>
       </form>
 
       <p class="login-footer">v1.0.0 &middot; Control de Asistencia con QR</p>

@@ -109,7 +109,11 @@
       </section>
 
       <section class="attendance-right-pane">
-        <div class="record-list" *ngIf="filteredRecords.length > 0; else emptyRecords">
+        <p class="feedback-error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+        <div class="loading-state" *ngIf="isLoading">Cargando historial...</div>
+
+        <div class="record-list" *ngIf="!isLoading && filteredRecords.length > 0; else emptyRecords">
           <article class="record-item" *ngFor="let record of filteredRecords">
             <div class="record-date-col">
               <p class="day">{{ record.day }}</p>
@@ -142,7 +146,7 @@
         </div>
 
         <ng-template #emptyRecords>
-          <div class="empty-state">
+          <div class="empty-state" *ngIf="!isLoading">
             <ion-icon name="calendar-clear-outline"></ion-icon>
             <h3>Sin registros</h3>
             <p>No se encontraron registros para el filtro seleccionado</p>

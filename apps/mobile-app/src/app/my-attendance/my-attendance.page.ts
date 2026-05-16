@@ -1,7 +1,8 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
-import { Component } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { IonContent, IonIcon } from '@ionic/angular/standalone';
-import { PageHeaderComponent } from '../shared/page-header/page-header.component';
 import { addIcons } from 'ionicons';
 import {
   alertCircleOutline,
@@ -12,18 +13,19 @@ import {
   logOutOutline,
   syncOutline,
 } from 'ionicons/icons';
-
-type AttendanceStatus =
-  | 'PRESENT'
-  | 'LATE'
-  | 'ABSENT'
-  | 'INCOMPLETE'
-  | 'JUSTIFIED';
+import { firstValueFrom } from 'rxjs';
+import {
+  AttendanceApiService,
+  AttendanceRecordResponse,
+  AttendanceStatus,
+} from '../core/api/attendance-api.service';
+import { AuthSessionService } from '../core/auth/auth-session.service';
+import { PageHeaderComponent } from '../shared/page-header/page-header.component';
 
 type AttendanceFilter = 'all' | 'PRESENT' | 'LATE' | 'ABSENT' | 'INCOMPLETE';
 
 interface AttendanceRecord {
-  id: number;
+  id: string;
   date: string;
   checkIn: string | null;
   checkOut: string | null;
@@ -48,205 +50,24 @@ interface AttendanceListItem extends AttendanceRecord {
   selector: 'app-my-attendance',
   templateUrl: './my-attendance.page.html',
   styleUrls: ['./my-attendance.page.scss'],
-  imports: [
-    IonContent,
-    IonIcon,
-    NgIf,
-    NgFor,
-    NgClass,
-    PageHeaderComponent,
-  ],
+  imports: [IonContent, IonIcon, NgIf, NgFor, NgClass, PageHeaderComponent],
 })
-export class MyAttendancePage {
+export class MyAttendancePage implements OnInit {
   protected readonly weekdays = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'];
 
-  protected readonly attendanceRecords: AttendanceRecord[] = [
-    {
-      id: 1,
-      date: '2026-05-01',
-      checkIn: '07:55',
-      checkOut: '17:02',
-      status: 'PRESENT',
-      lateMinutes: 0,
-      source: 'QR',
-    },
-    {
-      id: 2,
-      date: '2026-05-02',
-      checkIn: '08:12',
-      checkOut: '17:05',
-      status: 'LATE',
-      lateMinutes: 2,
-      source: 'QR',
-    },
-    {
-      id: 3,
-      date: '2026-05-04',
-      checkIn: '07:58',
-      checkOut: '17:00',
-      status: 'PRESENT',
-      lateMinutes: 0,
-      source: 'QR',
-    },
-    {
-      id: 4,
-      date: '2026-05-05',
-      checkIn: '08:00',
-      checkOut: '17:10',
-      status: 'PRESENT',
-      lateMinutes: 0,
-      source: 'QR',
-    },
-    {
-      id: 5,
-      date: '2026-05-06',
-      checkIn: '08:25',
-      checkOut: '17:03',
-      status: 'LATE',
-      lateMinutes: 15,
-      source: 'QR',
-    },
-    {
-      id: 6,
-      date: '2026-05-07',
-      checkIn: '07:50',
-      checkOut: '17:00',
-      status: 'PRESENT',
-      lateMinutes: 0,
-      source: 'QR',
-    },
-    {
-      id: 7,
-      date: '2026-05-08',
-      checkIn: '08:05',
-      checkOut: '17:08',
-      status: 'PRESENT',
-      lateMinutes: 0,
-      source: 'QR',
-    },
-    {
-      id: 8,
-      date: '2026-05-09',
-      checkIn: null,
-      checkOut: null,
-      status: 'ABSENT',
-      lateMinutes: 0,
-      source: null,
-    },
-    {
-      id: 9,
-      date: '2026-05-11',
-      checkIn: '07:45',
-      checkOut: '17:00',
-      status: 'PRESENT',
-      lateMinutes: 0,
-      source: 'QR',
-    },
-    {
-      id: 10,
-      date: '2026-05-12',
-      checkIn: '08:08',
-      checkOut: null,
-      status: 'INCOMPLETE',
-      lateMinutes: 0,
-      source: 'QR',
-    },
-    {
-      id: 11,
-      date: '2026-05-13',
-      checkIn: '07:59',
-      checkOut: '17:05',
-      status: 'PRESENT',
-      lateMinutes: 0,
-      source: 'QR',
-    },
-    {
-      id: 12,
-      date: '2026-05-14',
-      checkIn: '08:20',
-      checkOut: '17:02',
-      status: 'LATE',
-      lateMinutes: 10,
-      source: 'QR',
-    },
-    {
-      id: 13,
-      date: '2026-05-15',
-      checkIn: '07:52',
-      checkOut: '17:00',
-      status: 'PRESENT',
-      lateMinutes: 0,
-      source: 'QR',
-    },
-    {
-      id: 14,
-      date: '2026-05-16',
-      checkIn: '07:48',
-      checkOut: '17:15',
-      status: 'PRESENT',
-      lateMinutes: 0,
-      source: 'QR',
-    },
-    {
-      id: 15,
-      date: '2026-05-18',
-      checkIn: '08:01',
-      checkOut: '17:03',
-      status: 'PRESENT',
-      lateMinutes: 0,
-      source: 'QR',
-    },
-    {
-      id: 16,
-      date: '2026-05-19',
-      checkIn: '07:56',
-      checkOut: '17:00',
-      status: 'PRESENT',
-      lateMinutes: 0,
-      source: 'QR',
-    },
-    {
-      id: 17,
-      date: '2026-05-20',
-      checkIn: '08:18',
-      checkOut: '17:05',
-      status: 'LATE',
-      lateMinutes: 8,
-      source: 'QR',
-    },
-    {
-      id: 18,
-      date: '2026-05-21',
-      checkIn: '07:54',
-      checkOut: '17:00',
-      status: 'PRESENT',
-      lateMinutes: 0,
-      source: 'QR',
-    },
-    {
-      id: 19,
-      date: '2026-05-22',
-      checkIn: '07:57',
-      checkOut: '17:08',
-      status: 'PRESENT',
-      lateMinutes: 0,
-      source: 'QR',
-    },
-    {
-      id: 20,
-      date: '2026-05-23',
-      checkIn: '07:49',
-      checkOut: '17:02',
-      status: 'PRESENT',
-      lateMinutes: 0,
-      source: 'QR',
-    },
-  ];
-
+  protected attendanceRecords: AttendanceRecord[] = [];
   protected activeFilter: AttendanceFilter = 'all';
   protected displayedMonth: number;
   protected displayedYear: number;
   protected calendarDays: CalendarDay[] = [];
+  protected isLoading = false;
+  protected errorMessage: string | null = null;
+
+  private readonly timeFormatter = new Intl.DateTimeFormat('es-PE', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
 
   private readonly monthNamesLong = [
     'Enero',
@@ -278,7 +99,11 @@ export class MyAttendancePage {
     'DIC',
   ];
 
-  constructor() {
+  constructor(
+    private readonly attendanceApi: AttendanceApiService,
+    private readonly session: AuthSessionService,
+    private readonly router: Router,
+  ) {
     addIcons({
       syncOutline,
       chevronBackOutline,
@@ -293,6 +118,10 @@ export class MyAttendancePage {
     this.displayedMonth = now.getMonth();
     this.displayedYear = now.getFullYear();
     this.buildCalendar();
+  }
+
+  async ngOnInit(): Promise<void> {
+    await this.refreshAttendanceData();
   }
 
   protected get monthLabel(): string {
@@ -339,11 +168,31 @@ export class MyAttendancePage {
     this.activeFilter = filter;
   }
 
-  protected refreshAttendanceData(): void {
-    const now = new Date();
-    this.displayedMonth = now.getMonth();
-    this.displayedYear = now.getFullYear();
-    this.buildCalendar();
+  protected async refreshAttendanceData(): Promise<void> {
+    if (this.isLoading) {
+      return;
+    }
+
+    this.isLoading = true;
+    this.errorMessage = null;
+
+    try {
+      const response = await firstValueFrom(this.attendanceApi.getMyAttendance());
+      this.attendanceRecords = response.map((record) => this.mapAttendanceRecord(record));
+      this.buildCalendar();
+    } catch (error: unknown) {
+      if (error instanceof HttpErrorResponse && error.status === 401) {
+        this.session.clearSession();
+        await this.router.navigateByUrl('/login');
+        return;
+      }
+
+      this.attendanceRecords = [];
+      this.buildCalendar();
+      this.errorMessage = this.resolveErrorMessage(error);
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   protected statusLabel(status: AttendanceStatus): string {
@@ -437,5 +286,60 @@ export class MyAttendancePage {
     }
 
     return status === this.activeFilter;
+  }
+
+  private mapAttendanceRecord(record: AttendanceRecordResponse): AttendanceRecord {
+    return {
+      id: record.id,
+      date: record.attendance_date,
+      checkIn: this.formatTime(record.check_in_at),
+      checkOut: this.formatTime(record.check_out_at),
+      status: this.normalizeStatus(record.status),
+      lateMinutes: record.late_minutes,
+      source: record.source ?? null,
+    };
+  }
+
+  private normalizeStatus(status: AttendanceStatus): AttendanceStatus {
+    if (
+      status === 'PRESENT' ||
+      status === 'LATE' ||
+      status === 'ABSENT' ||
+      status === 'INCOMPLETE' ||
+      status === 'JUSTIFIED'
+    ) {
+      return status;
+    }
+
+    return 'PRESENT';
+  }
+
+  private formatTime(value: string | null | undefined): string | null {
+    if (!value) {
+      return null;
+    }
+
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      return null;
+    }
+
+    return this.timeFormatter.format(parsed);
+  }
+
+  private resolveErrorMessage(error: unknown): string {
+    if (error instanceof HttpErrorResponse) {
+      const backendMessage = error.error?.message;
+
+      if (Array.isArray(backendMessage) && backendMessage.length > 0) {
+        return backendMessage.join(' · ');
+      }
+
+      if (typeof backendMessage === 'string' && backendMessage.trim()) {
+        return backendMessage;
+      }
+    }
+
+    return 'No se pudo cargar tu historial de asistencia.';
   }
 }

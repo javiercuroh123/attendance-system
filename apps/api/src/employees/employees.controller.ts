@@ -56,6 +56,13 @@ export class EmployeesController {
     return this.employeesService.findAll(user);
   }
 
+  @Get('me')
+  @Roles(RoleCode.ADMIN, RoleCode.RRHH, RoleCode.SUPERVISOR, RoleCode.EMPLOYEE)
+  @ApiOperation({ summary: 'Obtener perfil de empleado autenticado' })
+  findMine(@CurrentUser() user: AuthenticatedUser) {
+    return this.employeesService.findByUserId(user.userId);
+  }
+
   @Get(':id')
   @Roles(RoleCode.ADMIN, RoleCode.RRHH, RoleCode.SUPERVISOR)
   @ApiOperation({ summary: 'Obtener empleado por id' })

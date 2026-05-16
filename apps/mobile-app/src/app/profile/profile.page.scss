@@ -78,6 +78,23 @@ ion-content.profile-content {
   border-radius: 999px;
 }
 
+.feedback-error {
+  margin: 0 0 10px;
+  color: #fda4af;
+  font-size: 12px;
+}
+
+.loading-state {
+  margin: 0 0 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+  background: rgba(23, 32, 51, 0.92);
+  padding: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-align: center;
+}
+
 .profile-header {
   text-align: center;
   padding: 6px 0 20px;

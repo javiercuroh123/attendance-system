@@ -26,7 +26,10 @@
       </section>
 
       <section *ngIf="activeTab === 'list'" class="incident-list-view">
-        <div class="incident-list" *ngIf="incidents.length > 0; else noIncidents">
+        <p class="feedback-error" *ngIf="errorMessage">{{ errorMessage }}</p>
+        <div class="loading-state" *ngIf="isLoading">Cargando solicitudes...</div>
+
+        <div class="incident-list" *ngIf="!isLoading && incidents.length > 0; else noIncidents">
           <article class="incident-item" *ngFor="let incident of incidents">
             <div class="incident-item-header">
               <span class="incident-type" [ngClass]="typeClass(incident.type)">
@@ -42,7 +45,7 @@
         </div>
 
         <ng-template #noIncidents>
-          <div class="empty-state">
+          <div class="empty-state" *ngIf="!isLoading">
             <ion-icon name="file-tray-outline"></ion-icon>
             <h3>Sin solicitudes registradas</h3>
             <p>Cuando registres una incidencia, aparecera aqui.</p>
@@ -51,6 +54,8 @@
       </section>
 
       <section *ngIf="activeTab === 'form'" class="incident-form-view">
+        <p class="feedback-error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
         <form class="incident-form" (submit)="$event.preventDefault()" novalidate>
           <div class="form-group">
             <label for="incidentDate">Fecha de asistencia</label>
@@ -89,8 +94,8 @@
             ></textarea>
           </div>
 
-          <button type="button" class="submit-btn" (click)="submitIncident()">
-            Enviar Solicitud
+          <button type="button" class="submit-btn" (click)="submitIncident()" [disabled]="isSubmitting">
+            {{ isSubmitting ? 'Enviando...' : 'Enviar Solicitud' }}
           </button>
         </form>
       </section>
