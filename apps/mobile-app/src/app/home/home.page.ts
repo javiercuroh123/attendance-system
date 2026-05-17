@@ -1,6 +1,13 @@
 import { NgClass, NgIf } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  NgZone,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { IonContent, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -31,6 +38,7 @@ type HomeStatus = 'none' | 'present' | 'late' | 'incomplete' | 'absent';
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
   imports: [IonContent, IonIcon, RouterLink, NgClass, NgIf, PageHeaderComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomePage implements OnInit, OnDestroy {
   protected employeeName = 'Empleado';
@@ -54,6 +62,10 @@ export class HomePage implements OnInit, OnDestroy {
   protected isRefreshing = false;
 
   private clockTimer: ReturnType<typeof setInterval> | null = null;
+  private isViewActive = false;
+  private hasLoadedOnce = false;
+  private lastHomeDataRefreshAt = 0;
+  private readonly homeDataRefreshIntervalMs = 45_000;
 
   private readonly timeFormatter = new Intl.DateTimeFormat('es-PE', {
     hour: '2-digit',
@@ -85,6 +97,8 @@ export class HomePage implements OnInit, OnDestroy {
     private readonly employeesApi: EmployeesApiService,
     private readonly session: AuthSessionService,
     private readonly router: Router,
+    private readonly zone: NgZone,
+    private readonly cdr: ChangeDetectorRef,
   ) {
     addIcons({
       notificationsOutline,
@@ -100,18 +114,34 @@ export class HomePage implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     this.refreshRealtimeData();
-    this.clockTimer = setInterval(() => {
-      this.refreshRealtimeData();
-    }, 1000);
-
-    await this.loadHomeData();
+    this.cdr.markForCheck();
   }
 
   ngOnDestroy(): void {
-    if (this.clockTimer !== null) {
-      clearInterval(this.clockTimer);
-      this.clockTimer = null;
+    this.stopClock();
+  }
+
+  async ionViewWillEnter(): Promise<void> {
+    this.isViewActive = true;
+    this.refreshRealtimeData();
+    this.startClock();
+
+    const now = Date.now();
+    const shouldRefreshData =
+      !this.hasLoadedOnce ||
+      now - this.lastHomeDataRefreshAt >= this.homeDataRefreshIntervalMs;
+
+    if (shouldRefreshData) {
+      await this.loadHomeData();
+      return;
     }
+
+    this.cdr.markForCheck();
+  }
+
+  ionViewDidLeave(): void {
+    this.isViewActive = false;
+    this.stopClock();
   }
 
   protected async refreshHomeData(): Promise<void> {
@@ -165,7 +195,10 @@ export class HomePage implements OnInit, OnDestroy {
       this.errorMessage = this.resolveErrorMessage(attendanceError);
     }
 
+    this.hasLoadedOnce = true;
+    this.lastHomeDataRefreshAt = Date.now();
     this.isRefreshing = false;
+    this.cdr.markForCheck();
   }
 
   private applyAttendanceState(records: AttendanceRecordResponse[]): void {
@@ -363,5 +396,31 @@ export class HomePage implements OnInit, OnDestroy {
     this.session.clearSession();
     this.isRefreshing = false;
     await this.router.navigateByUrl('/login');
+  }
+
+  private startClock(): void {
+    if (this.clockTimer !== null) {
+      return;
+    }
+
+    this.zone.runOutsideAngular(() => {
+      this.clockTimer = setInterval(() => {
+        if (!this.isViewActive) {
+          return;
+        }
+
+        this.refreshRealtimeData();
+        this.cdr.detectChanges();
+      }, 1000);
+    });
+  }
+
+  private stopClock(): void {
+    if (this.clockTimer === null) {
+      return;
+    }
+
+    clearInterval(this.clockTimer);
+    this.clockTimer = null;
   }
 }

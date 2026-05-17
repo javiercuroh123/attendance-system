@@ -12,17 +12,28 @@
     <main class="scan-body">
       <section class="qr-scanner-area">
         <div class="qr-viewfinder" aria-hidden="true">
+          <video #previewVideo class="qr-preview-video" autoplay playsinline muted></video>
           <span class="corner tl"></span>
           <span class="corner tr"></span>
           <span class="corner bl"></span>
           <span class="corner br"></span>
-          <span class="qr-scan-line"></span>
+          <span class="qr-scan-line" *ngIf="isScannerActive"></span>
         </div>
 
         <div class="qr-instructions">
           <p>Coloca el codigo QR dentro del marco</p>
-          <small>Ingresa el qrToken (o el JSON completo del QR) para marcar</small>
+          <small>{{ scannerMessage }}</small>
         </div>
+
+        <button
+          type="button"
+          class="camera-btn"
+          [disabled]="isPreparingScanner || !isScannerSupported"
+          (click)="toggleScanner()"
+        >
+          <ion-icon name="flash-outline"></ion-icon>
+          <span>{{ isPreparingScanner ? 'Preparando...' : scannerActionLabel }}</span>
+        </button>
 
         <label class="token-label" for="qrToken">Token QR</label>
         <input
@@ -38,9 +49,9 @@
 
         <button
           type="button"
-          class="simulate-btn"
+          class="manual-btn"
           (click)="submitAttendanceCheck()"
-          [disabled]="isSubmitting"
+          [disabled]="isSubmitting || isPreparingScanner"
         >
           <ion-icon name="flash-outline"></ion-icon>
           <span>{{ isSubmitting ? 'Enviando...' : 'Registrar Marcacion' }}</span>

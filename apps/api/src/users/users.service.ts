@@ -37,7 +37,12 @@ export class UsersService implements OnModuleInit {
   }
 
   async findByEmail(email: string) {
-    return this.userRepository.findOne({ where: { email } });
+    const normalizedEmail = email.trim().toLowerCase();
+
+    return this.userRepository
+      .createQueryBuilder('user')
+      .where('LOWER(user.email) = :email', { email: normalizedEmail })
+      .getOne();
   }
 
   async findOneOrFail(id: string) {
@@ -64,15 +69,14 @@ export class UsersService implements OnModuleInit {
   }
 
   async create(dto: CreateUserDto) {
-    const existing = await this.userRepository.findOne({
-      where: { email: dto.email },
-    });
+    const normalizedEmail = dto.email.trim().toLowerCase();
+    const existing = await this.findByEmail(normalizedEmail);
     if (existing) {
       throw new ConflictException('El correo ya está registrado');
     }
 
     const user = this.userRepository.create({
-      email: dto.email,
+      email: normalizedEmail,
       password_hash: await bcrypt.hash(dto.password, 10),
       status: dto.status ?? 'ACTIVE',
       role: dto.role ?? RoleCode.EMPLOYEE,
@@ -86,13 +90,12 @@ export class UsersService implements OnModuleInit {
     const user = await this.findOneOrFail(id);
 
     if (dto.email && dto.email !== user.email) {
-      const existing = await this.userRepository.findOne({
-        where: { email: dto.email },
-      });
+      const normalizedEmail = dto.email.trim().toLowerCase();
+      const existing = await this.findByEmail(normalizedEmail);
       if (existing && existing.id !== id) {
         throw new ConflictException('El correo ya está registrado');
       }
-      user.email = dto.email;
+      user.email = normalizedEmail;
     }
 
     if (dto.password) {

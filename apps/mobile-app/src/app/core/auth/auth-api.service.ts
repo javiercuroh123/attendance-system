@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { resolveApiBaseUrl } from '../config/api-base-url';
 import { AuthSessionService } from './auth-session.service';
 import {
   AuthUser,
@@ -19,7 +19,11 @@ export interface AuthMeResponse extends AuthUser {
 export class AuthApiService {
   private readonly http = inject(HttpClient);
   private readonly session = inject(AuthSessionService);
-  private readonly baseUrl = environment.apiBaseUrl;
+  private readonly baseUrl = resolveApiBaseUrl();
+
+  getResolvedBaseUrl(): string {
+    return this.baseUrl;
+  }
 
   login(payload: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.baseUrl}/auth/login`, payload);

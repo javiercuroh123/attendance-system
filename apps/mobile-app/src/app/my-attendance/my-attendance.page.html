@@ -39,12 +39,12 @@
 
         <div class="mini-calendar">
           <div class="cal-weekdays">
-            <span *ngFor="let weekday of weekdays">{{ weekday }}</span>
+            <span *ngFor="let weekday of weekdays; trackBy: trackByWeekday">{{ weekday }}</span>
           </div>
 
           <div class="cal-days">
             <div
-              *ngFor="let day of calendarDays"
+              *ngFor="let day of calendarDays; trackBy: trackByCalendarDay"
               class="cal-day"
               [class.empty]="day.day === null"
               [class.today]="day.isToday"
@@ -114,7 +114,7 @@
         <div class="loading-state" *ngIf="isLoading">Cargando historial...</div>
 
         <div class="record-list" *ngIf="!isLoading && filteredRecords.length > 0; else emptyRecords">
-          <article class="record-item" *ngFor="let record of filteredRecords">
+          <article class="record-item" *ngFor="let record of filteredRecords; trackBy: trackByRecordId">
             <div class="record-date-col">
               <p class="day">{{ record.day }}</p>
               <p class="month">{{ record.monthShort }}</p>

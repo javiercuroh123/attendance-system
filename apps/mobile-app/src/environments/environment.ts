@@ -5,6 +5,10 @@
 export const environment = {
   production: false,
   apiBaseUrl: 'http://localhost:3000',
+  apiProtocol: 'http',
+  apiPort: 3000,
+  // IP local de la PC para pruebas en Android/iOS (actualizar si cambia la red).
+  nativeApiHost: '192.168.18.108',
 };
 
 /*

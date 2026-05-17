@@ -1,8 +1,8 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
 import { AuthSessionService } from '../auth/auth-session.service';
+import { resolveApiBaseUrl } from '../config/api-base-url';
 
 export type IncidentType = 'REGULARIZATION' | 'PERMISSION' | 'JUSTIFICATION' | string;
 export type IncidentStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | string;
@@ -42,7 +42,7 @@ export interface CreateIncidentPayload {
 export class IncidentsApiService {
   private readonly http = inject(HttpClient);
   private readonly session = inject(AuthSessionService);
-  private readonly baseUrl = environment.apiBaseUrl;
+  private readonly baseUrl = resolveApiBaseUrl();
 
   getMyIncidents(): Observable<IncidentResponse[]> {
     return this.http.get<IncidentResponse[]>(`${this.baseUrl}/incidents/me`, {

@@ -1,0 +1,11 @@
+# Ruta del keystore relativa a la carpeta android/
+storeFile=keystore/attendance-release-key.jks
+
+# Password del keystore
+storePassword=CAMBIAR_STORE_PASSWORD
+
+# Alias de la llave dentro del keystore
+keyAlias=attendance_release_key
+
+# Password de la llave
+keyPassword=CAMBIAR_KEY_PASSWORD

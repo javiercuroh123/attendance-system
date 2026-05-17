@@ -35,3 +35,32 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+/*
+ * Android performance profile:
+ * disables expensive visual effects that can cause frame drops in WebView.
+ */
+body.mobile-app-android .tab-bar {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  background: rgba(10, 18, 34, 0.95) !important;
+}
+
+body.mobile-app-android .home-shell::before,
+body.mobile-app-android .attendance-shell::before,
+body.mobile-app-android .incidents-shell::before,
+body.mobile-app-android .profile-shell::before {
+  animation: none !important;
+  transform: none !important;
+}
+
+body.mobile-app-android .pulse-ring,
+body.mobile-app-android .qr-scan-line {
+  animation: none !important;
+}
+
+body.mobile-app-android .home-avatar,
+body.mobile-app-android .profile-avatar,
+body.mobile-app-android .qr-scan-btn {
+  box-shadow: none !important;
+}

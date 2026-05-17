@@ -1,8 +1,8 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
 import { AuthSessionService } from '../auth/auth-session.service';
+import { resolveApiBaseUrl } from '../config/api-base-url';
 
 export interface EmployeeProfileUser {
   id: string;
@@ -46,7 +46,7 @@ export interface EmployeeProfileResponse {
 export class EmployeesApiService {
   private readonly http = inject(HttpClient);
   private readonly session = inject(AuthSessionService);
-  private readonly baseUrl = environment.apiBaseUrl;
+  private readonly baseUrl = resolveApiBaseUrl();
 
   getMyProfile(): Observable<EmployeeProfileResponse> {
     return this.http.get<EmployeeProfileResponse>(`${this.baseUrl}/employees/me`, {

@@ -56,6 +56,7 @@ export class MyAttendancePage implements OnInit {
   protected readonly weekdays = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'];
 
   protected attendanceRecords: AttendanceRecord[] = [];
+  protected filteredRecords: AttendanceListItem[] = [];
   protected activeFilter: AttendanceFilter = 'all';
   protected displayedMonth: number;
   protected displayedYear: number;
@@ -128,26 +129,6 @@ export class MyAttendancePage implements OnInit {
     return `${this.monthNamesLong[this.displayedMonth]} ${this.displayedYear}`;
   }
 
-  protected get filteredRecords(): AttendanceListItem[] {
-    const sorted = [...this.attendanceRecords].sort((a, b) =>
-      b.date.localeCompare(a.date),
-    );
-
-    const filtered =
-      this.activeFilter === 'all'
-        ? sorted
-        : sorted.filter((record) => this.matchesFilter(record.status));
-
-    return filtered.map((record) => {
-      const date = new Date(`${record.date}T12:00:00`);
-      return {
-        ...record,
-        day: date.getDate(),
-        monthShort: this.monthNamesShort[date.getMonth()],
-      };
-    });
-  }
-
   protected changeMonth(delta: number): void {
     this.displayedMonth += delta;
 
@@ -165,7 +146,12 @@ export class MyAttendancePage implements OnInit {
   }
 
   protected setFilter(filter: AttendanceFilter): void {
+    if (this.activeFilter === filter) {
+      return;
+    }
+
     this.activeFilter = filter;
+    this.rebuildFilteredRecords();
   }
 
   protected async refreshAttendanceData(): Promise<void> {
@@ -179,6 +165,7 @@ export class MyAttendancePage implements OnInit {
     try {
       const response = await firstValueFrom(this.attendanceApi.getMyAttendance());
       this.attendanceRecords = response.map((record) => this.mapAttendanceRecord(record));
+      this.rebuildFilteredRecords();
       this.buildCalendar();
     } catch (error: unknown) {
       if (error instanceof HttpErrorResponse && error.status === 401) {
@@ -188,6 +175,7 @@ export class MyAttendancePage implements OnInit {
       }
 
       this.attendanceRecords = [];
+      this.rebuildFilteredRecords();
       this.buildCalendar();
       this.errorMessage = this.resolveErrorMessage(error);
     } finally {
@@ -233,6 +221,18 @@ export class MyAttendancePage implements OnInit {
     }
 
     return 'justified';
+  }
+
+  protected trackByWeekday(index: number, weekday: string): string {
+    return `${index}-${weekday}`;
+  }
+
+  protected trackByCalendarDay(index: number, day: CalendarDay): string {
+    return `${index}-${day.day ?? 'empty'}`;
+  }
+
+  protected trackByRecordId(_: number, record: AttendanceListItem): string {
+    return record.id;
   }
 
   private buildCalendar(): void {
@@ -286,6 +286,26 @@ export class MyAttendancePage implements OnInit {
     }
 
     return status === this.activeFilter;
+  }
+
+  private rebuildFilteredRecords(): void {
+    const sorted = [...this.attendanceRecords].sort((a, b) =>
+      b.date.localeCompare(a.date),
+    );
+
+    const filtered =
+      this.activeFilter === 'all'
+        ? sorted
+        : sorted.filter((record) => this.matchesFilter(record.status));
+
+    this.filteredRecords = filtered.map((record) => {
+      const date = new Date(`${record.date}T12:00:00`);
+      return {
+        ...record,
+        day: date.getDate(),
+        monthShort: this.monthNamesShort[date.getMonth()],
+      };
+    });
   }
 
   private mapAttendanceRecord(record: AttendanceRecordResponse): AttendanceRecord {

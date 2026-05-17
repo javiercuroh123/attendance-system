@@ -1,6 +1,13 @@
 import { NgIf } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnDestroy } from '@angular/core';
+import { Capacitor, PluginListenerHandle } from '@capacitor/core';
+import {
+  Barcode,
+  BarcodeFormat,
+  BarcodeScanner,
+  LensFacing,
+} from '@capacitor-mlkit/barcode-scanning';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { IonContent, IonIcon } from '@ionic/angular/standalone';
@@ -20,15 +27,29 @@ import { AuthSessionService } from '../core/auth/auth-session.service';
   styleUrls: ['./scan.page.scss'],
   imports: [IonContent, IonIcon, RouterLink, FormsModule, NgIf],
 })
-export class ScanPage implements OnDestroy {
+export class ScanPage implements OnInit, OnDestroy {
+  @ViewChild('previewVideo')
+  private previewVideoRef?: ElementRef<HTMLVideoElement>;
+
   protected showResult = false;
   protected isSubmitting = false;
+  protected isScannerSupported = false;
+  protected isScannerActive = false;
+  protected isPreparingScanner = false;
+  protected scannerMessage = 'La camara aun no esta activa.';
+  protected scannerActionLabel = 'Activar Camara';
   protected qrToken = '';
   protected errorMessage: string | null = null;
   protected resultTitle = 'Marcacion registrada';
   protected resultDescription = 'Se envio correctamente tu asistencia.';
 
+  private readonly platform = Capacitor.getPlatform();
+  private readonly isNative = this.platform === 'android' || this.platform === 'ios';
+
   private closeTimer: ReturnType<typeof setTimeout> | null = null;
+  private barcodesListener: PluginListenerHandle | null = null;
+  private scanErrorListener: PluginListenerHandle | null = null;
+  private handlingScannedCode = false;
 
   constructor(
     private readonly attendanceApi: AttendanceApiService,
@@ -40,6 +61,10 @@ export class ScanPage implements OnDestroy {
       flashOutline,
       checkmarkCircleOutline,
     });
+  }
+
+  async ngOnInit(): Promise<void> {
+    await this.initializeScanner();
   }
 
   async submitAttendanceCheck(): Promise<void> {
@@ -97,6 +122,20 @@ export class ScanPage implements OnDestroy {
 
   ngOnDestroy(): void {
     this.clearCloseTimer();
+    void this.stopScanner();
+  }
+
+  protected async toggleScanner(): Promise<void> {
+    if (this.isPreparingScanner) {
+      return;
+    }
+
+    if (this.isScannerActive) {
+      await this.stopScanner();
+      return;
+    }
+
+    await this.startScanner();
   }
 
   private clearCloseTimer(): void {
@@ -104,6 +143,214 @@ export class ScanPage implements OnDestroy {
       clearTimeout(this.closeTimer);
       this.closeTimer = null;
     }
+  }
+
+  private async initializeScanner(): Promise<void> {
+    try {
+      const { supported } = await BarcodeScanner.isSupported();
+      this.isScannerSupported = supported;
+      if (!supported) {
+        this.scannerMessage =
+          'Este navegador o dispositivo no soporta escaneo QR en tiempo real.';
+      } else {
+        this.scannerMessage = this.isNative
+          ? 'Usa la camara para leer el QR y registrar asistencia.'
+          : 'Activa la camara y apunta al QR para deteccion automatica.';
+      }
+    } catch {
+      this.isScannerSupported = false;
+      this.scannerMessage =
+        'No se pudo inicializar el escaner en este dispositivo.';
+    }
+  }
+
+  private async startScanner(): Promise<void> {
+    if (!this.isScannerSupported) {
+      this.errorMessage = 'El escaner de camara no esta disponible.';
+      return;
+    }
+
+    this.isPreparingScanner = true;
+    this.errorMessage = null;
+    this.scannerMessage = 'Inicializando camara...';
+
+    try {
+      const permissionGranted = await this.ensureCameraPermission();
+      if (!permissionGranted) {
+        this.errorMessage =
+          'Se necesita permiso de camara para escanear el codigo QR.';
+        this.scannerMessage = 'Permiso de camara denegado.';
+        return;
+      }
+
+      if (this.isNative) {
+        await this.scanWithNativeInterface();
+        return;
+      }
+
+      const previewVideo = this.previewVideoRef?.nativeElement;
+      if (!previewVideo) {
+        this.errorMessage =
+          'No se pudo crear la vista previa de camara para escanear.';
+        this.scannerMessage = 'No hay vista previa disponible.';
+        return;
+      }
+
+      await this.detachScannerListeners();
+
+      this.barcodesListener = await BarcodeScanner.addListener(
+        'barcodesScanned',
+        (event) => {
+          void this.handleDetectedBarcodes(event.barcodes);
+        },
+      );
+      this.scanErrorListener = await BarcodeScanner.addListener(
+        'scanError',
+        (event) => {
+          this.errorMessage = event.message || 'Error al escanear el codigo QR.';
+        },
+      );
+
+      await BarcodeScanner.startScan({
+        formats: [BarcodeFormat.QrCode],
+        lensFacing: LensFacing.Back,
+        videoElement: previewVideo,
+      });
+
+      this.isScannerActive = true;
+      this.scannerActionLabel = 'Detener Camara';
+      this.scannerMessage = 'Camara activa. Apunta al QR para detectarlo.';
+    } catch (error: unknown) {
+      this.errorMessage = this.resolveErrorMessage(error);
+      this.scannerMessage = 'No se pudo iniciar la camara.';
+      await this.stopScanner();
+    } finally {
+      this.isPreparingScanner = false;
+    }
+  }
+
+  private async scanWithNativeInterface(): Promise<void> {
+    this.isScannerActive = true;
+    this.scannerActionLabel = 'Escaneando...';
+    this.scannerMessage = 'Abriendo escaner nativo...';
+
+    try {
+      if (this.platform === 'android') {
+        await this.ensureGoogleScannerModule();
+      }
+
+      const { barcodes } = await BarcodeScanner.scan({
+        formats: [BarcodeFormat.QrCode],
+        autoZoom: true,
+      });
+
+      const detectedToken = this.extractTokenFromBarcodes(barcodes);
+      if (!detectedToken) {
+        this.errorMessage = 'No se detecto un QR valido. Intenta nuevamente.';
+        this.scannerMessage = 'No se detecto QR valido.';
+        return;
+      }
+
+      this.qrToken = detectedToken;
+      this.scannerMessage = 'QR detectado. Registrando asistencia...';
+      await this.submitAttendanceCheck();
+    } finally {
+      this.isScannerActive = false;
+      this.scannerActionLabel = 'Activar Camara';
+    }
+  }
+
+  private async stopScanner(): Promise<void> {
+    try {
+      if (!this.isNative) {
+        await BarcodeScanner.stopScan();
+      }
+    } catch {
+      // Ignorado para no bloquear cierre de pantalla.
+    } finally {
+      await this.detachScannerListeners();
+      this.isScannerActive = false;
+      this.scannerActionLabel = 'Activar Camara';
+
+      if (!this.errorMessage) {
+        this.scannerMessage = this.isScannerSupported
+          ? 'La camara aun no esta activa.'
+          : this.scannerMessage;
+      }
+    }
+  }
+
+  private async detachScannerListeners(): Promise<void> {
+    if (this.barcodesListener) {
+      await this.barcodesListener.remove().catch(() => undefined);
+      this.barcodesListener = null;
+    }
+
+    if (this.scanErrorListener) {
+      await this.scanErrorListener.remove().catch(() => undefined);
+      this.scanErrorListener = null;
+    }
+  }
+
+  private async handleDetectedBarcodes(barcodes: Barcode[]): Promise<void> {
+    if (this.handlingScannedCode || !barcodes.length) {
+      return;
+    }
+
+    const detectedToken = this.extractTokenFromBarcodes(barcodes);
+    if (!detectedToken) {
+      return;
+    }
+
+    this.handlingScannedCode = true;
+    this.qrToken = detectedToken;
+    this.scannerMessage = 'QR detectado. Registrando asistencia...';
+
+    try {
+      await this.stopScanner();
+      await this.submitAttendanceCheck();
+    } finally {
+      this.handlingScannedCode = false;
+    }
+  }
+
+  private extractTokenFromBarcodes(barcodes: Barcode[]): string | null {
+    for (const barcode of barcodes) {
+      const rawCandidate = barcode.rawValue?.trim();
+      if (rawCandidate) {
+        const parsedToken = this.extractQrToken(rawCandidate);
+        if (parsedToken) {
+          return parsedToken;
+        }
+      }
+
+      const displayCandidate = barcode.displayValue?.trim();
+      if (displayCandidate) {
+        const parsedToken = this.extractQrToken(displayCandidate);
+        if (parsedToken) {
+          return parsedToken;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  private async ensureGoogleScannerModule(): Promise<void> {
+    try {
+      const availability =
+        await BarcodeScanner.isGoogleBarcodeScannerModuleAvailable();
+      if (!availability.available) {
+        await BarcodeScanner.installGoogleBarcodeScannerModule();
+      }
+    } catch {
+      // Si falla esta verificacion, dejamos que scan() maneje el error final.
+    }
+  }
+
+  private async ensureCameraPermission(): Promise<boolean> {
+    const permission = await BarcodeScanner.requestPermissions();
+    return permission.camera === 'granted' || permission.camera === 'limited';
   }
 
   private buildDeviceInfo(): Record<string, unknown> {
@@ -164,6 +411,10 @@ export class ScanPage implements OnDestroy {
       if (typeof backendMessage === 'string' && backendMessage.trim()) {
         return backendMessage;
       }
+    }
+
+    if (error instanceof Error && error.message.trim()) {
+      return error.message;
     }
 
     return 'No se pudo registrar la marcacion en este momento.';

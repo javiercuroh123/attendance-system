@@ -31,6 +31,8 @@ export class LoginPage {
   protected showPassword = false;
   protected isSubmitting = false;
   protected errorMessage: string | null = null;
+  protected readonly backendUrl: string;
+  protected debugErrorDetails = '';
 
   constructor(
     private readonly formBuilder: FormBuilder,
@@ -46,6 +48,8 @@ export class LoginPage {
       eyeOffOutline,
       qrCodeOutline,
     });
+
+    this.backendUrl = this.authApi.getResolvedBaseUrl();
   }
 
   protected get showEmailError(): boolean {
@@ -71,16 +75,22 @@ export class LoginPage {
 
     this.isSubmitting = true;
     this.errorMessage = null;
+    this.debugErrorDetails = '';
 
     try {
+      const { email, password } = this.loginForm.getRawValue();
       const response = await firstValueFrom(
-        this.authApi.login(this.loginForm.getRawValue()),
+        this.authApi.login({
+          email: email.trim().toLowerCase(),
+          password,
+        }),
       );
       this.authSession.setSession(response);
 
       const redirectTo = this.route.snapshot.queryParamMap.get('redirect');
       await this.router.navigateByUrl(redirectTo ?? '/home');
     } catch (error: unknown) {
+      this.debugErrorDetails = this.resolveDebugDetails(error);
       this.errorMessage = this.resolveErrorMessage(error);
     } finally {
       this.isSubmitting = false;
@@ -89,6 +99,10 @@ export class LoginPage {
 
   private resolveErrorMessage(error: unknown): string {
     if (error instanceof HttpErrorResponse) {
+      if (error.status === 0) {
+        return `No hay conexion con el servidor (${this.backendUrl}). Verifica que la API este encendida y que el celular este en la misma red Wi-Fi.`;
+      }
+
       const backendMessage = error.error?.message;
 
       if (Array.isArray(backendMessage) && backendMessage.length > 0) {
@@ -101,5 +115,32 @@ export class LoginPage {
     }
 
     return 'No se pudo iniciar sesion. Verifica tus credenciales e intenta nuevamente.';
+  }
+
+  private resolveDebugDetails(error: unknown): string {
+    if (error instanceof HttpErrorResponse) {
+      const detailParts = [
+        `status=${error.status}`,
+        `statusText=${error.statusText || 'N/A'}`,
+        `url=${error.url ?? 'N/A'}`,
+      ];
+
+      const backendMessage = error.error?.message;
+      if (Array.isArray(backendMessage) && backendMessage.length > 0) {
+        detailParts.push(`backend=${backendMessage.join(' | ')}`);
+      } else if (typeof backendMessage === 'string' && backendMessage.trim()) {
+        detailParts.push(`backend=${backendMessage}`);
+      } else if (error.message) {
+        detailParts.push(`message=${error.message}`);
+      }
+
+      return detailParts.join(' · ');
+    }
+
+    if (error instanceof Error) {
+      return `${error.name}: ${error.message}`;
+    }
+
+    return `error=${String(error)}`;
   }
 }
