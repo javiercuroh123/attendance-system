@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
+import * as QRCode from 'qrcode';
 import {
   CreateQrSessionPayload,
   CreateQrSessionResponse,
@@ -59,6 +60,7 @@ export class QrSessionsPage {
   readonly sessionsRaw = signal<QrSessionResponse[]>([]);
   readonly nowMs = signal(Date.now());
   readonly lastGenerated = signal<LastGeneratedInfo | null>(null);
+  readonly qrImageDataUrl = signal<string | null>(null);
 
   readonly rows = computed<QrSessionRow[]>(() =>
     this.sessionsRaw().map((item) => this.mapToRow(item)),
@@ -106,6 +108,13 @@ export class QrSessionsPage {
     const activeId = this.activeSession()?.id;
     if (!generated || !activeId || generated.sessionId !== activeId) return null;
     return generated.qrPayloadText;
+  });
+
+  readonly visibleQrImageDataUrl = computed(() => {
+    const generated = this.lastGenerated();
+    const activeId = this.activeSession()?.id;
+    if (!generated || !activeId || generated.sessionId !== activeId) return null;
+    return this.qrImageDataUrl();
   });
 
   readonly isCreateModalOpen = signal(false);
@@ -217,6 +226,7 @@ export class QrSessionsPage {
           const hasActive = rows.some((item) => this.deriveStatus(item, this.nowMs()) === 'ACTIVE');
           if (!hasActive) {
             this.lastGenerated.set(null);
+            this.qrImageDataUrl.set(null);
           }
         },
         error: (error: HttpErrorResponse) => {
@@ -242,8 +252,30 @@ export class QrSessionsPage {
       point,
       validitySeconds: payload.validitySeconds ?? 300,
     });
+    void this.renderQrImage(response.qrToken);
 
     this.successMessage.set(`Sesión QR ${response.id} generada correctamente.`);
+  }
+
+  private async renderQrImage(qrToken: string): Promise<void> {
+    try {
+      const dataUrl = await QRCode.toDataURL(qrToken, {
+        errorCorrectionLevel: 'M',
+        margin: 2,
+        width: 512,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF',
+        },
+      });
+
+      this.qrImageDataUrl.set(dataUrl);
+    } catch {
+      this.qrImageDataUrl.set(null);
+      this.errorMessage.set(
+        'No se pudo renderizar el codigo QR. Regenera la sesion nuevamente.',
+      );
+    }
   }
 
   private mapToRow(item: QrSessionResponse): QrSessionRow {

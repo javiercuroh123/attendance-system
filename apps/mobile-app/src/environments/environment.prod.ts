@@ -3,5 +3,5 @@ export const environment = {
   apiBaseUrl: 'http://localhost:3000',
   apiProtocol: 'http',
   apiPort: 3000,
-  nativeApiHost: '192.168.18.108',
+  nativeApiHost: '192.168.137.148',
 };

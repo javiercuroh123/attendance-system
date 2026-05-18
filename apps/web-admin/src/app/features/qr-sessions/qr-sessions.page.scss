@@ -239,9 +239,9 @@ tr:last-child td {
 }
 
 .qr-wrap {
-  width: 150px;
-  height: 150px;
-  background: var(--ink);
+  width: 196px;
+  height: 196px;
+  background: var(--white);
   border-radius: var(--r-md);
   display: flex;
   align-items: center;
@@ -250,9 +250,17 @@ tr:last-child td {
   box-shadow: var(--shadow-md);
 }
 
-.qr-wrap svg {
-  width: 130px;
-  height: 130px;
+.qr-image {
+  width: 172px;
+  height: 172px;
+  image-rendering: crisp-edges;
+}
+
+.qr-placeholder {
+  margin: 0;
+  font-size: 11px;
+  color: var(--slate-6);
+  line-height: 1.35;
 }
 
 .qr-timer {

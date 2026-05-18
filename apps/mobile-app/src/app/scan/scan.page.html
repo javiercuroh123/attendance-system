@@ -12,7 +12,18 @@
     <main class="scan-body">
       <section class="qr-scanner-area">
         <div class="qr-viewfinder" aria-hidden="true">
-          <video #previewVideo class="qr-preview-video" autoplay playsinline muted></video>
+          <video
+            *ngIf="!usesNativeScanner"
+            #previewVideo
+            class="qr-preview-video"
+            [class.active]="isScannerActive"
+            autoplay
+            playsinline
+            muted
+          ></video>
+          <div class="qr-preview-placeholder" *ngIf="usesNativeScanner || !isScannerActive">
+            <ion-icon name="scan-outline"></ion-icon>
+          </div>
           <span class="corner tl"></span>
           <span class="corner tr"></span>
           <span class="corner bl"></span>

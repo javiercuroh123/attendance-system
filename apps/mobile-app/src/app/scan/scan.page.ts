@@ -16,6 +16,7 @@ import {
   arrowBackOutline,
   checkmarkCircleOutline,
   flashOutline,
+  scanOutline,
 } from 'ionicons/icons';
 import { firstValueFrom } from 'rxjs';
 import { AttendanceApiService } from '../core/api/attendance-api.service';
@@ -42,6 +43,7 @@ export class ScanPage implements OnInit, OnDestroy {
   protected errorMessage: string | null = null;
   protected resultTitle = 'Marcacion registrada';
   protected resultDescription = 'Se envio correctamente tu asistencia.';
+  protected readonly usesNativeScanner: boolean;
 
   private readonly platform = Capacitor.getPlatform();
   private readonly isNative = this.platform === 'android' || this.platform === 'ios';
@@ -56,10 +58,13 @@ export class ScanPage implements OnInit, OnDestroy {
     private readonly session: AuthSessionService,
     private readonly router: Router,
   ) {
+    this.usesNativeScanner = this.isNative;
+
     addIcons({
       arrowBackOutline,
       flashOutline,
       checkmarkCircleOutline,
+      scanOutline,
     });
   }
 
@@ -175,16 +180,16 @@ export class ScanPage implements OnInit, OnDestroy {
     this.scannerMessage = 'Inicializando camara...';
 
     try {
+      if (this.isNative) {
+        await this.scanWithNativeInterface();
+        return;
+      }
+
       const permissionGranted = await this.ensureCameraPermission();
       if (!permissionGranted) {
         this.errorMessage =
           'Se necesita permiso de camara para escanear el codigo QR.';
         this.scannerMessage = 'Permiso de camara denegado.';
-        return;
-      }
-
-      if (this.isNative) {
-        await this.scanWithNativeInterface();
         return;
       }
 
