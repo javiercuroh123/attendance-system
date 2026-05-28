@@ -26,195 +26,181 @@
   <p class="feedback feedback-success">{{ successMessage() }}</p>
 }
 
-<section class="g2">
-  <article class="card">
-    <div class="card-head">
-      <h3>Turnos configurados</h3>
-    </div>
-    <div class="tbl-wrap">
-      <table>
-        <thead>
+<section class="card">
+  <div class="card-head">
+    <h3>Turnos configurados</h3>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Nombre</th>
+          <th>Entrada</th>
+          <th>Salida</th>
+          <th>Tolerancia</th>
+          <th>Días</th>
+          <th>Estado</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.id) {
           <tr>
-            <th>Código</th>
-            <th>Nombre</th>
-            <th>Entrada</th>
-            <th>Salida</th>
-            <th>Tolerancia</th>
-            <th>Días</th>
-            <th>Estado</th>
-            <th></th>
+            <td><code class="code-cell">{{ row.code }}</code></td>
+            <td>{{ row.name }}</td>
+            <td>{{ row.start }}</td>
+            <td>{{ row.end }}</td>
+            <td>{{ row.tolerance }}</td>
+            <td>{{ row.days }}</td>
+            <td>
+              <span
+                class="badge"
+                [class.b-active]="row.status === 'ACTIVE'"
+                [class.b-inactive]="row.status === 'INACTIVE'"
+              >
+                {{ statusLabel(row.status) }}
+              </span>
+            </td>
+            <td>
+              <button
+                type="button"
+                class="btn btn-outline btn-xs"
+                [disabled]="!canManageSchedules()"
+                (click)="startEditMode(row.id)"
+              >
+                Editar
+              </button>
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          @for (row of rows(); track row.id) {
-            <tr>
-              <td><code class="code-cell">{{ row.code }}</code></td>
-              <td>{{ row.name }}</td>
-              <td>{{ row.start }}</td>
-              <td>{{ row.end }}</td>
-              <td>{{ row.tolerance }}</td>
-              <td>{{ row.days }}</td>
-              <td>
-                <span
-                  class="badge"
-                  [class.b-active]="row.status === 'ACTIVE'"
-                  [class.b-inactive]="row.status === 'INACTIVE'"
-                >
-                  {{ statusLabel(row.status) }}
-                </span>
-              </td>
-              <td>
-                <button
-                  type="button"
-                  class="btn btn-outline btn-xs"
-                  [disabled]="!canManageSchedules()"
-                  (click)="startEditMode(row.id)"
-                >
-                  Editar
-                </button>
-              </td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="8">
-                <div class="empty-state">Aún no hay horarios registrados.</div>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-  </article>
+        } @empty {
+          <tr>
+            <td colspan="8">
+              <div class="empty-state">Aún no hay horarios registrados.</div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>
 
-  <article class="card">
-    <div class="card-head">
-      <h3>{{ isEditMode() ? 'Editar horario' : 'Registrar horario' }}</h3>
-    </div>
-    <div class="card-body">
+@if (isFormModalOpen()) {
+  <section class="modal-backdrop" (click)="cancelForm()">
+    <article class="modal-card" (click)="$event.stopPropagation()">
+      <header class="modal-head">
+        <h3>{{ isEditMode() ? 'Editar horario' : 'Nuevo horario' }}</h3>
+        <button type="button" class="btn-icon" (click)="cancelForm()">✕</button>
+      </header>
+
       @if (formErrorMessage()) {
         <p class="feedback feedback-error">{{ formErrorMessage() }}</p>
       }
 
-      <div class="form-grid">
-        <div class="fg fg-full">
-          <label class="lbl">Nombre del turno</label>
-          <input
-            class="finput"
-            type="text"
-            placeholder="Ej: Turno especial"
-            [disabled]="!canManageSchedules() || isSaving()"
-            [ngModel]="formName()"
-            (ngModelChange)="formName.set($event)"
-          />
-        </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="fg fg-full">
+            <label class="lbl">Nombre del turno</label>
+            <input
+              class="finput"
+              type="text"
+              placeholder="Ej: Turno especial"
+              [disabled]="isSaving()"
+              [ngModel]="formName()"
+              (ngModelChange)="formName.set($event)"
+            />
+          </div>
 
-        <div class="fg">
-          <label class="lbl">Código</label>
-          <input
-            class="finput"
-            type="text"
-            placeholder="SCH-XX"
-            [disabled]="!canManageSchedules() || isSaving()"
-            [ngModel]="formCode()"
-            (ngModelChange)="formCode.set($event)"
-          />
-        </div>
+          <div class="fg">
+            <label class="lbl">Código</label>
+            <input
+              class="finput"
+              type="text"
+              placeholder="SCH-XX"
+              [disabled]="isSaving()"
+              [ngModel]="formCode()"
+              (ngModelChange)="formCode.set($event)"
+            />
+          </div>
 
-        <div class="fg">
-          <label class="lbl">Tolerancia (min)</label>
-          <input
-            class="finput"
-            type="number"
-            min="0"
-            [disabled]="!canManageSchedules() || isSaving()"
-            [ngModel]="formTolerance()"
-            (ngModelChange)="formTolerance.set($event)"
-          />
-        </div>
+          <div class="fg">
+            <label class="lbl">Tolerancia (min)</label>
+            <input
+              class="finput"
+              type="number"
+              min="0"
+              [disabled]="isSaving()"
+              [ngModel]="formTolerance()"
+              (ngModelChange)="formTolerance.set($event)"
+            />
+          </div>
 
-        <div class="fg">
-          <label class="lbl">Hora de entrada</label>
-          <div class="time-wrap">
+          <div class="fg">
+            <label class="lbl">Hora de entrada</label>
             <input
               class="finput"
               type="time"
-              [disabled]="!canManageSchedules() || isSaving()"
+              [disabled]="isSaving()"
               [ngModel]="formStartTime()"
               (ngModelChange)="formStartTime.set($event)"
             />
-            <span class="time-icon">◷</span>
           </div>
-        </div>
 
-        <div class="fg">
-          <label class="lbl">Hora de salida</label>
-          <div class="time-wrap">
+          <div class="fg">
+            <label class="lbl">Hora de salida</label>
             <input
               class="finput"
               type="time"
-              [disabled]="!canManageSchedules() || isSaving()"
+              [disabled]="isSaving()"
               [ngModel]="formEndTime()"
               (ngModelChange)="formEndTime.set($event)"
             />
-            <span class="time-icon">◷</span>
           </div>
-        </div>
 
-        <div class="fg">
-          <label class="lbl">Días laborables</label>
-          <select
-            class="finput"
-            [disabled]="!canManageSchedules() || isSaving()"
-            [ngModel]="formWorkDays()"
-            (ngModelChange)="formWorkDays.set($event)"
-          >
-            @if (!workDayOptions.map((item) => item.value).includes(formWorkDays())) {
-              <option [value]="formWorkDays()">{{ formWorkDays() }}</option>
-            }
-            @for (option of workDayOptions; track option.value) {
-              <option [value]="option.value">{{ option.label }}</option>
-            }
-          </select>
-        </div>
+          <div class="fg">
+            <label class="lbl">Días laborables</label>
+            <select
+              class="finput"
+              [disabled]="isSaving()"
+              [ngModel]="formWorkDays()"
+              (ngModelChange)="formWorkDays.set($event)"
+            >
+              @if (!workDayOptions.map((item) => item.value).includes(formWorkDays())) {
+                <option [value]="formWorkDays()">{{ formWorkDays() }}</option>
+              }
+              @for (option of workDayOptions; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </div>
 
-        <div class="fg">
-          <label class="lbl">Estado</label>
-          <select
-            class="finput"
-            [disabled]="!canManageSchedules() || isSaving()"
-            [ngModel]="formStatus()"
-            (ngModelChange)="formStatus.set($event)"
-          >
-            <option value="ACTIVE">Activo</option>
-            <option value="INACTIVE">Inactivo</option>
-          </select>
+          <div class="fg">
+            <label class="lbl">Estado</label>
+            <select
+              class="finput"
+              [disabled]="isSaving()"
+              [ngModel]="formStatus()"
+              (ngModelChange)="formStatus.set($event)"
+            >
+              <option value="ACTIVE">Activo</option>
+              <option value="INACTIVE">Inactivo</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      <div class="form-actions">
-        <button
-          type="button"
-          class="btn btn-outline"
-          [disabled]="!canManageSchedules() || isSaving()"
-          (click)="cancelForm()"
-        >
-          Cancelar
-        </button>
-        <button
-          type="button"
-          class="btn btn-dark"
-          [disabled]="!canManageSchedules() || isSaving()"
-          (click)="saveSchedule()"
-        >
+      <footer class="modal-actions">
+        <button type="button" class="btn btn-outline" (click)="cancelForm()">Cancelar</button>
+        <button type="button" class="btn btn-dark" [disabled]="isSaving()" (click)="saveSchedule()">
           {{
             isSaving()
               ? 'Guardando...'
               : isEditMode()
                 ? 'Guardar cambios'
-                : 'Guardar'
+                : 'Crear horario'
           }}
         </button>
-      </div>
-    </div>
-  </article>
-</section>
+      </footer>
+    </article>
+  </section>
+}

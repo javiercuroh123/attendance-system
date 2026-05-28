@@ -43,6 +43,7 @@ export class SchedulesPage {
 
   readonly schedulesRaw = signal<ScheduleResponse[]>([]);
   readonly editingScheduleId = signal('');
+  readonly isFormModalOpen = signal(false);
 
   readonly formName = signal('');
   readonly formCode = signal('');
@@ -99,6 +100,7 @@ export class SchedulesPage {
     this.formErrorMessage.set(null);
     this.errorMessage.set(null);
     this.successMessage.set(null);
+    this.isFormModalOpen.set(true);
   }
 
   startEditMode(scheduleId: string): void {
@@ -118,10 +120,14 @@ export class SchedulesPage {
     this.formErrorMessage.set(null);
     this.errorMessage.set(null);
     this.successMessage.set(null);
+    this.isFormModalOpen.set(true);
   }
 
   cancelForm(): void {
-    this.startCreateMode();
+    this.isFormModalOpen.set(false);
+    this.editingScheduleId.set('');
+    this.resetForm();
+    this.formErrorMessage.set(null);
   }
 
   saveSchedule(): void {
@@ -151,7 +157,9 @@ export class SchedulesPage {
           const message = this.isEditMode()
             ? 'Horario actualizado correctamente.'
             : 'Horario creado correctamente.';
-          this.startCreateMode();
+          this.isFormModalOpen.set(false);
+          this.editingScheduleId.set('');
+          this.resetForm();
           this.successMessage.set(message);
           this.loadSchedules();
         },

@@ -78,6 +78,9 @@
           <div class="user-role">{{ userRole() }}</div>
         </div>
       </div>
+      <button type="button" class="btn-logout" (click)="logout()">
+        Cerrar sesión
+      </button>
     </div>
   </aside>
 
@@ -93,9 +96,6 @@
       </div>
       <div class="topbar-right">
         <span class="topbar-date">{{ topbarDate }}</span>
-        <button type="button" class="btn btn-outline btn-sm" (click)="logout()">
-          Cerrar sesión
-        </button>
       </div>
     </header>
 
