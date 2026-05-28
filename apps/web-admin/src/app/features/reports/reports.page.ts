@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Observable, finalize } from 'rxjs';
+import * as XLSX from 'xlsx';
 import {
   AbsencesReportResponse,
   DailyReportResponse,
@@ -149,21 +150,15 @@ export class ReportsPage {
       .pipe(finalize(() => this.isExporting.set(false)))
       .subscribe({
         next: (response) => {
-          const filename =
-            mode === 'excel'
-              ? response.filename.replace(/\.csv$/i, '.csv')
-              : response.filename;
-
-          this.downloadFile(response.content, filename);
-          this.pushRecentReport(response);
-
           if (mode === 'excel') {
-            this.successMessage.set(
-              'El backend actual exporta CSV (compatible con Excel).',
-            );
+            const xlsxFilename = response.filename.replace(/\.csv$/i, '.xlsx');
+            this.downloadExcel(response.content, xlsxFilename);
+            this.successMessage.set('Reporte exportado como Excel correctamente.');
           } else {
+            this.downloadFile(response.content, response.filename);
             this.successMessage.set('Reporte exportado correctamente.');
           }
+          this.pushRecentReport(response);
         },
         error: (error: HttpErrorResponse) => {
           this.errorMessage.set(this.extractErrorMessage(error));
@@ -371,6 +366,21 @@ export class ReportsPage {
   private downloadFile(content: string, filename: string): void {
     if (!isPlatformBrowser(this.platformId)) return;
     const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  private downloadExcel(csvContent: string, filename: string): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const workbook = XLSX.read(csvContent, { type: 'string' });
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([excelBuffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;

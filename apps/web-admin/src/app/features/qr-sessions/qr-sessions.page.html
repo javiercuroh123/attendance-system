@@ -53,7 +53,7 @@
                   [class.b-expired]="row.status === 'EXPIRED'"
                   [class.b-cancelled]="row.status === 'CANCELLED'"
                 >
-                  {{ row.status }}
+                  {{ statusLabel(row.status) }}
                 </span>
               </td>
             </tr>

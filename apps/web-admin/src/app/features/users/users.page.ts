@@ -99,6 +99,11 @@ export class UsersPage {
     this.loadUsers();
   }
 
+  statusLabel(status: string): string {
+    const map: Record<string, string> = { ACTIVE: 'Activo', INACTIVE: 'Inactivo' };
+    return map[status] ?? status;
+  }
+
   setSearchTerm(value: string): void {
     this.searchTerm.set(value);
   }

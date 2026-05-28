@@ -77,24 +77,24 @@ export class IncidentsPage {
     ).length;
 
     return [
-      { label: 'Pendientes', value: String(pendingCount), note: 'Estado', highlight: 'PENDING' },
+      { label: 'Pendientes', value: String(pendingCount), note: 'Estado', highlight: 'Pendiente' },
       {
         label: 'Aprobadas (mes)',
         value: String(approvedMonth),
         note: 'Estado',
-        highlight: 'APPROVED',
+        highlight: 'Aprobado',
       },
       {
         label: 'Rechazadas (mes)',
         value: String(rejectedMonth),
         note: 'Estado',
-        highlight: 'REJECTED',
+        highlight: 'Rechazado',
       },
       {
         label: 'Regularizaciones',
         value: String(regularizations),
         note: 'Tipo',
-        highlight: 'REGULARIZATION',
+        highlight: 'Regularización',
       },
     ];
   });
@@ -129,7 +129,7 @@ export class IncidentsPage {
           id: row.id,
           icon: this.typeIcon(row.request_type),
           employee: employeeName,
-          type: row.request_type.toUpperCase(),
+          type: this.requestTypeLabel(row.request_type.toUpperCase()),
           description: row.description,
           date: this.formatDate(row.attendance_date),
           status: normalized,
@@ -155,6 +155,25 @@ export class IncidentsPage {
 
   refresh(): void {
     this.loadIncidents();
+  }
+
+  statusLabel(status: string): string {
+    const map: Record<string, string> = {
+      PENDING: 'Pendiente',
+      APPROVED: 'Aprobado',
+      REJECTED: 'Rechazado',
+    };
+    return map[status] ?? status;
+  }
+
+  requestTypeLabel(type: string): string {
+    const map: Record<string, string> = {
+      REGULARIZATION: 'Regularización',
+      JUSTIFICATION: 'Justificación',
+      PERMISSION: 'Permiso',
+      MISSING_CHECK_IN: 'Entrada omitida',
+    };
+    return map[type] ?? type;
   }
 
   setSearchTerm(value: string): void {

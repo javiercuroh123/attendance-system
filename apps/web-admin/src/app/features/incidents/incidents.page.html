@@ -48,9 +48,9 @@
     (ngModelChange)="setStatusFilter($event)"
   >
     <option value="ALL">Todos los estados</option>
-    <option value="PENDING">PENDING</option>
-    <option value="APPROVED">APPROVED</option>
-    <option value="REJECTED">REJECTED</option>
+    <option value="PENDING">Pendiente</option>
+    <option value="APPROVED">Aprobado</option>
+    <option value="REJECTED">Rechazado</option>
   </select>
 </section>
 
@@ -80,7 +80,7 @@
           [class.b-approved]="request.status === 'APPROVED'"
           [class.b-rejected]="request.status === 'REJECTED'"
         >
-          {{ request.status }}
+          {{ statusLabel(request.status) }}
         </span>
         @if (request.canReview) {
           <div class="inc-actions">
@@ -139,10 +139,10 @@
             [ngModel]="createRequestType()"
             (ngModelChange)="createRequestType.set($event)"
           >
-            <option value="REGULARIZATION">REGULARIZATION</option>
-            <option value="JUSTIFICATION">JUSTIFICATION</option>
-            <option value="PERMISSION">PERMISSION</option>
-            <option value="MISSING_CHECK_IN">MISSING_CHECK_IN</option>
+            <option value="REGULARIZATION">Regularización</option>
+            <option value="JUSTIFICATION">Justificación</option>
+            <option value="PERMISSION">Permiso</option>
+            <option value="MISSING_CHECK_IN">Entrada omitida</option>
           </select>
         </label>
 

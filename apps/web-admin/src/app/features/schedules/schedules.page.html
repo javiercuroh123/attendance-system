@@ -60,7 +60,7 @@
                   [class.b-active]="row.status === 'ACTIVE'"
                   [class.b-inactive]="row.status === 'INACTIVE'"
                 >
-                  {{ row.status }}
+                  {{ statusLabel(row.status) }}
                 </span>
               </td>
               <td>
@@ -185,8 +185,8 @@
             [ngModel]="formStatus()"
             (ngModelChange)="formStatus.set($event)"
           >
-            <option value="ACTIVE">ACTIVE</option>
-            <option value="INACTIVE">INACTIVE</option>
+            <option value="ACTIVE">Activo</option>
+            <option value="INACTIVE">Inactivo</option>
           </select>
         </div>
       </div>

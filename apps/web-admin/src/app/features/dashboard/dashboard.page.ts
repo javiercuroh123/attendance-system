@@ -89,11 +89,11 @@ export class DashboardPage {
   readonly canExportReport = computed(() => this.canUsePrivilegedDashboard());
 
   readonly statCards = signal<StatCard[]>([
-    { label: 'Empleados activos', value: '0', note: 'Estado', highlight: 'ACTIVE' },
-    { label: 'Presentes', value: '0', note: 'PRESENT ·', highlight: '0 %' },
-    { label: 'Tardanzas', value: '0', note: 'Estado', highlight: 'LATE' },
+    { label: 'Empleados activos', value: '0', note: 'Estado', highlight: 'Activo' },
+    { label: 'Presentes', value: '0', note: 'Presentes ·', highlight: '0 %' },
+    { label: 'Tardanzas', value: '0', note: 'Estado', highlight: 'Tardanza' },
     { label: 'Ausentes', value: '0', note: 'Sin', highlight: 'justificar' },
-    { label: 'QR activos', value: '0', note: 'Sesión', highlight: 'ACTIVE' },
+    { label: 'QR activos', value: '0', note: 'Sesión', highlight: 'Activo' },
   ]);
 
   readonly weekBars = signal<WeekBar[]>(this.buildEmptyWeekBars());
@@ -149,6 +149,17 @@ export class DashboardPage {
     if (status === 'LATE') return 'b-late';
     if (status === 'JUSTIFIED') return 'b-justified';
     return 'b-absent';
+  }
+
+  statusLabel(status: string): string {
+    const map: Record<string, string> = {
+      PRESENT: 'Presente',
+      LATE: 'Tardanza',
+      ABSENT: 'Ausente',
+      INCOMPLETE: 'Incompleto',
+      JUSTIFIED: 'Justificado',
+    };
+    return map[status] ?? status;
   }
 
   isCompactStatValue(value: string): boolean {
@@ -219,19 +230,19 @@ export class DashboardPage {
               label: 'Empleados activos',
               value: String(activeEmployees),
               note: 'Estado',
-              highlight: 'ACTIVE',
+              highlight: 'Activo',
             },
             {
               label: 'Presentes',
               value: String(onTimeCount),
-              note: 'PRESENT ·',
+              note: 'Presentes ·',
               highlight: `${this.calculatePercentage(onTimeCount, activeEmployees)} %`,
             },
             {
               label: 'Tardanzas',
               value: String(lateCount),
               note: 'Estado',
-              highlight: 'LATE',
+              highlight: 'Tardanza',
             },
             {
               label: 'Ausentes',
@@ -243,7 +254,7 @@ export class DashboardPage {
               label: 'QR activos',
               value: String(activeQrSessions.length),
               note: 'Sesión',
-              highlight: 'ACTIVE',
+              highlight: 'Activo',
             },
           ]);
 
@@ -326,15 +337,15 @@ export class DashboardPage {
           this.statCards.set([
             {
               label: 'Estado de hoy',
-              value: todayStatus === 'ABSENT' ? 'SIN MARCA' : todayStatus,
+              value: todayStatus === 'ABSENT' ? 'Sin marca' : this.statusLabel(todayStatus),
               note: 'Entrada',
               highlight: checkInText,
             },
             {
               label: 'Salida de hoy',
-              value: checkOutText === '—' ? 'PENDIENTE' : checkOutText,
+              value: checkOutText === '—' ? 'Pendiente' : checkOutText,
               note: 'Estado',
-              highlight: checkOutText === '—' ? 'INCOMPLETO' : 'OK',
+              highlight: checkOutText === '—' ? 'Incompleto' : 'OK',
             },
             {
               label: 'Registros (mes)',
@@ -346,7 +357,7 @@ export class DashboardPage {
               label: 'Tardanzas (mes)',
               value: String(monthLate),
               note: 'Estado',
-              highlight: 'LATE',
+              highlight: 'Tardanza',
             },
             {
               label: 'Incidencias pendientes',

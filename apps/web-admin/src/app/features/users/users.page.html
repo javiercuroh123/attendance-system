@@ -52,8 +52,8 @@
     (ngModelChange)="setStatusFilter($event)"
   >
     <option value="ALL">Todos los estados</option>
-    <option value="ACTIVE">ACTIVE</option>
-    <option value="INACTIVE">INACTIVE</option>
+    <option value="ACTIVE">Activo</option>
+    <option value="INACTIVE">Inactivo</option>
   </select>
 </section>
 
@@ -96,7 +96,7 @@
                 [class.b-active]="row.status === 'ACTIVE'"
                 [class.b-inactive]="row.status === 'INACTIVE'"
               >
-                {{ row.status }}
+                {{ statusLabel(row.status) }}
               </span>
             </td>
             <td>{{ row.lastLoginAt }}</td>
@@ -152,7 +152,7 @@
           <input
             class="finput"
             type="email"
-            placeholder="usuario@empresa.com"
+            placeholder="usuario@pedsar.com"
             [ngModel]="formEmail()"
             (ngModelChange)="formEmail.set($event)"
           />
@@ -189,8 +189,8 @@
           <label class="field">
             <span>Estado</span>
             <select class="finput" [ngModel]="formStatus()" (ngModelChange)="formStatus.set($event)">
-              <option value="ACTIVE">ACTIVE</option>
-              <option value="INACTIVE">INACTIVE</option>
+              <option value="ACTIVE">Activo</option>
+              <option value="INACTIVE">Inactivo</option>
             </select>
           </label>
         </div>

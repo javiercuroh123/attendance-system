@@ -145,6 +145,15 @@ export class QrSessionsPage {
     this.loadSessions();
   }
 
+  statusLabel(status: string): string {
+    const map: Record<string, string> = {
+      ACTIVE: 'Activo',
+      EXPIRED: 'Expirado',
+      CANCELLED: 'Cancelado',
+    };
+    return map[status] ?? status;
+  }
+
   submitCreateSession(): void {
     const point = this.formPointDescription().trim();
     const rawValidity = Number(this.formValiditySeconds());

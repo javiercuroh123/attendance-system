@@ -133,7 +133,7 @@ export class AdminShellComponent {
   );
 
   readonly userEmail = computed(
-    () => this.session()?.user.email ?? 'admin@consultora.com',
+    () => this.session()?.user.email ?? 'admin@pedsar.com',
   );
 
   readonly userRole = computed(

@@ -54,11 +54,11 @@
     (ngModelChange)="onStatusChange($event)"
   >
     <option value="ALL">Todos los estados</option>
-    <option value="PRESENT">PRESENT</option>
-    <option value="INCOMPLETE">INCOMPLETE</option>
-    <option value="LATE">LATE</option>
-    <option value="ABSENT">ABSENT</option>
-    <option value="JUSTIFIED">JUSTIFIED</option>
+    <option value="PRESENT">Presente</option>
+    <option value="INCOMPLETE">Incompleto</option>
+    <option value="LATE">Tardanza</option>
+    <option value="ABSENT">Ausente</option>
+    <option value="JUSTIFIED">Justificado</option>
   </select>
 
   <button type="button" class="btn btn-outline btn-sm" [disabled]="isLoading()" (click)="refreshAttendance()">
@@ -73,13 +73,13 @@
         <tr>
           <th>Empleado</th>
           <th>Fecha</th>
-          <th>Entrada (check_in_at)</th>
-          <th>Salida (check_out_at)</th>
+          <th>Entrada</th>
+          <th>Salida</th>
           <th>Horas</th>
           <th>Estado</th>
-          <th>Late min</th>
+          <th>Min. tardanza</th>
           <th>Origen</th>
-          <th>QR sesión</th>
+          <th>Sesión QR</th>
         </tr>
       </thead>
       <tbody>
@@ -100,7 +100,7 @@
             <td>{{ row.workedHours }}</td>
             <td>
               <span class="badge" [ngClass]="statusClass(row.status)">
-                {{ row.status }}
+                {{ statusLabel(row.status) }}
               </span>
             </td>
             <td>{{ row.lateMinutes }}</td>

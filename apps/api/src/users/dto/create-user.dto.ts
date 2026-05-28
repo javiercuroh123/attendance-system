@@ -9,7 +9,7 @@ import {
 import { RoleCode } from '../../common/enums/role-code.enum';
 
 export class CreateUserDto {
-  @ApiProperty({ example: 'usuario@consultora.com' })
+  @ApiProperty({ example: 'usuario@pedsar.com' })
   @IsEmail()
   email!: string;
 

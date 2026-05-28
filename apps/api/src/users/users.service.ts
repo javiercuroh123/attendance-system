@@ -27,7 +27,7 @@ export class UsersService implements OnModuleInit {
     }
 
     const admin = this.userRepository.create({
-      email: 'admin@consultora.com',
+      email: 'admin@pedsar.com',
       password_hash: await bcrypt.hash('12345678', 10),
       status: 'ACTIVE',
       role: RoleCode.ADMIN,
@@ -136,5 +136,33 @@ export class UsersService implements OnModuleInit {
     const user = await this.findOneOrFail(userId);
     user.refresh_token_hash = null;
     await this.userRepository.save(user);
+  }
+
+  async savePasswordResetToken(userId: string, tokenHash: string, expiresAt: Date) {
+    await this.userRepository.update(userId, {
+      password_reset_token: tokenHash,
+      password_reset_expires_at: expiresAt,
+    });
+  }
+
+  async findByResetToken(tokenHash: string) {
+    return this.userRepository.findOne({
+      where: { password_reset_token: tokenHash },
+    });
+  }
+
+  async clearPasswordResetToken(userId: string) {
+    await this.userRepository.update(userId, {
+      password_reset_token: null,
+      password_reset_expires_at: null,
+    });
+  }
+
+  async updatePasswordAndClearResetToken(userId: string, passwordHash: string) {
+    await this.userRepository.update(userId, {
+      password_hash: passwordHash,
+      password_reset_token: null,
+      password_reset_expires_at: null,
+    });
   }
 }

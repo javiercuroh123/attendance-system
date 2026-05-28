@@ -87,6 +87,11 @@ export class SchedulesPage {
     this.loadSchedules();
   }
 
+  statusLabel(status: string): string {
+    const map: Record<string, string> = { ACTIVE: 'Activo', INACTIVE: 'Inactivo' };
+    return map[status] ?? status;
+  }
+
   startCreateMode(): void {
     if (!this.canManageSchedules()) return;
     this.editingScheduleId.set('');

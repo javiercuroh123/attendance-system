@@ -132,6 +132,17 @@ export class AttendancePage {
     return 'b-absent';
   }
 
+  statusLabel(status: string): string {
+    const map: Record<string, string> = {
+      PRESENT: 'Presente',
+      LATE: 'Tardanza',
+      ABSENT: 'Ausente',
+      INCOMPLETE: 'Incompleto',
+      JUSTIFIED: 'Justificado',
+    };
+    return map[status] ?? status;
+  }
+
   openManualAdjustment(): void {
     if (!this.canManualAdjust()) return;
 
