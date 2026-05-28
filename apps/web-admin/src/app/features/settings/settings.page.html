@@ -1,7 +1,7 @@
 <section class="ph">
   <div class="ph-left">
     <h2>Configuración</h2>
-    <p>Tabla <code>system_settings</code> — parámetros generales del sistema</p>
+    <p>Parámetros generales del sistema</p>
   </div>
   <div class="ph-actions">
     <button
@@ -31,7 +31,7 @@
     <div class="card-body">
       <div class="form-grid">
         <div class="fg fg-full">
-          <label class="lbl">Nombre de la empresa (company_name)</label>
+          <label class="lbl">Nombre de la empresa</label>
           <input
             class="finput"
             type="text"
@@ -42,7 +42,7 @@
         </div>
 
         <div class="fg fg-full">
-          <label class="lbl">Nombre del centro de trabajo (worksite_name)</label>
+          <label class="lbl">Nombre del centro de trabajo</label>
           <input
             class="finput"
             type="text"
@@ -53,7 +53,7 @@
         </div>
 
         <div class="fg fg-full">
-          <label class="lbl">Dirección (worksite_address)</label>
+          <label class="lbl">Dirección</label>
           <input
             class="finput"
             type="text"
@@ -64,7 +64,7 @@
         </div>
 
         <div class="fg">
-          <label class="lbl">Latitud (worksite_latitude)</label>
+          <label class="lbl">Latitud</label>
           <input
             class="finput"
             type="text"
@@ -75,7 +75,7 @@
         </div>
 
         <div class="fg">
-          <label class="lbl">Longitud (worksite_longitude)</label>
+          <label class="lbl">Longitud</label>
           <input
             class="finput"
             type="text"
@@ -86,7 +86,7 @@
         </div>
 
         <div class="fg fg-full">
-          <label class="lbl">Descripción punto QR (qr_point_description)</label>
+          <label class="lbl">Descripción del punto QR</label>
           <input
             class="finput"
             type="text"
@@ -97,7 +97,7 @@
         </div>
 
         <div class="fg">
-          <label class="lbl">Zona horaria (default_timezone)</label>
+          <label class="lbl">Zona horaria</label>
           <select
             class="finput"
             [disabled]="isLoading() || isSaving()"
@@ -114,7 +114,7 @@
         </div>
 
         <div class="fg">
-          <label class="lbl">Estado (status)</label>
+          <label class="lbl">Estado del sistema</label>
           <select
             class="finput"
             [disabled]="isLoading() || isSaving()"
@@ -125,7 +125,7 @@
               <option [value]="status()">{{ status() }}</option>
             }
             @for (statusOption of statusOptions; track statusOption) {
-              <option [value]="statusOption">{{ statusOption }}</option>
+              <option [value]="statusOption">{{ statusOption === 'ACTIVE' ? 'Activo' : 'Inactivo' }}</option>
             }
           </select>
         </div>

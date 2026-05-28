@@ -59,26 +59,25 @@ export class SettingsPage {
     {
       id: 'auto-qr',
       title: 'Registro automático por QR',
-      description: 'Activo cuando el sistema está en estado ACTIVE',
+      description: 'Activo cuando el sistema está habilitado',
       enabled: this.status() === 'ACTIVE',
     },
     {
       id: 'geo-validation',
       title: 'Validación de geolocalización',
-      description:
-        'Activo cuando hay worksite_latitude y worksite_longitude definidos',
+      description: 'Activo cuando hay coordenadas de ubicación definidas',
       enabled: this.worksiteLatitude().trim() !== '' && this.worksiteLongitude().trim() !== '',
     },
     {
       id: 'audit-log',
-      title: 'Registro en audit_logs',
-      description: 'Se registra automáticamente en backend al editar configuración',
+      title: 'Registro de auditoría',
+      description: 'Se registra automáticamente al editar la configuración',
       enabled: true,
     },
     {
       id: 'daily-report',
       title: 'Reporte diario automático',
-      description: 'Disponible en endpoint GET /reports/daily',
+      description: 'Disponible en el módulo de Reportes',
       enabled: true,
     },
   ]);

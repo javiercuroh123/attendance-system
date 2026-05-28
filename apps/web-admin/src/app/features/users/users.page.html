@@ -1,7 +1,7 @@
 <section class="ph">
   <div class="ph-left">
     <h2>Usuarios</h2>
-    <p>Tabla users — acceso, rol y estado del sistema</p>
+    <p>Acceso, rol y estado del sistema</p>
   </div>
   <div class="ph-actions">
     <button type="button" class="btn btn-outline" [disabled]="isLoading()" (click)="refresh()">
@@ -40,10 +40,10 @@
 
   <select class="finput select-input" [ngModel]="roleFilter()" (ngModelChange)="setRoleFilter($event)">
     <option value="ALL">Todos los roles</option>
-    <option value="ADMIN">ADMIN</option>
+    <option value="ADMIN">Administrador</option>
     <option value="RRHH">RRHH</option>
-    <option value="SUPERVISOR">SUPERVISOR</option>
-    <option value="EMPLOYEE">EMPLOYEE</option>
+    <option value="SUPERVISOR">Supervisor</option>
+    <option value="EMPLOYEE">Empleado</option>
   </select>
 
   <select
@@ -87,7 +87,7 @@
                 [class.b-sup]="row.role === 'SUPERVISOR'"
                 [class.b-emp]="row.role === 'EMPLOYEE'"
               >
-                {{ row.role }}
+                {{ roleLabel(row.role) }}
               </span>
             </td>
             <td>
@@ -179,10 +179,10 @@
           <label class="field">
             <span>Rol</span>
             <select class="finput" [ngModel]="formRole()" (ngModelChange)="formRole.set($event)">
-              <option value="ADMIN">ADMIN</option>
+              <option value="ADMIN">Administrador</option>
               <option value="RRHH">RRHH</option>
-              <option value="SUPERVISOR">SUPERVISOR</option>
-              <option value="EMPLOYEE">EMPLOYEE</option>
+              <option value="SUPERVISOR">Supervisor</option>
+              <option value="EMPLOYEE">Empleado</option>
             </select>
           </label>
 

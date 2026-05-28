@@ -161,6 +161,16 @@ export class EmployeesPage {
     return map[status] ?? status;
   }
 
+  roleLabel(role: string): string {
+    const map: Record<string, string> = {
+      ADMIN: 'Admin',
+      RRHH: 'RRHH',
+      SUPERVISOR: 'Supervisor',
+      EMPLOYEE: 'Empleado',
+    };
+    return map[role] ?? role;
+  }
+
   setSearchTerm(value: string): void {
     this.searchTerm.set(value);
   }

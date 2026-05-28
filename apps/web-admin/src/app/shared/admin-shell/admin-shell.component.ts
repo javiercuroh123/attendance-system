@@ -36,7 +36,7 @@ export class AdminShellComponent {
   private readonly navLinks: NavLink[] = [
     {
       route: '/dashboard',
-      label: 'Dashboard',
+      label: 'Panel principal',
       icon: '▤',
       section: 'ROOT',
       roles: ['ADMIN', 'RRHH', 'SUPERVISOR', 'EMPLOYEE'],
@@ -136,9 +136,16 @@ export class AdminShellComponent {
     () => this.session()?.user.email ?? 'admin@pedsar.com',
   );
 
-  readonly userRole = computed(
-    () => this.userRoles()[0] ?? 'NO_ROLE',
-  );
+  readonly userRole = computed(() => {
+    const roleMap: Record<string, string> = {
+      ADMIN: 'Administrador',
+      RRHH: 'RRHH',
+      SUPERVISOR: 'Supervisor',
+      EMPLOYEE: 'Empleado',
+    };
+    const role = this.userRoles()[0] ?? '';
+    return roleMap[role] ?? role;
+  });
 
   readonly userInitials = computed(() => {
     const email = this.userEmail();

@@ -40,7 +40,7 @@ export const routes: Routes = [
         path: 'dashboard',
         canActivate: [rolesGuard],
         data: {
-          title: 'Dashboard',
+          title: 'Panel principal',
           subtitle: 'Resumen del día',
           roles: ['ADMIN', 'RRHH', 'SUPERVISOR', 'EMPLOYEE'],
         },
@@ -52,7 +52,7 @@ export const routes: Routes = [
       {
         path: 'users',
         canActivate: [rolesGuard],
-        data: { title: 'Usuarios', subtitle: 'users', roles: ['ADMIN'] },
+        data: { title: 'Usuarios', subtitle: 'Gestión de accesos y roles', roles: ['ADMIN'] },
         loadComponent: () =>
           import('./features/users/users.page').then((m) => m.UsersPage),
       },
@@ -61,7 +61,7 @@ export const routes: Routes = [
         canActivate: [rolesGuard],
         data: {
           title: 'Empleados',
-          subtitle: 'employees',
+          subtitle: 'Personal de la empresa',
           roles: ['ADMIN', 'RRHH', 'SUPERVISOR'],
         },
         loadComponent: () =>
@@ -74,7 +74,7 @@ export const routes: Routes = [
         canActivate: [rolesGuard],
         data: {
           title: 'Horarios',
-          subtitle: 'work_schedules',
+          subtitle: 'Turnos y tolerancias',
           roles: ['ADMIN', 'RRHH', 'SUPERVISOR'],
         },
         loadComponent: () =>
@@ -87,7 +87,7 @@ export const routes: Routes = [
         canActivate: [rolesGuard],
         data: {
           title: 'Asistencia',
-          subtitle: 'attendance_records',
+          subtitle: 'Entradas, salidas y tardanzas',
           roles: ['ADMIN', 'RRHH', 'SUPERVISOR', 'EMPLOYEE'],
         },
         loadComponent: () =>
@@ -100,7 +100,7 @@ export const routes: Routes = [
         canActivate: [rolesGuard],
         data: {
           title: 'Incidencias',
-          subtitle: 'incident_requests',
+          subtitle: 'Regularizaciones y permisos',
           roles: ['ADMIN', 'RRHH', 'SUPERVISOR', 'EMPLOYEE'],
         },
         loadComponent: () =>
@@ -124,7 +124,7 @@ export const routes: Routes = [
         canActivate: [rolesGuard],
         data: {
           title: 'Sesiones QR',
-          subtitle: 'qr_sessions',
+          subtitle: 'Generación y validación de códigos',
           roles: ['ADMIN', 'RRHH', 'SUPERVISOR'],
         },
         loadComponent: () =>
@@ -137,7 +137,7 @@ export const routes: Routes = [
         canActivate: [rolesGuard],
         data: {
           title: 'Auditoría',
-          subtitle: 'audit_logs',
+          subtitle: 'Trazabilidad de acciones',
           roles: ['ADMIN', 'RRHH'],
         },
         loadComponent: () =>
@@ -148,7 +148,7 @@ export const routes: Routes = [
         canActivate: [rolesGuard],
         data: {
           title: 'Configuración',
-          subtitle: 'system_settings',
+          subtitle: 'Parámetros generales del sistema',
           roles: ['ADMIN', 'RRHH', 'SUPERVISOR'],
         },
         loadComponent: () =>

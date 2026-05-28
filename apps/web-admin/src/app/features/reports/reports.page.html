@@ -1,7 +1,7 @@
 <section class="ph">
   <div class="ph-left">
     <h2>Reportes</h2>
-    <p>Generación de informes — endpoints /reports/*</p>
+    <p>Generación de informes y exportaciones</p>
   </div>
   <div class="ph-actions">
     <button type="button" class="btn btn-outline" [disabled]="isExporting()" (click)="exportCsv()">
@@ -62,10 +62,10 @@
         <div class="fg fg-full">
           <label class="lbl">Tipo de reporte</label>
           <select class="finput" [ngModel]="reportType()" (ngModelChange)="reportType.set($event)">
-            <option value="daily">Asistencia general (daily)</option>
-            <option value="monthly">Reporte mensual (monthly)</option>
-            <option value="late">Tardanzas (late)</option>
-            <option value="absences">Ausencias (absences)</option>
+            <option value="daily">Asistencia general</option>
+            <option value="monthly">Reporte mensual</option>
+            <option value="late">Tardanzas</option>
+            <option value="absences">Ausencias</option>
           </select>
         </div>
 

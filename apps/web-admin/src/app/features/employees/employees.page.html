@@ -1,7 +1,7 @@
 <section class="ph">
   <div class="ph-left">
     <h2>Empleados</h2>
-    <p>Tabla employees — datos del personal</p>
+    <p>Datos del personal</p>
   </div>
   <div class="ph-actions">
     <button type="button" class="btn btn-outline" [disabled]="isLoading()" (click)="refresh()">
@@ -40,10 +40,10 @@
 
   <select class="finput select-input" [ngModel]="roleFilter()" (ngModelChange)="setRoleFilter($event)">
     <option value="ALL">Todos los roles</option>
-    <option value="ADMIN">ADMIN</option>
+    <option value="ADMIN">Administrador</option>
     <option value="RRHH">RRHH</option>
-    <option value="SUPERVISOR">SUPERVISOR</option>
-    <option value="EMPLOYEE">EMPLOYEE</option>
+    <option value="SUPERVISOR">Supervisor</option>
+    <option value="EMPLOYEE">Empleado</option>
   </select>
 
   <select class="finput select-input" [ngModel]="statusFilter()" (ngModelChange)="setStatusFilter($event)">
@@ -91,7 +91,7 @@
                 [class.b-sup]="row.role === 'SUPERVISOR'"
                 [class.b-emp]="row.role === 'EMPLOYEE'"
               >
-                {{ row.role }}
+                {{ roleLabel(row.role) }}
               </span>
             </td>
             <td>
@@ -159,7 +159,7 @@
               <option value="">Selecciona usuario...</option>
               @for (user of availableUsers(); track user.id) {
                 <option [value]="user.id">
-                  {{ user.email }} · {{ user.role }} · {{ user.status }}
+                  {{ user.email }} · {{ roleLabel(user.role) }} · {{ statusLabel(user.status) }}
                 </option>
               }
             </select>
