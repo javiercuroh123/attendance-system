@@ -5,9 +5,12 @@ import { Capacitor } from '@capacitor/core';
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
+  styleUrls: ['app.component.scss'],
   imports: [IonApp, IonRouterOutlet],
 })
 export class AppComponent {
+  protected splashHidden = false;
+
   constructor() {}
 
   ngOnInit(): void {
@@ -20,11 +23,12 @@ export class AppComponent {
 
     if (platform === 'android') {
       document.body.classList.add('mobile-app-android');
-      return;
-    }
-
-    if (platform === 'ios') {
+    } else if (platform === 'ios') {
       document.body.classList.add('mobile-app-ios');
     }
+
+    setTimeout(() => {
+      this.splashHidden = true;
+    }, 2400);
   }
 }
