@@ -1,7 +1,7 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'http://localhost:3000',
-  apiProtocol: 'http',
-  apiPort: 3000,
-  nativeApiHost: '192.168.137.148',
+  apiBaseUrl: 'https://attendance-system-production-0f0a.up.railway.app',
+  apiProtocol: 'https',
+  apiPort: 443,
+  nativeApiHost: 'attendance-system-production-0f0a.up.railway.app',
 };
