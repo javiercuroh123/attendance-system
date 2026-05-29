@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  apiBaseUrl: 'http://localhost:3000',
+  apiBaseUrl: 'https://attendance-system-production-0f0a.up.railway.app',
   apiProtocol: 'https',
   apiPort: 443,
   // Railway URL para pruebas en Android/iOS.
