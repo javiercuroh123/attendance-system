@@ -19,18 +19,35 @@ import { UsersModule } from './users/users.module';
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get<string>('DB_HOST', 'localhost'),
-        port: Number(configService.get<string>('DB_PORT', '5432')),
-        username: configService.get<string>('DB_USER', 'postgres'),
-        password: configService.get<string>('DB_PASSWORD', 'postgres'),
-        database: configService.get<string>('DB_NAME', 'attendance_db'),
-        autoLoadEntities: true,
-        synchronize:
-          configService.get<string>('DB_SYNCHRONIZE', 'false') === 'true',
-        logging: configService.get<string>('DB_LOGGING', 'false') === 'true',
-      }),
+      useFactory: (configService: ConfigService) => {
+        const databaseUrl = configService.get<string>('DATABASE_URL');
+        const isProduction = configService.get<string>('NODE_ENV') === 'production';
+        const synchronize = configService.get<string>('DB_SYNCHRONIZE', 'false') === 'true';
+        const logging = configService.get<string>('DB_LOGGING', 'false') === 'true';
+
+        if (databaseUrl) {
+          return {
+            type: 'postgres',
+            url: databaseUrl,
+            autoLoadEntities: true,
+            synchronize,
+            logging,
+            ssl: isProduction ? { rejectUnauthorized: false } : false,
+          };
+        }
+
+        return {
+          type: 'postgres',
+          host: configService.get<string>('DB_HOST', 'localhost'),
+          port: Number(configService.get<string>('DB_PORT', '5432')),
+          username: configService.get<string>('DB_USER', 'postgres'),
+          password: configService.get<string>('DB_PASSWORD', 'postgres'),
+          database: configService.get<string>('DB_NAME', 'attendance_db'),
+          autoLoadEntities: true,
+          synchronize,
+          logging,
+        };
+      },
     }),
     AuthModule,
     UsersModule,
