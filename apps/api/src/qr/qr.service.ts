@@ -45,7 +45,7 @@ export class QrService {
 
     const rawToken = crypto.randomBytes(24).toString('hex');
     const now = new Date();
-    const validitySeconds = dto.validitySeconds ?? 300;
+    const validitySeconds = dto.validitySeconds ?? 60;
     const expiresAt = new Date(now.getTime() + validitySeconds * 1000);
 
     const session = this.qrRepository.create({

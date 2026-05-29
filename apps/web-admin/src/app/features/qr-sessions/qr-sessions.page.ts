@@ -170,7 +170,7 @@ export class QrSessionsPage {
 
     const fallbackPoint =
       activePoint || generated?.point || this.formPointDescription() || 'Entrada principal';
-    const fallbackValidity = generated?.validitySeconds ?? 300;
+    const fallbackValidity = generated?.validitySeconds ?? 60;
 
     this.generateSession({
       validitySeconds: fallbackValidity,
@@ -253,7 +253,7 @@ export class QrSessionsPage {
       qrToken: response.qrToken,
       qrPayloadText: JSON.stringify(response.qrPayload, null, 2),
       point,
-      validitySeconds: payload.validitySeconds ?? 300,
+      validitySeconds: payload.validitySeconds ?? 60,
     };
     void this.renderQrImage(response.qrToken, info);
 
