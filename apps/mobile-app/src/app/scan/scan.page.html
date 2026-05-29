@@ -46,19 +46,22 @@
           <span>{{ isPreparingScanner ? 'Preparando...' : scannerActionLabel }}</span>
         </button>
 
-        <label class="token-label" for="qrToken">Token QR</label>
-        <input
-          id="qrToken"
-          class="token-input"
-          type="text"
-          [(ngModel)]="qrToken"
-          placeholder="Pega aqui el qrToken o JSON"
-          [disabled]="isSubmitting"
-        />
+        <ng-container *ngIf="!isScannerSupported">
+          <label class="token-label" for="qrToken">Token QR</label>
+          <input
+            id="qrToken"
+            class="token-input"
+            type="text"
+            [(ngModel)]="qrToken"
+            placeholder="Pega aqui el qrToken o JSON"
+            [disabled]="isSubmitting"
+          />
+        </ng-container>
 
         <p class="scan-error" *ngIf="errorMessage">{{ errorMessage }}</p>
 
         <button
+          *ngIf="!isScannerSupported"
           type="button"
           class="manual-btn"
           (click)="submitAttendanceCheck()"
