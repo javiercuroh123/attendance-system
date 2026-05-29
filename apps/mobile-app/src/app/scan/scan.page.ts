@@ -58,7 +58,7 @@ export class ScanPage implements OnInit, OnDestroy {
     private readonly session: AuthSessionService,
     private readonly router: Router,
   ) {
-    this.usesNativeScanner = this.isNative;
+    this.usesNativeScanner = false;
 
     addIcons({
       arrowBackOutline,
@@ -70,7 +70,7 @@ export class ScanPage implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     await this.initializeScanner();
-    if (this.isNative && this.isScannerSupported) {
+    if (this.isScannerSupported) {
       await this.startScanner();
     }
   }
@@ -183,11 +183,6 @@ export class ScanPage implements OnInit, OnDestroy {
     this.scannerMessage = 'Inicializando camara...';
 
     try {
-      if (this.isNative) {
-        await this.scanWithNativeInterface();
-        return;
-      }
-
       const permissionGranted = await this.ensureCameraPermission();
       if (!permissionGranted) {
         this.errorMessage =
@@ -237,42 +232,9 @@ export class ScanPage implements OnInit, OnDestroy {
     }
   }
 
-  private async scanWithNativeInterface(): Promise<void> {
-    this.isScannerActive = true;
-    this.scannerActionLabel = 'Escaneando...';
-    this.scannerMessage = 'Abriendo escaner nativo...';
-
-    try {
-      if (this.platform === 'android') {
-        await this.ensureGoogleScannerModule();
-      }
-
-      const { barcodes } = await BarcodeScanner.scan({
-        formats: [BarcodeFormat.QrCode],
-        autoZoom: true,
-      });
-
-      const detectedToken = this.extractTokenFromBarcodes(barcodes);
-      if (!detectedToken) {
-        this.errorMessage = 'No se detecto un QR valido. Intenta nuevamente.';
-        this.scannerMessage = 'No se detecto QR valido.';
-        return;
-      }
-
-      this.qrToken = detectedToken;
-      this.scannerMessage = 'QR detectado. Registrando asistencia...';
-      await this.submitAttendanceCheck();
-    } finally {
-      this.isScannerActive = false;
-      this.scannerActionLabel = 'Activar Camara';
-    }
-  }
-
   private async stopScanner(): Promise<void> {
     try {
-      if (!this.isNative) {
-        await BarcodeScanner.stopScan();
-      }
+      await BarcodeScanner.stopScan();
     } catch {
       // Ignorado para no bloquear cierre de pantalla.
     } finally {
@@ -342,18 +304,6 @@ export class ScanPage implements OnInit, OnDestroy {
     }
 
     return null;
-  }
-
-  private async ensureGoogleScannerModule(): Promise<void> {
-    try {
-      const availability =
-        await BarcodeScanner.isGoogleBarcodeScannerModuleAvailable();
-      if (!availability.available) {
-        await BarcodeScanner.installGoogleBarcodeScannerModule();
-      }
-    } catch {
-      // Si falla esta verificacion, dejamos que scan() maneje el error final.
-    }
   }
 
   private async ensureCameraPermission(): Promise<boolean> {
