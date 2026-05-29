@@ -58,7 +58,7 @@ export class ScanPage implements OnInit, OnDestroy {
     private readonly session: AuthSessionService,
     private readonly router: Router,
   ) {
-    this.usesNativeScanner = false;
+    this.usesNativeScanner = this.isNative;
 
     addIcons({
       arrowBackOutline,
@@ -191,34 +191,36 @@ export class ScanPage implements OnInit, OnDestroy {
         return;
       }
 
-      const previewVideo = this.previewVideoRef?.nativeElement;
-      if (!previewVideo) {
-        this.errorMessage =
-          'No se pudo crear la vista previa de camara para escanear.';
-        this.scannerMessage = 'No hay vista previa disponible.';
-        return;
-      }
-
       await this.detachScannerListeners();
 
       this.barcodesListener = await BarcodeScanner.addListener(
         'barcodesScanned',
-        (event) => {
-          void this.handleDetectedBarcodes(event.barcodes);
-        },
+        (event) => { void this.handleDetectedBarcodes(event.barcodes); },
       );
       this.scanErrorListener = await BarcodeScanner.addListener(
         'scanError',
-        (event) => {
-          this.errorMessage = event.message || 'Error al escanear el codigo QR.';
-        },
+        (event) => { this.errorMessage = event.message || 'Error al escanear el codigo QR.'; },
       );
 
-      await BarcodeScanner.startScan({
-        formats: [BarcodeFormat.QrCode],
-        lensFacing: LensFacing.Back,
-        videoElement: previewVideo,
-      });
+      if (this.isNative) {
+        document.body.classList.add('barcode-scanner-active');
+        await BarcodeScanner.startScan({
+          formats: [BarcodeFormat.QrCode],
+          lensFacing: LensFacing.Back,
+        });
+      } else {
+        const previewVideo = this.previewVideoRef?.nativeElement;
+        if (!previewVideo) {
+          this.errorMessage = 'No se pudo crear la vista previa de camara.';
+          this.scannerMessage = 'No hay vista previa disponible.';
+          return;
+        }
+        await BarcodeScanner.startScan({
+          formats: [BarcodeFormat.QrCode],
+          lensFacing: LensFacing.Back,
+          videoElement: previewVideo,
+        });
+      }
 
       this.isScannerActive = true;
       this.scannerActionLabel = 'Detener Camara';
@@ -233,6 +235,9 @@ export class ScanPage implements OnInit, OnDestroy {
   }
 
   private async stopScanner(): Promise<void> {
+    if (this.isNative) {
+      document.body.classList.remove('barcode-scanner-active');
+    }
     try {
       await BarcodeScanner.stopScan();
     } catch {

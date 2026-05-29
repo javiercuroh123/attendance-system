@@ -40,6 +40,25 @@
  * Android performance profile:
  * disables expensive visual effects that can cause frame drops in WebView.
  */
+/* Modo escáner nativo: cámara visible detrás del WebView */
+body.barcode-scanner-active {
+  --background: transparent !important;
+  --ion-background-color: transparent !important;
+  background: transparent !important;
+}
+
+body.barcode-scanner-active ion-content {
+  --background: transparent !important;
+}
+
+body.barcode-scanner-active .scan-shell {
+  background: transparent !important;
+}
+
+body.barcode-scanner-active .qr-scanner-area::before {
+  display: none !important;
+}
+
 body.mobile-app-android .tab-bar {
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
