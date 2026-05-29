@@ -73,7 +73,8 @@ body.barcode-scanner-active .qr-preview-placeholder ion-icon {
   display: none !important;
 }
 
-body.barcode-scanner-active .qr-scan-line {
+body.barcode-scanner-active .qr-scan-line,
+body.mobile-app-android.barcode-scanner-active .qr-scan-line {
   animation: scan-line 2.5s ease-in-out infinite !important;
 }
 
