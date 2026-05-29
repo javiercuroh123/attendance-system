@@ -59,6 +59,18 @@ body.barcode-scanner-active .qr-scanner-area::before {
   display: none !important;
 }
 
+body.barcode-scanner-active .qr-viewfinder {
+  background: transparent !important;
+}
+
+body.barcode-scanner-active .qr-preview-placeholder {
+  background: transparent !important;
+}
+
+body.barcode-scanner-active .qr-preview-placeholder ion-icon {
+  display: none !important;
+}
+
 body.mobile-app-android .tab-bar {
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
