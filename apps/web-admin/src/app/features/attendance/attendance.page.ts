@@ -144,15 +144,7 @@ export class AttendancePage {
   }
 
   openManualAdjustment(): void {
-    if (!this.canManualAdjust()) return;
-
-    if (this.recordsWithId().length === 0) {
-      this.manualSuccessMessage.set(null);
-      this.errorMessage.set(
-        'No hay registros con ID para ajustar en la fecha/filtro actual.',
-      );
-      return;
-    }
+    if (!this.canManualAdjust() || this.recordsWithId().length === 0) return;
 
     this.manualErrorMessage.set(null);
     this.manualSuccessMessage.set(null);

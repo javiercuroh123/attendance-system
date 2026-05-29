@@ -108,6 +108,7 @@ export class AdminShellComponent {
   ];
 
   readonly sidebarOpen = signal(false);
+  readonly isLogoutModalOpen = signal(false);
   readonly session = this.authSession.session;
   readonly topbarDate = this.formatTopbarDate(new Date());
   readonly userRoles = computed(() => getUserRoles(this.session()?.user));
@@ -162,7 +163,17 @@ export class AdminShellComponent {
     this.sidebarOpen.set(false);
   }
 
+  openLogoutModal(): void {
+    this.sidebarOpen.set(false);
+    this.isLogoutModalOpen.set(true);
+  }
+
+  cancelLogout(): void {
+    this.isLogoutModalOpen.set(false);
+  }
+
   logout(): void {
+    this.isLogoutModalOpen.set(false);
     this.authSession.clearSession();
     void this.router.navigateByUrl('/auth/login');
   }

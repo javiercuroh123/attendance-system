@@ -41,7 +41,9 @@
         <tbody>
           @for (row of rows(); track row.id) {
             <tr>
-              <td><code class="id-cell">{{ row.id }}</code></td>
+              <td>
+                <code class="id-cell" [title]="row.id">{{ row.id.slice(0, 8) }}…</code>
+              </td>
               <td>{{ row.issuedBy }}</td>
               <td>{{ row.point }}</td>
               <td>{{ row.startsAt }}</td>
@@ -69,7 +71,13 @@
 
   <article class="card">
     <div class="qr-panel">
-      <div class="qr-top">Sesión activa — {{ activeSessionId() }}</div>
+      <div class="qr-top">
+        @if (activeSessionId()) {
+          Sesión activa — {{ activeSessionId().slice(0, 8) }}…
+        } @else {
+          Sin sesión activa
+        }
+      </div>
 
       <div class="qr-wrap">
         @if (visibleQrImageDataUrl()) {
@@ -90,7 +98,11 @@
         <span class="qr-count">{{ countdownDisplay() }}</span>
       </div>
 
-      <div class="qr-token">{{ activeSessionId() }} · {{ activeSessionPoint() }}</div>
+      @if (activeSessionId()) {
+        <div class="qr-token" [title]="activeSessionId()">
+          {{ activeSessionId().slice(0, 8) }}… · {{ activeSessionPoint() }}
+        </div>
+      }
 
       @if (visibleQrToken()) {
         <div class="payload">

@@ -21,6 +21,7 @@ import {
   ReportEmployee,
   ReportsApiService,
 } from './reports-api.service';
+import { ReportsStateService } from './reports-state.service';
 
 type ReportType = 'daily' | 'monthly' | 'late' | 'absences';
 
@@ -49,6 +50,7 @@ interface PreviewState {
 })
 export class ReportsPage {
   private readonly reportsApi = inject(ReportsApiService);
+  private readonly reportsState = inject(ReportsStateService);
   private readonly platformId = inject(PLATFORM_ID);
 
   readonly isLoadingPreview = signal(false);
@@ -59,11 +61,11 @@ export class ReportsPage {
   readonly successMessage = signal<string | null>(null);
 
   readonly employees = signal<ReportEmployee[]>([]);
-  readonly recentReports = signal<RecentReport[]>([]);
+  readonly recentReports = this.reportsState.recentReports;
 
   readonly preview = signal<PreviewState | null>(null);
 
-  readonly fromDate = signal(this.getCurrentMonthStart());
+  readonly fromDate = signal(this.getToday());
   readonly toDate = signal(this.getCurrentMonthEnd());
   readonly reportType = signal<ReportType>('daily');
   readonly selectedEmployeeId = signal('ALL');
@@ -111,6 +113,11 @@ export class ReportsPage {
       .subscribe({
         next: (response) => {
           this.preview.set(this.buildPreviewState(type, response));
+          if (isPlatformBrowser(this.platformId)) {
+            setTimeout(() => {
+              document.getElementById('preview-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 50);
+          }
         },
         error: (error: HttpErrorResponse) => {
           this.errorMessage.set(this.extractErrorMessage(error));
@@ -128,7 +135,7 @@ export class ReportsPage {
   }
 
   generateReport(): void {
-    this.exportReportFile('csv');
+    this.previewReport();
   }
 
   downloadRecent(report: RecentReport): void {
@@ -211,7 +218,7 @@ export class ReportsPage {
       content: response.content,
     };
 
-    this.recentReports.update((current) => [item, ...current].slice(0, 10));
+    this.reportsState.push(item);
   }
 
   private buildRecentTitle(type: string): string {
@@ -339,9 +346,9 @@ export class ReportsPage {
     });
   }
 
-  private getCurrentMonthStart(): string {
+  private getToday(): string {
     const date = new Date();
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-01`;
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
   }
 
   private getCurrentMonthEnd(): string {

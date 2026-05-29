@@ -21,8 +21,8 @@
           <rect x="13" y="13" width="1" height="1" rx=".5" fill="#0d1117" opacity=".85" />
         </svg>
       </div>
-      <div class="brand-name">Sistema de Asistencia QR</div>
-      <div class="brand-sub">Panel Administrativo</div>
+      <div class="brand-name">PEDSAR</div>
+      <div class="brand-sub">Sistema de Asistencia QR</div>
     </div>
 
     <nav class="sidebar-nav">
@@ -78,7 +78,7 @@
           <div class="user-role">{{ userRole() }}</div>
         </div>
       </div>
-      <button type="button" class="btn-logout" (click)="logout()">
+      <button type="button" class="btn-logout" (click)="openLogoutModal()">
         Cerrar sesión
       </button>
     </div>
@@ -102,3 +102,21 @@
     <main class="content"><router-outlet /></main>
   </div>
 </section>
+
+@if (isLogoutModalOpen()) {
+  <section class="logout-backdrop" (click)="cancelLogout()">
+    <article class="logout-card" (click)="$event.stopPropagation()">
+      <div class="logout-icon">⏻</div>
+      <h3>¿Cerrar sesión?</h3>
+      <p>Tu sesión actual se cerrará y serás redirigido al inicio de sesión.</p>
+      <div class="logout-actions">
+        <button type="button" class="btn-cancel" (click)="cancelLogout()">
+          Cancelar
+        </button>
+        <button type="button" class="btn-confirm" (click)="logout()">
+          Cerrar sesión
+        </button>
+      </div>
+    </article>
+  </section>
+}

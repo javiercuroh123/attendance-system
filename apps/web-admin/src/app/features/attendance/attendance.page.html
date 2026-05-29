@@ -10,7 +10,8 @@
     <button
       type="button"
       class="btn btn-dark"
-      [disabled]="!canManualAdjust()"
+      [disabled]="!canManualAdjust() || recordsWithId().length === 0"
+      [title]="recordsWithId().length === 0 ? 'No hay registros de asistencia para ajustar en esta fecha' : ''"
       (click)="openManualAdjustment()"
     >
       + Ajuste manual

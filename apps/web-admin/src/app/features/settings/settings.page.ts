@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 import {
@@ -9,17 +9,6 @@ import {
   UpdateSystemSettingsPayload,
 } from './settings-api.service';
 
-interface OperationalRule {
-  id: string;
-  title: string;
-  description: string;
-  enabled: boolean;
-}
-
-interface StackItem {
-  label: string;
-  value: string;
-}
 
 @Component({
   selector: 'app-settings-page',
@@ -37,6 +26,8 @@ export class SettingsPage {
   readonly errorMessage = signal<string | null>(null);
   readonly successMessage = signal<string | null>(null);
 
+  readonly isEditModalOpen = signal(false);
+
   readonly companyName = signal('');
   readonly worksiteName = signal('');
   readonly worksiteAddress = signal('');
@@ -45,6 +36,17 @@ export class SettingsPage {
   readonly qrPointDescription = signal('');
   readonly defaultTimezone = signal('America/Lima');
   readonly status = signal('ACTIVE');
+
+  private snapshot = {
+    companyName: '',
+    worksiteName: '',
+    worksiteAddress: '',
+    worksiteLatitude: '',
+    worksiteLongitude: '',
+    qrPointDescription: '',
+    defaultTimezone: 'America/Lima',
+    status: 'ACTIVE',
+  };
 
   readonly timezoneOptions = [
     'America/Lima',
@@ -55,42 +57,37 @@ export class SettingsPage {
 
   readonly statusOptions = ['ACTIVE', 'INACTIVE'];
 
-  readonly operationalRules = computed<OperationalRule[]>(() => [
-    {
-      id: 'auto-qr',
-      title: 'Registro automático por QR',
-      description: 'Activo cuando el sistema está habilitado',
-      enabled: this.status() === 'ACTIVE',
-    },
-    {
-      id: 'geo-validation',
-      title: 'Validación de geolocalización',
-      description: 'Activo cuando hay coordenadas de ubicación definidas',
-      enabled: this.worksiteLatitude().trim() !== '' && this.worksiteLongitude().trim() !== '',
-    },
-    {
-      id: 'audit-log',
-      title: 'Registro de auditoría',
-      description: 'Se registra automáticamente al editar la configuración',
-      enabled: true,
-    },
-    {
-      id: 'daily-report',
-      title: 'Reporte diario automático',
-      description: 'Disponible en el módulo de Reportes',
-      enabled: true,
-    },
-  ]);
-
-  readonly stackItems: StackItem[] = [
-    { label: 'Frontend web', value: 'Angular' },
-    { label: 'App móvil', value: 'Ionic + Angular' },
-    { label: 'Backend', value: 'NestJS' },
-    { label: 'Base de datos', value: 'PostgreSQL · 8 tablas' },
-  ];
-
   constructor() {
     this.loadSettings();
+  }
+
+  openEditModal(): void {
+    this.snapshot = {
+      companyName: this.companyName(),
+      worksiteName: this.worksiteName(),
+      worksiteAddress: this.worksiteAddress(),
+      worksiteLatitude: this.worksiteLatitude(),
+      worksiteLongitude: this.worksiteLongitude(),
+      qrPointDescription: this.qrPointDescription(),
+      defaultTimezone: this.defaultTimezone(),
+      status: this.status(),
+    };
+    this.errorMessage.set(null);
+    this.successMessage.set(null);
+    this.isEditModalOpen.set(true);
+  }
+
+  cancelEditModal(): void {
+    this.companyName.set(this.snapshot.companyName);
+    this.worksiteName.set(this.snapshot.worksiteName);
+    this.worksiteAddress.set(this.snapshot.worksiteAddress);
+    this.worksiteLatitude.set(this.snapshot.worksiteLatitude);
+    this.worksiteLongitude.set(this.snapshot.worksiteLongitude);
+    this.qrPointDescription.set(this.snapshot.qrPointDescription);
+    this.defaultTimezone.set(this.snapshot.defaultTimezone);
+    this.status.set(this.snapshot.status);
+    this.errorMessage.set(null);
+    this.isEditModalOpen.set(false);
   }
 
   saveChanges(): void {
@@ -109,6 +106,7 @@ export class SettingsPage {
       .subscribe({
         next: (updated) => {
           this.applySettingsToForm(updated);
+          this.isEditModalOpen.set(false);
           this.successMessage.set('Configuración guardada correctamente.');
         },
         error: (error: HttpErrorResponse) => {

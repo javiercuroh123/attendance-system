@@ -35,13 +35,24 @@ export class AuditPage {
 
   readonly moduleOptions: Array<{ value: ModuleFilter; label: string }> = [
     { value: 'ALL', label: 'Todos los módulos' },
-    { value: 'auth', label: 'auth' },
-    { value: 'employees', label: 'employees' },
-    { value: 'attendance', label: 'attendance' },
-    { value: 'incidents', label: 'incidents' },
-    { value: 'qr', label: 'qr' },
-    { value: 'settings', label: 'settings' },
+    { value: 'auth', label: 'Autenticación' },
+    { value: 'employees', label: 'Empleados' },
+    { value: 'attendance', label: 'Asistencia' },
+    { value: 'incidents', label: 'Incidencias' },
+    { value: 'qr', label: 'Sesiones QR' },
+    { value: 'settings', label: 'Configuración' },
   ];
+
+  readonly moduleLabels: Record<string, string> = {
+    AUTH: 'Autenticación',
+    EMPLOYEES: 'Empleados',
+    ATTENDANCE: 'Asistencia',
+    INCIDENTS: 'Incidencias',
+    QR: 'Sesiones QR',
+    SETTINGS: 'Configuración',
+    USERS: 'Usuarios',
+    SCHEDULES: 'Horarios',
+  };
 
   readonly entries = computed<AuditEntryView[]>(() =>
     this.logsRaw().map((log) => this.mapToView(log)),
@@ -104,15 +115,17 @@ export class AuditPage {
     const target = log.entity_id ? ` (${this.shortenId(log.entity_id)})` : '';
 
     const detailsParts: string[] = [];
-    if (log.old_data) detailsParts.push(`old: ${this.summarizeValue(log.old_data)}`);
-    if (log.new_data) detailsParts.push(`new: ${this.summarizeValue(log.new_data)}`);
-    if (log.status) detailsParts.push(`status: ${log.status}`);
-    if (log.ip_address) detailsParts.push(`ip: ${log.ip_address}`);
-    if (log.device_info) detailsParts.push(`device: ${this.summarizeValue(log.device_info)}`);
+    if (log.old_data) detailsParts.push(`anterior: ${this.summarizeValue(log.old_data)}`);
+    if (log.new_data) detailsParts.push(`nuevo: ${this.summarizeValue(log.new_data)}`);
+    if (log.status) detailsParts.push(`estado: ${this.humanizeStatus(log.status)}`);
+    if (log.ip_address) detailsParts.push(`IP: ${log.ip_address}`);
+    if (log.device_info) detailsParts.push(`dispositivo: ${this.summarizeValue(log.device_info)}`);
+
+    const rawModule = (log.module || 'unknown').toUpperCase();
 
     return {
       id: log.id,
-      module: (log.module || 'unknown').toUpperCase(),
+      module: this.moduleLabels[rawModule] ?? rawModule,
       summary: `${actor} realizó ${action} en ${entity}${target}`,
       details: detailsParts.join(' · ') || 'Sin detalles adicionales',
       time: this.formatDateTime(log.created_at),
@@ -129,6 +142,19 @@ export class AuditPage {
     return `Usuario ${this.shortenId(log.actor_user_id)}`;
   }
 
+  private humanizeStatus(status: string): string {
+    const map: Record<string, string> = {
+      SUCCESS: 'Exitoso',
+      ERROR: 'Error',
+      ACTIVE: 'Activo',
+      INACTIVE: 'Inactivo',
+      PENDING: 'Pendiente',
+      APPROVED: 'Aprobado',
+      REJECTED: 'Rechazado',
+    };
+    return map[status?.toUpperCase()] ?? status;
+  }
+
   private humanizeAction(action: string): string {
     const upper = action?.trim().toUpperCase() ?? '';
     const dictionary: Record<string, string> = {
@@ -142,6 +168,13 @@ export class AuditPage {
       LOGIN: 'inicio de sesión',
       LOGOUT: 'cierre de sesión',
       MANUAL_ADJUSTMENT: 'ajuste manual',
+      'CREATE SESSION': 'creación de sesión',
+      CREATE_SESSION: 'creación de sesión',
+      'UPDATE SESSION': 'actualización de sesión',
+      CANCEL: 'cancelación',
+      REGISTER: 'registro',
+      CHECK_IN: 'registro de entrada',
+      CHECK_OUT: 'registro de salida',
     };
     return dictionary[upper] ?? upper.toLowerCase().replace(/_/g, ' ');
   }

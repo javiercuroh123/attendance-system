@@ -18,6 +18,7 @@ import {
   QrSessionResponse,
   QrSessionsApiService,
 } from './qr-sessions-api.service';
+import { QrSessionsStateService } from './qr-sessions-state.service';
 
 type QrVisualStatus = 'ACTIVE' | 'EXPIRED' | 'CANCELLED';
 
@@ -30,14 +31,6 @@ interface QrSessionRow {
   status: QrVisualStatus;
 }
 
-interface LastGeneratedInfo {
-  sessionId: string;
-  qrToken: string;
-  qrPayloadText: string;
-  point: string;
-  validitySeconds: number;
-}
-
 @Component({
   selector: 'app-qr-sessions-page',
   standalone: true,
@@ -48,6 +41,7 @@ interface LastGeneratedInfo {
 })
 export class QrSessionsPage {
   private readonly qrApi = inject(QrSessionsApiService);
+  private readonly qrState = inject(QrSessionsStateService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly platformId = inject(PLATFORM_ID);
 
@@ -59,8 +53,9 @@ export class QrSessionsPage {
 
   readonly sessionsRaw = signal<QrSessionResponse[]>([]);
   readonly nowMs = signal(Date.now());
-  readonly lastGenerated = signal<LastGeneratedInfo | null>(null);
-  readonly qrImageDataUrl = signal<string | null>(null);
+
+  readonly lastGenerated = this.qrState.lastGenerated;
+  readonly qrImageDataUrl = this.qrState.qrImageDataUrl;
 
   readonly rows = computed<QrSessionRow[]>(() =>
     this.sessionsRaw().map((item) => this.mapToRow(item)),
@@ -71,7 +66,7 @@ export class QrSessionsPage {
     return this.sessionsRaw().find((item) => this.deriveStatus(item, now) === 'ACTIVE') ?? null;
   });
 
-  readonly activeSessionId = computed(() => this.activeSession()?.id ?? 'Sin activa');
+  readonly activeSessionId = computed(() => this.activeSession()?.id ?? '');
   readonly activeSessionPoint = computed(
     () => this.activeSession()?.point_description?.trim() || 'Punto no definido',
   );
@@ -119,7 +114,7 @@ export class QrSessionsPage {
 
   readonly isCreateModalOpen = signal(false);
   readonly formPointDescription = signal('Entrada principal');
-  readonly formValiditySeconds = signal(300);
+  readonly formValiditySeconds = signal(60);
 
   constructor() {
     this.loadSessions();
@@ -234,8 +229,7 @@ export class QrSessionsPage {
           this.sessionsRaw.set(rows);
           const hasActive = rows.some((item) => this.deriveStatus(item, this.nowMs()) === 'ACTIVE');
           if (!hasActive) {
-            this.lastGenerated.set(null);
-            this.qrImageDataUrl.set(null);
+            this.qrState.clear();
           }
         },
         error: (error: HttpErrorResponse) => {
@@ -254,19 +248,22 @@ export class QrSessionsPage {
       payload.qrPointDescription ??
       'Entrada principal';
 
-    this.lastGenerated.set({
+    const info = {
       sessionId: response.id,
       qrToken: response.qrToken,
       qrPayloadText: JSON.stringify(response.qrPayload, null, 2),
       point,
       validitySeconds: payload.validitySeconds ?? 300,
-    });
-    void this.renderQrImage(response.qrToken);
+    };
+    void this.renderQrImage(response.qrToken, info);
 
     this.successMessage.set(`Sesión QR ${response.id} generada correctamente.`);
   }
 
-  private async renderQrImage(qrToken: string): Promise<void> {
+  private async renderQrImage(
+    qrToken: string,
+    info: { sessionId: string; qrToken: string; qrPayloadText: string; point: string; validitySeconds: number },
+  ): Promise<void> {
     try {
       const dataUrl = await QRCode.toDataURL(qrToken, {
         errorCorrectionLevel: 'M',
@@ -278,11 +275,11 @@ export class QrSessionsPage {
         },
       });
 
-      this.qrImageDataUrl.set(dataUrl);
+      this.qrState.set(info, dataUrl);
     } catch {
-      this.qrImageDataUrl.set(null);
+      this.qrState.clear();
       this.errorMessage.set(
-        'No se pudo renderizar el codigo QR. Regenera la sesion nuevamente.',
+        'No se pudo renderizar el código QR. Regenera la sesión nuevamente.',
       );
     }
   }

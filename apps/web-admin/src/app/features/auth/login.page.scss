@@ -50,27 +50,30 @@ p {
 .auth-left-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
 }
 
 .brand-icon {
-  width: 34px;
-  height: 34px;
+  width: 52px;
+  height: 52px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .brand-icon svg {
-  width: 18px;
-  height: 18px;
+  width: 28px;
+  height: 28px;
 }
 
 .auth-left-name {
   font-family: 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
-  font-size: 16px;
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: 1px;
   color: var(--white);
 }
 

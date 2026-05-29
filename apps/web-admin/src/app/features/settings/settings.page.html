@@ -7,171 +7,190 @@
     <button
       type="button"
       class="btn btn-dark"
-      [disabled]="isLoading() || isSaving()"
-      (click)="saveChanges()"
+      [disabled]="isLoading()"
+      (click)="openEditModal()"
     >
-      {{ isSaving() ? 'Guardando...' : 'Guardar cambios' }}
+      ✎ Editar configuración
     </button>
   </div>
 </section>
-
-@if (errorMessage()) {
-  <p class="feedback feedback-error">{{ errorMessage() }}</p>
-}
 
 @if (successMessage()) {
   <p class="feedback feedback-success">{{ successMessage() }}</p>
 }
 
-<section class="g2">
-  <article class="card">
-    <header class="card-head">
-      <h3>Datos de la empresa y centro de trabajo</h3>
-    </header>
-    <div class="card-body">
-      <div class="form-grid">
-        <div class="fg fg-full">
-          <label class="lbl">Nombre de la empresa</label>
-          <input
-            class="finput"
-            type="text"
-            [disabled]="isLoading() || isSaving()"
-            [ngModel]="companyName()"
-            (ngModelChange)="companyName.set($event)"
-          />
+<article class="card">
+  <header class="card-head">
+    <h3>Datos de la empresa y centro de trabajo</h3>
+  </header>
+  <div class="card-body">
+    <div class="data-grid">
+        <div class="data-row data-full">
+          <span class="data-lbl">Nombre de la empresa</span>
+          <span class="data-val">{{ companyName() || '—' }}</span>
         </div>
-
-        <div class="fg fg-full">
-          <label class="lbl">Nombre del centro de trabajo</label>
-          <input
-            class="finput"
-            type="text"
-            [disabled]="isLoading() || isSaving()"
-            [ngModel]="worksiteName()"
-            (ngModelChange)="worksiteName.set($event)"
-          />
+        <div class="data-row data-full">
+          <span class="data-lbl">Centro de trabajo</span>
+          <span class="data-val">{{ worksiteName() || '—' }}</span>
         </div>
-
-        <div class="fg fg-full">
-          <label class="lbl">Dirección</label>
-          <input
-            class="finput"
-            type="text"
-            [disabled]="isLoading() || isSaving()"
-            [ngModel]="worksiteAddress()"
-            (ngModelChange)="worksiteAddress.set($event)"
-          />
+        <div class="data-row data-full">
+          <span class="data-lbl">Dirección</span>
+          <span class="data-val">{{ worksiteAddress() || '—' }}</span>
         </div>
-
-        <div class="fg">
-          <label class="lbl">Latitud</label>
-          <input
-            class="finput"
-            type="text"
-            [disabled]="isLoading() || isSaving()"
-            [ngModel]="worksiteLatitude()"
-            (ngModelChange)="worksiteLatitude.set($event)"
-          />
+        <div class="data-row">
+          <span class="data-lbl">Latitud</span>
+          <span class="data-val">{{ worksiteLatitude() || '—' }}</span>
         </div>
-
-        <div class="fg">
-          <label class="lbl">Longitud</label>
-          <input
-            class="finput"
-            type="text"
-            [disabled]="isLoading() || isSaving()"
-            [ngModel]="worksiteLongitude()"
-            (ngModelChange)="worksiteLongitude.set($event)"
-          />
+        <div class="data-row">
+          <span class="data-lbl">Longitud</span>
+          <span class="data-val">{{ worksiteLongitude() || '—' }}</span>
         </div>
-
-        <div class="fg fg-full">
-          <label class="lbl">Descripción del punto QR</label>
-          <input
-            class="finput"
-            type="text"
-            [disabled]="isLoading() || isSaving()"
-            [ngModel]="qrPointDescription()"
-            (ngModelChange)="qrPointDescription.set($event)"
-          />
+        <div class="data-row data-full">
+          <span class="data-lbl">Punto QR</span>
+          <span class="data-val">{{ qrPointDescription() || '—' }}</span>
         </div>
-
-        <div class="fg">
-          <label class="lbl">Zona horaria</label>
-          <select
-            class="finput"
-            [disabled]="isLoading() || isSaving()"
-            [ngModel]="defaultTimezone()"
-            (ngModelChange)="defaultTimezone.set($event)"
+        <div class="data-row">
+          <span class="data-lbl">Zona horaria</span>
+          <span class="data-val">{{ defaultTimezone() || '—' }}</span>
+        </div>
+        <div class="data-row">
+          <span class="data-lbl">Estado del sistema</span>
+          <span
+            class="badge"
+            [class.b-active]="status() === 'ACTIVE'"
+            [class.b-inactive]="status() === 'INACTIVE'"
           >
-            @if (!timezoneOptions.includes(defaultTimezone())) {
-              <option [value]="defaultTimezone()">{{ defaultTimezone() }}</option>
-            }
-            @for (tz of timezoneOptions; track tz) {
-              <option [value]="tz">{{ tz }}</option>
-            }
-          </select>
-        </div>
-
-        <div class="fg">
-          <label class="lbl">Estado del sistema</label>
-          <select
-            class="finput"
-            [disabled]="isLoading() || isSaving()"
-            [ngModel]="status()"
-            (ngModelChange)="status.set($event)"
-          >
-            @if (!statusOptions.includes(status())) {
-              <option [value]="status()">{{ status() }}</option>
-            }
-            @for (statusOption of statusOptions; track statusOption) {
-              <option [value]="statusOption">{{ statusOption === 'ACTIVE' ? 'Activo' : 'Inactivo' }}</option>
-            }
-          </select>
+            {{ status() === 'ACTIVE' ? 'Activo' : 'Inactivo' }}
+          </span>
         </div>
       </div>
     </div>
   </article>
 
-  <div class="right-col">
-    <article class="card">
-      <header class="card-head">
-        <h3>Parámetros operativos</h3>
+@if (isEditModalOpen()) {
+  <section class="modal-backdrop" (click)="cancelEditModal()">
+    <article class="modal-card" (click)="$event.stopPropagation()">
+      <header class="modal-head">
+        <h3>Editar configuración</h3>
+        <button type="button" class="btn-icon" (click)="cancelEditModal()">✕</button>
       </header>
-      <div class="card-body card-body-compact">
-        @for (rule of operationalRules(); track rule.id) {
-          <div class="cfg-row">
-            <div class="cfg-left">
-              <h4>{{ rule.title }}</h4>
-              <p>{{ rule.description }}</p>
-            </div>
-            <button
-              type="button"
-              class="toggle"
-              [class.on]="rule.enabled"
-              [attr.aria-pressed]="rule.enabled"
-              [attr.aria-label]="rule.title"
-              disabled
-            ></button>
-          </div>
-        }
-      </div>
-    </article>
 
-    <article class="card">
-      <header class="card-head">
-        <h3>Stack tecnológico</h3>
-      </header>
-      <div class="card-body">
-        <div class="stack-list">
-          @for (item of stackItems; track item.label) {
-            <div class="stack-row">
-              <span class="stack-key">{{ item.label }}</span>
-              <span class="stack-val">{{ item.value }}</span>
-            </div>
-          }
+      @if (errorMessage()) {
+        <p class="feedback feedback-error">{{ errorMessage() }}</p>
+      }
+
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="fg fg-full">
+            <label class="lbl">Nombre de la empresa</label>
+            <input
+              class="finput"
+              type="text"
+              [disabled]="isSaving()"
+              [ngModel]="companyName()"
+              (ngModelChange)="companyName.set($event)"
+            />
+          </div>
+
+          <div class="fg fg-full">
+            <label class="lbl">Centro de trabajo</label>
+            <input
+              class="finput"
+              type="text"
+              [disabled]="isSaving()"
+              [ngModel]="worksiteName()"
+              (ngModelChange)="worksiteName.set($event)"
+            />
+          </div>
+
+          <div class="fg fg-full">
+            <label class="lbl">Dirección</label>
+            <input
+              class="finput"
+              type="text"
+              [disabled]="isSaving()"
+              [ngModel]="worksiteAddress()"
+              (ngModelChange)="worksiteAddress.set($event)"
+            />
+          </div>
+
+          <div class="fg">
+            <label class="lbl">Latitud</label>
+            <input
+              class="finput"
+              type="text"
+              [disabled]="isSaving()"
+              [ngModel]="worksiteLatitude()"
+              (ngModelChange)="worksiteLatitude.set($event)"
+            />
+          </div>
+
+          <div class="fg">
+            <label class="lbl">Longitud</label>
+            <input
+              class="finput"
+              type="text"
+              [disabled]="isSaving()"
+              [ngModel]="worksiteLongitude()"
+              (ngModelChange)="worksiteLongitude.set($event)"
+            />
+          </div>
+
+          <div class="fg fg-full">
+            <label class="lbl">Descripción del punto QR</label>
+            <input
+              class="finput"
+              type="text"
+              [disabled]="isSaving()"
+              [ngModel]="qrPointDescription()"
+              (ngModelChange)="qrPointDescription.set($event)"
+            />
+          </div>
+
+          <div class="fg">
+            <label class="lbl">Zona horaria</label>
+            <select
+              class="finput"
+              [disabled]="isSaving()"
+              [ngModel]="defaultTimezone()"
+              (ngModelChange)="defaultTimezone.set($event)"
+            >
+              @if (!timezoneOptions.includes(defaultTimezone())) {
+                <option [value]="defaultTimezone()">{{ defaultTimezone() }}</option>
+              }
+              @for (tz of timezoneOptions; track tz) {
+                <option [value]="tz">{{ tz }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="fg">
+            <label class="lbl">Estado del sistema</label>
+            <select
+              class="finput"
+              [disabled]="isSaving()"
+              [ngModel]="status()"
+              (ngModelChange)="status.set($event)"
+            >
+              @if (!statusOptions.includes(status())) {
+                <option [value]="status()">{{ status() }}</option>
+              }
+              @for (statusOption of statusOptions; track statusOption) {
+                <option [value]="statusOption">{{ statusOption === 'ACTIVE' ? 'Activo' : 'Inactivo' }}</option>
+              }
+            </select>
+          </div>
         </div>
       </div>
+
+      <footer class="modal-actions">
+        <button type="button" class="btn btn-outline" [disabled]="isSaving()" (click)="cancelEditModal()">
+          Cancelar
+        </button>
+        <button type="button" class="btn btn-dark" [disabled]="isSaving()" (click)="saveChanges()">
+          {{ isSaving() ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+      </footer>
     </article>
-  </div>
-</section>
+  </section>
+}
