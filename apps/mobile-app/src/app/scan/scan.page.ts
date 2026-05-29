@@ -7,7 +7,7 @@ import {
   BarcodeScanner,
   LensFacing,
 } from '@capacitor-mlkit/barcode-scanning';
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { IonContent, IonIcon } from '@ionic/angular/standalone';
@@ -57,6 +57,7 @@ export class ScanPage implements OnInit, OnDestroy {
     private readonly attendanceApi: AttendanceApiService,
     private readonly session: AuthSessionService,
     private readonly router: Router,
+    private readonly zone: NgZone,
   ) {
     this.usesNativeScanner = this.isNative;
 
@@ -195,11 +196,11 @@ export class ScanPage implements OnInit, OnDestroy {
 
       this.barcodesListener = await BarcodeScanner.addListener(
         'barcodesScanned',
-        (event) => { void this.handleDetectedBarcodes(event.barcodes); },
+        (event) => this.zone.run(() => { void this.handleDetectedBarcodes(event.barcodes); }),
       );
       this.scanErrorListener = await BarcodeScanner.addListener(
         'scanError',
-        (event) => { this.errorMessage = event.message || 'Error al escanear el codigo QR.'; },
+        (event) => this.zone.run(() => { this.errorMessage = event.message || 'Error al escanear el codigo QR.'; }),
       );
 
       if (this.isNative) {

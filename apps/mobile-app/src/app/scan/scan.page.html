@@ -74,6 +74,13 @@
       </section>
     </main>
 
+    <div class="qr-processing-overlay" *ngIf="isSubmitting">
+      <div class="qr-processing-card">
+        <div class="qr-spinner"></div>
+        <p>Registrando asistencia...</p>
+      </div>
+    </div>
+
     <div class="qr-result-overlay" [class.show]="showResult" [attr.aria-hidden]="!showResult">
       <div class="qr-result-card">
         <div class="qr-result-icon">
