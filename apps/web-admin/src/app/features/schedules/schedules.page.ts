@@ -192,12 +192,12 @@ export class SchedulesPage {
   }
 
   private buildPayload(): ScheduleCreatePayload | ScheduleUpdatePayload | null {
-    const name = this.formName().trim();
-    const code = this.formCode().trim();
-    const toleranceRaw = this.formTolerance().trim();
-    const startTimeRaw = this.formStartTime().trim();
-    const endTimeRaw = this.formEndTime().trim();
-    const workDays = this.formWorkDays().trim();
+    const name = String(this.formName()).trim();
+    const code = String(this.formCode()).trim();
+    const toleranceRaw = String(this.formTolerance()).trim();
+    const startTimeRaw = String(this.formStartTime()).trim();
+    const endTimeRaw = String(this.formEndTime()).trim();
+    const workDays = String(this.formWorkDays()).trim();
     const status = this.formStatus();
 
     if (!name) {
