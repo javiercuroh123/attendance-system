@@ -37,6 +37,7 @@
         </div>
 
         <button
+          *ngIf="!usesNativeScanner"
           type="button"
           class="camera-btn"
           [disabled]="isPreparingScanner || !isScannerSupported"

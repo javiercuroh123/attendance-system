@@ -70,6 +70,9 @@ export class ScanPage implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     await this.initializeScanner();
+    if (this.isNative && this.isScannerSupported) {
+      await this.startScanner();
+    }
   }
 
   async submitAttendanceCheck(): Promise<void> {
