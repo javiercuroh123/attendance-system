@@ -37,7 +37,7 @@ export interface UpdateUserStatusPayload {
 export class UsersApiService {
   private readonly http = inject(HttpClient);
   private readonly authSession = inject(AuthSessionService);
-  private readonly baseUrl = 'http://localhost:3000';
+  private readonly baseUrl = 'https://attendance-system-production-0f0a.up.railway.app';
 
   private authHeaders(): HttpHeaders {
     const token = this.authSession.getAccessToken();

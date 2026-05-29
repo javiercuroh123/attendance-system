@@ -6,7 +6,7 @@ import { LoginRequest, LoginResponse } from './auth.models';
 @Injectable({ providedIn: 'root' })
 export class AuthApiService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:3000';
+  private readonly baseUrl = 'https://attendance-system-production-0f0a.up.railway.app';
 
   login(payload: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.baseUrl}/auth/login`, payload);
