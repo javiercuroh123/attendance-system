@@ -61,8 +61,15 @@ body.barcode-scanner-active .qr-scanner-area::before {
 
 body.barcode-scanner-active .qr-viewfinder {
   background: transparent !important;
-  border-radius: 0 !important;
+  border-radius: 8px !important;
   overflow: visible !important;
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.65) !important;
+}
+
+body.barcode-scanner-active .qr-viewfinder .corner {
+  border-color: #ffffff !important;
+  width: 24px !important;
+  height: 24px !important;
 }
 
 body.barcode-scanner-active .qr-preview-placeholder {
@@ -76,6 +83,11 @@ body.barcode-scanner-active .qr-preview-placeholder ion-icon {
 body.barcode-scanner-active .qr-scan-line,
 body.mobile-app-android.barcode-scanner-active .qr-scan-line {
   display: none !important;
+}
+
+body.barcode-scanner-active .qr-instructions {
+  color: #ffffff !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8) !important;
 }
 
 body.mobile-app-android .tab-bar {
