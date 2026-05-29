@@ -61,6 +61,8 @@ body.barcode-scanner-active .qr-scanner-area::before {
 
 body.barcode-scanner-active .qr-viewfinder {
   background: transparent !important;
+  border-radius: 0 !important;
+  overflow: visible !important;
 }
 
 body.barcode-scanner-active .qr-preview-placeholder {
@@ -69,6 +71,10 @@ body.barcode-scanner-active .qr-preview-placeholder {
 
 body.barcode-scanner-active .qr-preview-placeholder ion-icon {
   display: none !important;
+}
+
+body.barcode-scanner-active .qr-scan-line {
+  animation: scan-line 2.5s ease-in-out infinite !important;
 }
 
 body.mobile-app-android .tab-bar {
